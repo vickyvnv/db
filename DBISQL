@@ -1,0 +1,448 @@
+$2y$10$LieynTCDMzHhK7W/JTS7AuUJQF3cr65d8rOxrfkf18hR20b2IPzKG
+
+; $Id: dbi_sql.ini,v 1.215 2008/08/08 12:29:55 tdressle Exp $
+[LIST_DBI]
+; entry one will be expanded with a "order by" clause at the source code
+;1="select * from (select xxx.*, ROW_NUMBER() OVER (ORDER BY xxx.%s %s) COUNTER from (select DR.request_id request_id, DS.DBI_STATUS_DESC DBI_STATUS_DESC, lc1.DBI_TYPE_DESC DBI_TYPE, dr.brief_desc,dc1.contact_last_name || ', '||dc1.contact_first_name|| ' ('||dc1.contact_phone||')<br>'||dc1.contact_dept||', '||dc1.contact_position REQUESTOR, decode(dc2.contact_last_name, NULL, '', dc2.contact_last_name || ', '||dc2.contact_first_name|| ' ('||dc2.contact_phone||')<br>'||dc2.contact_dept||', '||dc2.contact_position) SDE_APPROVAL, decode(dc3.contact_last_name, NULL, '', dc3.contact_last_name|| ', '||dc3.contact_first_name|| ' ('||dc3.contact_phone||')<br>'||dc3.contact_dept||', '||dc3.contact_position) DA_APPROVAL, to_char(DR.REQUEST_DATE,'YYYY-MM-DD HH24:MI:SS') Submitted_On, to_char(nvl(DR.UPDATE_DATE,DR.REQUEST_DATE),'YYYY-MM-DD HH24:MI:SS') Last_Change_On, dc4.contact_last_name || ', '||dc4.contact_first_name|| ' ('||dc4.contact_phone||')<br>'||dc4.contact_dept||', '||dc4.contact_position OPERATOR_ID, DP.PRIORITY PRIORITY, DR.priority_id priority_id from dbi_request DR, dbi_priority DP, dbi_statuses ds, DBI_LOV_CONTROL lc1, dbi_contacts dc1, dbi_contacts dc2, dbi_contacts dc3, dbi_contacts dc4 where DR.status_date>sysdate-:DAYS and DR.PRIORITY_ID = DP.PRIORITY_ID and DR.DBI_STATUS=DS.DBI_STATUS %s and dr.dbi_type = lc1.dbi_type and dr.requestor_id = dc1.contact_id(+) and dr.sde_id = dc2.contact_id(+) and dr.adba_id = dc3.contact_id(+) and dr.operator_id = dc4.contact_id(+)) xxx) where COUNTER BETWEEN %d AND %d"
+;1="select DR.request_id request_id, DS.DBI_STATUS_DESC DBI_STATUS_DESC, lc1.DBI_TYPE_DESC DBI_TYPE, dr.brief_desc,dc1.contact_last_name || ', '||dc1.contact_first_name|| ' ('||dc1.contact_phone||')<br>'||dc1.contact_dept||', '||dc1.contact_position REQUESTOR, decode(dc2.contact_last_name, NULL, '', dc2.contact_last_name || ', '||dc2.contact_first_name|| ' ('||dc2.contact_phone||')<br>'||dc2.contact_dept||', '||dc2.contact_position) SDE_APPROVAL, decode(dc3.contact_last_name, NULL, '', dc3.contact_last_name|| ', '||dc3.contact_first_name|| ' ('||dc3.contact_phone||')<br>'||dc3.contact_dept||', '||dc3.contact_position) DA_APPROVAL, to_char(DR.REQUEST_DATE,'YYYY-MM-DD HH24:MI:SS') Submitted_On, to_char(nvl(DR.UPDATE_DATE,DR.REQUEST_DATE),'YYYY-MM-DD HH24:MI:SS') Last_Change_On, dc4.contact_last_name || ', '||dc4.contact_first_name|| ' ('||dc4.contact_phone||')<br>'||dc4.contact_dept||', '||dc4.contact_position OPERATOR_ID, DP.PRIORITY PRIORITY from dbi_request DR, dbi_priority DP, dbi_statuses ds, DBI_LOV_CONTROL lc1, dbi_contacts dc1, dbi_contacts dc2, dbi_contacts dc3, dbi_contacts dc4 where DR.status_date>sysdate-:DAYS and DR.PRIORITY_ID = DP.PRIORITY_ID and DR.DBI_STATUS=DS.DBI_STATUS %s and dr.dbi_type = lc1.dbi_type and dr.requestor_id = dc1.contact_id(+) and dr.sde_id = dc2.contact_id(+) and dr.adba_id = dc3.contact_id(+) and dr.operator_id = dc4.contact_id(+)"
+1="select DR.request_id request_id, DS.DBI_STATUS_DESC DBI_STATUS_DESC, lc1.DBI_TYPE_DESC DBI_TYPE, dr.DBI_FLAG, dr.brief_desc,dc1.contact_last_name || ', '||dc1.contact_first_name|| ' ('||dc1.contact_phone||')<br>'||dc1.contact_dept||', '||dc1.contact_position REQUESTOR, decode(dc2.contact_last_name, NULL, '', dc2.contact_last_name || ', '||dc2.contact_first_name|| ' ('||dc2.contact_phone||')<br>'||dc2.contact_dept||', '||dc2.contact_position) SDE_APPROVAL, decode(dc3.contact_last_name, NULL, '', dc3.contact_last_name|| ', '||dc3.contact_first_name|| ' ('||dc3.contact_phone||')<br>'||dc3.contact_dept||', '||dc3.contact_position) DA_APPROVAL, to_char(DR.REQUEST_DATE,'YYYY-MM-DD HH24:MI:SS') Submitted_On, to_char(nvl(DR.UPDATE_DATE,DR.REQUEST_DATE),'YYYY-MM-DD HH24:MI:SS') Last_Change_On, dc4.contact_last_name || ', '||dc4.contact_first_name|| ' ('||dc4.contact_phone||')<br>'||dc4.contact_dept||', '||dc4.contact_position OPERATOR_ID, DP.PRIORITY PRIORITY from dbi_request DR, dbi_priority DP, dbi_statuses ds, DBI_LOV_CONTROL lc1, dbi_contacts dc1, dbi_contacts dc2, dbi_contacts dc3, dbi_contacts dc4 where DR.status_date>sysdate-:DAYS and DR.PRIORITY_ID = DP.PRIORITY_ID and DR.DBI_STATUS=DS.DBI_STATUS %s and dr.dbi_type = lc1.dbi_type and dr.requestor_id = dc1.contact_id(+) and dr.sde_id = dc2.contact_id(+) and dr.adba_id = dc3.contact_id(+) and dr.operator_id = dc4.contact_id(+)"
+2="select distinct REQUEST_ID from DBI_REQUEST_HISTORY where REQUESTOR_ID = :CONTACT_ID or SDE_ID = :CONTACT_ID or ADBA_ID = :CONTACT_ID";
+;2="select count(ROWNUM) COUNTER from dbi_request DR, dbi_priority DP, dbi_statuses ds, DBI_LOV_CONTROL lc1, dbi_contacts dc1, dbi_contacts dc2, dbi_contacts dc3, dbi_contacts dc4 where DR.status_date>sysdate-:DAYS and DR.PRIORITY_ID = DP.PRIORITY_ID and DR.DBI_STATUS=DS.DBI_STATUS %s and dr.dbi_type = lc1.dbi_type and dr.requestor_id = dc1.contact_id(+) and dr.sde_id = dc2.contact_id(+) and dr.adba_id = dc3.contact_id(+) and dr.operator_id = dc4.contact_id(+)"
+
+[EDIT_DBI]
+1="select dr.dbi_status, lov.CANCELLATION_REASON_DESC CANCELLATION_REASON, lov2.REJECTION_REASON_DESC REJECTION_REASON, dr.REQUEST_COMMENTS, dr.DBI_INSTRUCTIONS, DR.BRIEF_DESC, DR.PROBLEM_DESC, DR.BUSINESS_IMPACT, DR.ON_HOLD_FLAG, to_char(DR.DBI_EXPIRATION_DATE,'YYYY-MM-DD') DBI_EXPIRATION_DATE, DR.REFERENCE_DBI, DR.SERF_CR_ID, DR.TT_ID, DR.SW_VERSION, DR.request_id, DS.DBI_STATUS_DESC, DR.DBI_TYPE, lc1.DBI_TYPE_DESC, getContactString(dc1.contact_id) REQUESTOR, decode(dc2.contact_last_name, NULL, '', getContactString(dc2.contact_id)) SDE_APPROVAL, decode(dc3.contact_last_name, NULL, '', getContactString(dc3.contact_id)) DA_APPROVAL, to_char(DR.REQUEST_DATE,'YYYY-MM-DD HH24:MI:SS') Submitted_On, to_char(DR.STATUS_DATE,'YYYY-MM-DD HH24:MI:SS') STATUS_DATE, to_char(DR.UPDATE_DATE,'YYYY-MM-DD HH24:MI:SS') LAST_CHANGED, getContactString(dc4.contact_id) OPERATOR, DP.PRIORITY PRIORITY, DR.priority_id PRIORITY_ID, to_char(dr.update_date, 'YYYY-MM-DD HH24:MI:SS') UPDATE_DATE from dbi_lov_control lov, dbi_lov_control lov2, dbi_request DR, dbi_priority DP, dbi_statuses ds, DBI_LOV_CONTROL lc1, dbi_contacts dc1, dbi_contacts dc2, dbi_contacts dc3, dbi_contacts dc4 where DR.PRIORITY_ID = DP.PRIORITY_ID and DR.DBI_STATUS=DS.DBI_STATUS and dr.dbi_type = lc1.dbi_type and dr.requestor_id = dc1.contact_id(+) and dr.sde_id = dc2.contact_id(+) and dr.adba_id = dc3.contact_id(+) and dr.operator_id = dc4.contact_id(+) and dr.request_id = :REQUEST_ID and lov.cancellation_reason(+) = dr.cancellation_reason and lov2.rejection_reason(+) = dr.rejection_reason"
+2="select PRIORITY_ID, PRIORITY from DBI_Priority order by 1"
+3="select MARKET, SW_VERSION FROM DBI_SW_VERSIONS where CURRENT_IND = 'Y' order by 1"
+4="select DBI_TYPE, DBI_TYPE_DESC FROM DBI_LOV_CONTROL where DBI_TYPE is not NULL order by 1"
+5="select getContactString(:CONTACT_ID) from dual"
+6="update dbi_request set operator_id = :OPERATOR_ID, priority_id = :PRIORITY_ID, sw_version = :SW_VERSION, dbi_type = :DBI_TYPE, tt_id = :TT_ID, serf_cr_id = :SERF_CR_ID, reference_dbi = :REFERENCE_DBI, brief_desc = :BRIEF_DESC, problem_desc = :PROBLEM_DESC, business_impact = :BUSINESS_IMPACT, update_date = sysdate where request_id = :REQUEST_ID"
+7="insert into dbi_request (request_id, requestor_id, operator_id, priority_id, sw_version, dbi_type, tt_id, serf_cr_id, reference_dbi, brief_desc, problem_desc, business_impact, update_date, status_date, request_date, dbi_status, on_hold_flag, dbi_flag) values(:REQUEST_ID, :OPERATOR_ID, :OPERATOR_ID, :PRIORITY_ID, :SW_VERSION, :DBI_TYPE, :TT_ID, :SERF_CR_ID, :REFERENCE_DBI, :BRIEF_DESC, :PROBLEM_DESC, :BUSINESS_IMPACT, sysdate, sysdate, sysdate, 'OP', 0, :DBI_FLAG)"
+8="select dbi_request_1sq.nextval from dual";
+
+[DBI_SUMMARY]
+1="select dr.dbi_instructions,lcc.CANCELLATION_REASON_desc, DR.REQUEST_COMMENTS, lcr.REJECTION_REASON_desc, DR.REQUEST_COMMENTS, DR.BRIEF_DESC, DR.PROBLEM_DESC, DR.BUSINESS_IMPACT, DR.ON_HOLD_FLAG, to_char(DR.DBI_EXPIRATION_DATE,'YYYY-MM-DD') DBI_EXPIRATION_DATE, DR.REFERENCE_DBI, DR.SERF_CR_ID, DR.TT_ID, DR.SW_VERSION, DR.request_id, DS.DBI_STATUS_DESC, DR.DBI_STATUS, DR.DBI_TYPE, lc1.DBI_TYPE_DESC, DR.APPROVED_OPERATOR, dc1.contact_last_name || ', '||dc1.contact_first_name|| ' ('||dc1.contact_phone||')<br>'||dc1.contact_dept||', '||dc1.contact_position REQUESTOR, decode(dc2.contact_last_name, NULL, '', getContactString(dc2.contact_id)) SDE_APPROVAL, decode(dc3.contact_last_name, NULL, '', getContactString(dc3.contact_id)) DA_APPROVAL, to_char(DR.REQUEST_DATE,'YYYY-MM-DD HH24:MI:SS') Submitted_On, to_char(DR.STATUS_DATE,'YYYY-MM-DD HH24:MI:SS') STATUS_DATE, to_char(DR.UPDATE_DATE,'YYYY-MM-DD HH24:MI:SS') LAST_CHANGED, decode(dc4.contact_last_name, NULL, '',getContactString(dc4.contact_id)) OPERATOR, DP.PRIORITY PRIORITY, DR.priority_id PRIORITY_ID , dc1.contact_id CONTACT_ID from dbi_request DR, dbi_priority DP, dbi_statuses ds, DBI_LOV_CONTROL lc1, dbi_contacts dc1, dbi_contacts dc2, dbi_contacts dc3, dbi_contacts dc4, dbi_lov_control lcr, dbi_lov_control lcc where DR.PRIORITY_ID = DP.PRIORITY_ID and DR.DBI_STATUS=DS.DBI_STATUS and dr.dbi_type = lc1.dbi_type and dr.requestor_id = dc1.contact_id(+) and dr.sde_id = dc2.contact_id(+) and dr.adba_id = dc3.contact_id(+) and dr.operator_id = dc4.contact_id(+) and dr.request_id = :REQUEST_ID and lcc.cancellation_reason(+)=dr.cancellation_reason and lcr.rejection_reason(+)=dr.rejection_reason"
+2="select PRIORITY from DBI_Priority where PRIORITY_ID = :PRIORITY_ID"
+3="select MARKET FROM DBI_SW_VERSIONS where CURRENT_IND = 'Y' AND SW_VERSION = :SW_VERSION"
+4="select DBI_TYPE_DESC FROM DBI_LOV_CONTROL where DBI_TYPE = :DBI_TYPE"
+5="select DBI_OPER_LONG FROM DBI_OPERATOR where DBI_OPER_SHORT = :DBI_OPER_SHORT"
+//6="select r.execution_stage stage, r.db_instance db, r.db_user db_user, r.table_name, 'area' area, 'owner' owner, 'secondary' Second, l.sql_action_desc sql, r.exp_rows exp, r.act_rows act, r.execution_id ID, to_char(e.execution_date,'YYYY-MM-DD hh24:mi:ss') executed, e.run_time_minutes sec from dbi_execution e, dbi_execution_results r , dbi_lov_control l where e.request_id=:REQUEST_ID and e.request_id=r.request_id and e.execution_stage=r.execution_stage and e.db_instance=r.db_instance and e.db_user=r.db_user and r.sql_action=l.sql_action"
+6="select r.execution_stage stage, r.db_instance db, r.db_user db_user, r.table_name, 'area' area, 'owner' owner, 'secondary' Second, l.sql_action_desc sql, r.exp_rows exp, r.act_rows act, r.execution_id ID, to_char(e.execution_date,'YYYY-MM-DD hh24:mi:ss') executed, e.run_time_minutes sec from dbi_execution e, dbi_execution_results r , dbi_lov_control l where e.request_id=:REQUEST_ID and e.request_id=r.request_id and e.execution_stage=r.execution_stage and e.db_instance=r.db_instance and e.db_user=r.db_user and r.sql_action=l.sql_action ORDER BY stage, DB, TABLE_NAME, SQL"
+7="select area,new_owner new,new_secondary_process new_sec,old_owner owner,secondary_process SECOND from k2k_table_ownership where OBJ_NAME_PRD=:TABLE_NAME"
+8="select dwh_threshold dwh from dbi_dwh_tables where db_instance='$inst' and dwh_table_name='$tname'"
+9="select db_instance db,db_user,temp_table_name table_name, temp_type_desc temp_type, to_char(drop_date,'YYYY-MM-DD') drop_date, temp_sql sql,temp_table_status status from dbi_temp_tables tt, dbi_lov_control lc where request_id=:REQUEST_ID and tt.temp_type=lc.temp_type"
+10="select position_id pos, table_name, alias_name alias_column from dbi_template where request_id=:REQUEST_ID order by position_id, table_name"
+11="select contact_dept dept from dbi_contacts where contact_id = :CONTACT_ID"
+12="select id, on_hold, to_char(sys_creation_date,'YYYY-MM-DD HH24:MI:SS') creation_date, to_char(sys_update_date,'YYYY-MM-DD HH24:MI:SS') update_date, getContactString(operator_id) operator, scheduled_month, scheduled_date, scheduled_weekday, scheduled_hour, scheduled_minute, scheduled_status,  schedule_comments from da_crontab where link_id in (select link_id from da_projects where project_name='DBITOOL' and version=:VERSION) and key1=:REQUEST_ID order by id"
+13="select count(table_name) from dbi_available_tables where table_name=:TABLE_NAME"
+14="select db_instance,db_user,maschine,procname from dbi_execution where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+
+[RECURRING_DBI]
+1="select id, on_hold, to_char(sys_creation_date,'YYYY-MM-DD HH24:MI:SS') creation_date, to_char(sys_update_date,'YYYY-MM-DD hh24:mi:ss') update_date, getContactString(operator_id) operator, scheduled_month, scheduled_date, scheduled_weekday, scheduled_hour, scheduled_minute, scheduled_status, schedule_comments from da_crontab where link_id in (select link_id from da_projects where project_name='DBITOOL') and key1=:REQUEST_ID order by id"
+2="update da_crontab set SCHEDULED_MONTH = :SCHEDULED_MONTH, SCHEDULED_DATE = :SCHEDULED_DATE, SCHEDULED_WEEKDAY = :SCHEDULED_WEEKDAY, SCHEDULED_HOUR = :SCHEDULED_HOUR, SCHEDULED_MINUTE = :SCHEDULED_MINUTE, SYS_UPDATE_DATE = SYSDATE where link_id in (select link_id from da_projects where project_name='DBITOOL') and key1=:REQUEST_ID"
+3="insert into da_crontab (id, ON_HOLD, SCHEDULED_MONTH, SCHEDULED_DATE, SCHEDULED_WEEKDAY, SCHEDULED_HOUR, SCHEDULED_MINUTE, SYS_UPDATE_DATE, SYS_CREATION_DATE, operator_id, link_id, key1) values(da_crontab_1sq.nextval, :ON_HOLD, :SCHEDULED_MONTH, :SCHEDULED_DATE, :SCHEDULED_WEEKDAY, :SCHEDULED_HOUR, :SCHEDULED_MINUTE, SYSDATE, sysdate, :OPERATOR_ID, (select link_id from da_projects where project_name='DBITOOL' and version = :VERSION), :REQUEST_ID)"
+4="delete from da_crontab where key1 = :REQUEST_ID and link_id = (select link_id from da_projects where project_name='DBITOOL' and version = :VERSION)"
+5="select DB_USER, DB_INSTANCE, EXECUTION_ID,EXECUTION_STAGE from dbi_execution where REQUEST_ID= :REQUEST_ID order by EXECUTION_STAGE"
+6="select key7 from da_crontab where key1 = :REQUEST_ID and link_id = (select link_id from da_projects where project_name='DBITOOL' and version = :VERSION)"
+7="update da_crontab set ON_HOLD = :ON_HOLD, SYS_UPDATE_DATE = SYSDATE where link_id in (select link_id from da_projects where project_name='DBITOOL') and key1=:REQUEST_ID"
+
+[INSERT_SQL]
+1="select TEST_INSTANCE from DBI_INSTANCES where PROD_INSTANCE = :PROD_INSTANCE and MARKET = :MARKET"
+2="select distinct sql_action,sql_action_desc from dbi_lov_control where not sql_action is null"
+3="select dr.DBI_STATUS, ds.DBI_STATUS_DESC, dsv.MARKET from DBI_REQUEST dr, DBI_STATUSES ds, DBI_SW_VERSIONS dsv where dr.REQUEST_ID = :REQUEST_ID and ds.DBI_STATUS = dr.DBI_STATUS and dr.SW_VERSION = dsv.SW_VERSION"
+4="select DB_USER, DB_INSTANCE, max(EXECUTION_ID) EXECUTION from dbi_execution where EXECUTION_STAGE =:EXECUTION_STAGE and REQUEST_ID= :REQUEST_ID group by DB_USER,DB_INSTANCE"
+5="select PROD_INSTANCE from DBI_INSTANCES where MARKET =:MARKET"
+6="select * from dbi_execution where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+7="insert into dbi_execution(request_id,execution_stage,db_instance,execution_id,db_user,operator_id,update_date)values(:REQUEST_ID,:EXECUTION_STAGE,:DB_INSTANCE,0,:DB_USER, :OPERATOR_ID, sysdate )"
+8="update dbi_execution set db_instance=:DB_INSTANCE, db_user=:DB_USER, operator_id=:OPERATOR_ID, update_date=sysdate where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+9="delete from dbi_execution_results where request_id =:REQUEST_ID and execution_id =:EXECUTION_ID and execution_stage = :EXECUTION_STAGE"
+10="SELECT test_instance, to_char(downtime_begin, 'HH24:MI') downtime_begin, to_char(downtime_end, 'HH24:MI') downtime_end FROM dbi_instances WHERE prod_instance= :PROD_INSTANCE"
+11="delete from dbi_execution_results where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+12="insert into dbi_execution_results (request_id, execution_stage, db_instance, execution_id, table_name, sql_action, exp_rows,row_id,db_user, operator_id,update_date)values(:REQUEST_ID, :EXECUTION_STAGE, :DB_INSTANCE, 0, :TABLE_NAME, :SQL_ACTION, 0, :ROW_ID, :DB_USER, :OPERATOR_ID, sysdate)"
+13="delete from dbi_temp_tables where request_id=:REQUEST_ID and db_instance=:DB_INSTANCE"
+14="insert into dbi_temp_tables (request_id,  db_instance,  temp_table_name,  db_user, temp_type,   drop_date, operator_id,update_date) values (:REQUEST_ID, :DB_INSTANCE, :TEMP_TABLE_NAME, :DB_USER, 'R', trunc(sysdate)+30, :OPERATOR_ID, sysdate)"
+15="delete from dbi_template where request_id=:REQUEST_ID"
+16="Alter session set nls_date_format='DD.MM.YYYY HH24:MI:SS'"
+17="select * from dbi_request where request_id=:REQUEST_ID"
+
+[ADDITIONAL_INFO]
+//1="SELECT r.execution_stage stage, r.db_instance instance, r.db_user, r.sql_action, l.sql_action_desc action, r.table_name, r.execution_id ex_id, r.exp_rows, r.act_rows FROM dbi_execution_results r, dbi_lov_control l WHERE request_id=:REQUEST_ID and r.sql_action=l.sql_action order by Stage,row_id"
+1="SELECT r.execution_stage stage, r.db_instance instance, r.db_user, r.sql_action, l.sql_action_desc action, r.table_name, r.execution_id ex_id, r.exp_rows, r.act_rows FROM dbi_execution_results r, dbi_lov_control l WHERE request_id=:REQUEST_ID and r.sql_action=l.sql_action order by Stage, instance, TABLE_NAME, ACTION"
+2="SELECT nvl(execution_comments, '') comments FROM dbi_execution WHERE request_id = :REQUEST_ID and execution_stage = :EXECUTION_STAGE and db_instance = :DB_INSTANCE  and db_user = :DB_USER and execution_id = :EXECUTION_ID"
+3="select db_instance instance,db_user,temp_table_name,temp_type, to_char(drop_date,'DD.MM.YYYY') dropdate,temp_table_status,temp_sql from dbi_temp_tables where request_id=:REQUEST_ID "
+4="select distinct temp_type,temp_type_desc from dbi_lov_control where not temp_type is null"
+5="select prod_instance instance from dbi_instances where market=:MARKET union select test_instance instance from dbi_instances where market=:MARKET and not test_instance is null"
+6="select to_char(sysdate+30,'DD.MM.YYYY') ddate from dual"
+7="select DB_USER, DB_INSTANCE, max(EXECUTION_ID) EXECUTION from dbi_execution where EXECUTION_STAGE =:EXECUTION_STAGE and REQUEST_ID= :REQUEST_ID group by DB_USER,DB_INSTANCE"
+8="select REQUESTOR_ID, SDE_ID, DBI_INSTRUCTIONS, r.dbi_status, r.sw_version, dbi_status_desc, market from dbi_request r, dbi_statuses s, dbi_sw_versions v where request_id = :REQUEST_ID and r.dbi_status = s.dbi_status and r.sw_version = v.sw_version"
+9="select DB_USER, DB_INSTANCE, max(execution_id) EXECUTION from dbi_execution where execution_stage='Prod' and request_id = :REQUEST_ID group by db_user,db_instance"
+10="select DB_USER,DB_INSTANCE,max(execution_id) EXECUTION from dbi_execution where execution_stage='Test' and request_id = :REQUEST_ID group by db_user,db_instance"
+11="select distinct sql_action,sql_action_desc from dbi_lov_control where not sql_action is null"
+12="update dbi_execution_results set update_date = sysdate, exp_rows=:E_A_ROWS, sql_action=:NEW_SQL_ACTION, table_name=:NEW_TABLE_NAME ,row_id=:ROW_ID where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE and db_user=:DB_USER and execution_id=:EXECUTION_ID and sql_action=:SQL_ACTION and db_instance=:DB_INSTANCE and table_name=:TABLE_NAME"
+13="update dbi_execution_results set update_date = sysdate, act_rows=:E_A_ROWS where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE and db_user=:DB_USER and execution_id=:EXECUTION_ID and sql_action=:SQL_ACTION and db_instance=:DB_INSTANCE and table_name=:TABLE_NAME"
+14="update dbi_execution set update_date = sysdate, execution_comments=:EXECUTION_COMMENTS where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE and execution_id=:EXECUTION_ID and db_user=:DB_USER and db_instance=:DB_INSTANCE"
+15="delete from dbi_temp_tables where request_id=:REQUEST_ID"
+16="insert into dbi_temp_tables (request_id,operator_id,update_date,TEMP_TABLE_NAME,DB_INSTANCE, DB_USER, TEMP_TYPE, DROP_DATE, TEMP_SQL) values (:REQUEST_ID,:OPERATOR_ID,sysdate,:TEMP_TABLE_NAME,:DB_INSTANCE, :DB_USER, :TEMP_TYPE, :DROP_DATE, :TEMP_SQL)"
+17="select exp_rows from dbi_execution_results where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE and db_user=:DB_USER and execution_id=:EXECUTION_ID and sql_action=:SQL_ACTION and db_instance=:DB_INSTANCE and table_name=:TABLE_NAME"
+18="select MARKET from dbi_sw_versions where sw_version= :SW_VERSION"
+19="SELECT table_name FROM dbi_available_tables WHERE db_instance = :INSTANCE union select table_name from dbi_execution_results where request_id = :request_id"
+20="delete from dbi_execution_results where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE and db_user=:DB_USER and execution_id=:EXECUTION_ID and sql_action=:SQL_ACTION and db_instance=:DB_INSTANCE and table_name=:TABLE_NAME"
+21="select exp_rows from dbi_execution_results where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE and db_user=:DB_USER and sql_action=:SQL_ACTION and db_instance=:DB_INSTANCE and table_name=:TABLE_NAME"
+;22="insert into dbi_execution_results (request_id, execution_stage, db_instance, execution_id, table_name, sql_action, exp_rows,row_id,db_user, operator_id,update_date)values(:REQUEST_ID, :EXECUTION_STAGE, :DB_INSTANCE, 0, :TABLE_NAME, :SQL_ACTION, :EXP_ROWS,:ROW_ID, :DB_USER, :OPERATOR_ID, sysdate)"
+;22="insert into dbi_execution_results (request_id, execution_stage, db_instance, execution_id, table_name, sql_action, exp_rows,row_id,db_user, operator_id,update_date)values(:REQUEST_ID, :EXECUTION_STAGE, :DB_INSTANCE, 0, :TABLE_NAME, :SQL_ACTION, :ROW_ID, 0, :DB_USER, :OPERATOR_ID, sysdate)"
+22="insert into dbi_execution_results (request_id, execution_stage, db_instance, execution_id, table_name, sql_action, exp_rows, row_id, db_user, operator_id, update_date) values(:REQUEST_ID, :EXECUTION_STAGE, :DB_INSTANCE, 0, :TABLE_NAME, :SQL_ACTION, :E_A_ROWS, 0, :DB_USER, :OPERATOR_ID, sysdate)"
+23="select count(table_name) from dbi_available_tables where table_name=:TABLE_NAME"
+
+[SEARCH_DBI]
+; entry one will be expanded with a "from" and additions "where" clauses at the source code
+;1="select distinct DR.request_id request_id, DS.DBI_STATUS_DESC DBI_STATUS_DESC, lov.DBI_TYPE_DESC DBI_TYPE_DESC, DR.BRIEF_DESC,getContactString(dr.requestor_id) REQUESTOR, decode(dr.sde_id, NULL, '', getContactString(dr.sde_id)) SDE_APPROVAL, decode(dr.adba_id, NULL, '', getContactString(dr.adba_id)) DA_APPROVAL, to_char(DR.REQUEST_DATE,'YYYY-MM-DD HH24:MI:SS') Submitted_On, to_char(DR.UPDATE_DATE,'YYYY-MM-DD HH24:MI:SS') Last_Change_On, getContactString(dr.operator_id) OPERATOR_ID, DP.PRIORITY PRIORITY, DR.priority_id priority_id from dbi_request dr, dbi_priority dp, dbi_statuses ds,dbi_lov_control lov #from where #where and dr.priority_id=dp.priority_id and dr.dbi_status=ds.dbi_status and dr.dbi_type = lov.dbi_type"
+1="select distinct DR.request_id request_id, DS.DBI_STATUS_DESC DBI_STATUS_DESC, lov.DBI_TYPE_DESC DBI_TYPE_DESC, DR.DBI_FLAG, DR.BRIEF_DESC,getContactString(dr.requestor_id) REQUESTOR, decode(dr.sde_id, NULL, '', getContactString(dr.sde_id)) SDE_APPROVAL, decode(dr.adba_id, NULL, '', getContactString(dr.adba_id)) DA_APPROVAL, to_char(DR.REQUEST_DATE,'YYYY-MM-DD HH24:MI:SS') Submitted_On, to_char(DR.UPDATE_DATE,'YYYY-MM-DD HH24:MI:SS') Last_Change_On, getContactString(dr.operator_id) OPERATOR_ID, DP.PRIORITY PRIORITY, DR.priority_id priority_id from dbi_request dr, dbi_priority dp, dbi_statuses ds,dbi_lov_control lov #from where #where and dr.priority_id=dp.priority_id and dr.dbi_status=ds.dbi_status and dr.dbi_type = lov.dbi_type"
+2="select DBI_STATUS, DBI_STATUS_DESC from DBI_STATUSES order by DBI_STATUS_DESC";
+3="select DBI_TYPE, DBI_TYPE_DESC FROM DBI_LOV_CONTROL where DBI_TYPE is not NULL order by 1"
+4="select PRIORITY_ID, PRIORITY FROM DBI_PRIORITY order by 1"
+5="select PROD_INSTANCE, PROD_INSTANCE FROM DBI_INSTANCES order by 1"
+6="select TABLE_NAME, TABLE_NAME FROM DBI_AVAILABLE_TABLES order by 1"
+
+
+[SEARCH_DBI_TABLELIST]
+1="select distinct TABLE_NAME from DBI_AVAILABLE_TABLES where DB_INSTANCE = :INSTANCE order by TABLE_NAME"
+2="select distinct TABLE_NAME from DBI_AVAILABLE_TABLES order by TABLE_NAME"
+3="select distinct TABLE_NAME from DBI_AVAILABLE_TABLES where DB_INSTANCE in (%s) order by TABLE_NAME"
+
+[CHANGE_DBI_STATUS]
+1="select APPROVED_OPERATOR, DR.DBI_TYPE, DR.DBI_STATUS, DR.ON_HOLD_FLAG, DR.request_id, DS.DBI_STATUS_DESC, to_char(DR.STATUS_DATE,'YYYY-MM-DD HH24:MI:SS') STATUS_DATE, to_char(DR.UPDATE_DATE,'YYYY-MM-DD HH24:MI:SS') LAST_CHANGED, getContactString(dc4.contact_id) OPERATOR, DR.priority_id PRIORITY_ID from dbi_request DR, dbi_priority DP, dbi_statuses ds, dbi_contacts dc4 where DR.PRIORITY_ID = DP.PRIORITY_ID and DR.DBI_STATUS=DS.DBI_STATUS and dr.operator_id = dc4.contact_id(+) and dr.request_id = :REQUEST_ID"
+2="select getContactString(:CONTACT_ID) from dual"
+3="select PRIORITY_ID, PRIORITY from DBI_Priority order by 1"
+4="select DBI_NEXT_STATUS from DBI_NEXT_STATUS where DBI_CURR_STATUS = :DBI_CURR_STATUS and DBI_OPERATOR_ALLOWED = :DBI_OPERATOR_ALLOWED and DBI_TYPE = :DBI_TYPE and DBI_FLAG = :DBI_FLAG"
+5="select CANCELLATION_REASON, CANCELLATION_REASON_DESC from dbi_lov_control where CANCELLATION_REASON_DESC is not null order by CANCELLATION_REASON_DESC"
+; entry 6 will be expandet with other columns
+6="update dbi_request set priority_id = :PRIORITY_ID, ON_HOLD_FLAG = :ON_HOLD_FLAG, update_date = sysdate, operator_id= :OPERATOR_ID , status_date = sysdate, dbi_status = :DBI_STATUS %s where request_id = :REQUEST_ID "
+7="select REJECTION_REASON, REJECTION_REASON_DESC from dbi_lov_control where REJECTION_REASON_DESC is not null order by REJECTION_REASON_DESC"
+8="select DBI_OPER_SHORT, DBI_OPER_LONG from DBI_OPERATOR where DBI_OPER_SHORT in ('SDE', 'DAT', 'RAS') order by DBI_OPER_LONG"
+9="select count(request_id) from dbi_execution_results where request_id=:REQUEST_ID and execution_stage='Test' and act_rows is null"
+10="delete from dbi_execution_results where request_id=:REQUEST_ID and execution_stage='Prod'"
+11="delete from dbi_execution where request_id=:REQUEST_ID and execution_stage='Prod'"
+12="insert into dbi_execution (request_id,execution_stage,db_instance,execution_id,db_user,operator_id,update_date) values(:REQUEST_ID,'Prod',:PROD_INSTANCE,0,:PROD_USER,:OPERATOR,sysdate)"
+13="insert into dbi_execution_results (request_id,execution_stage,db_instance,execution_id,table_name,sql_action,exp_rows,row_id,db_user,operator_id,update_date) select :REQUEST_ID, 'Prod', :PROD_INST, 0, TABLE_NAME, SQL_ACTION, ACT_ROWS, -(ROW_ID+1000), :PROD_USER, :OPERATOR, sysdate from dbi_execution_results where request_id=:REQUEST_ID and execution_stage='Test'"
+14="select DB_USER, DB_INSTANCE from dbi_execution where execution_stage='Prod' and request_id = :REQUEST_ID"
+15="select id, on_hold from da_crontab where link_id in (select link_id from da_projects where project_name='DBITOOL' and VERSION=:VERSION) and key1=:REQUEST_ID order by id"
+16="update da_crontab set on_hold = :ON_HOLD where id = :ID"
+17="update da_crontab set on_hold = :ON_HOLD where link_id = (select link_id from da_projects where project_name='DBITOOL' and VERSION=:VERSION) and key1=:REQUEST_ID"
+18="select notify from DBI_notifications where operator_id = :OPERATOR_ID and REQUEST_ID = :REQUEST_ID"
+19="insert into DBI_notifications (operator_id, request_id, notify) values (:OPERATOR_ID, :REQUEST_ID, :NOTIFY)"
+20="delete from DBI_notifications where operator_id = :OPERATOR_ID and REQUEST_ID = :REQUEST_ID"
+21="update DBI_notifications set notify=:NOTIFY where operator_id = :OPERATOR_ID and REQUEST_ID = :REQUEST_ID"
+;22="select contact_email from DBI_notifications n, dbi_contacts c where n.notify='Y' and n.REQUEST_ID = :REQUEST_ID and n.OPERATOR_ID <> :OPERATOR_ID and n.operator_id = c.contact_id"
+22="select contact_email from DBI_notifications n, dbi_contacts c where n.notify='Y' and n.REQUEST_ID = :REQUEST_ID and n.OPERATOR_ID <> :OPERATOR_ID and n.operator_id = c.contact_id and c.ACTIVE_IND = 'Y'"
+23="select DBI_OPER_LONG FROM DBI_OPERATOR where DBI_OPER_SHORT = :DBI_OPER_SHORT"
+24="select REJECTION_REASON_DESC FROM DBI_LOV_CONTROL where rejection_reason = :REJECTION_REASON"
+25="select CANCELLATION_REASON_DESC FROM DBI_LOV_CONTROL where CANCELLATION_reason = :CANCELLATION_REASON"
+26="update dbi_execution_results set execution_stage = :EXECUTION_STAGE where REQUEST_ID = :REQUEST_ID"
+27="delete from dbi_execution where execution_stage = :EXECUTION_STAGE and REQUEST_ID = :REQUEST_ID"
+28="update dbi_execution_results set act_rows=exp_rows where execution_stage = :EXECUTION_STAGE and REQUEST_ID = :REQUEST_ID"
+29="Delete from DBI_Notifications where request_id=:REQUEST_ID"
+30="select db_instance,db_user,procname from dbi_execution where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+
+[DBICLASS_NEU]
+1="select APPROVED_OPERATOR, DS.DBI_STATUS_DESC, dr.*, to_char(dr.DBI_EXPIRATION_DATE, 'YYYY-MM-DD') exp_date, to_char(dr.request_date, 'YYYY-MM-DD') req_date, dc.contact_last_name || ', '||dc.contact_first_name|| ' ('||dc.contact_phone||') '||dc.contact_dept||', '||dc.contact_position REQUESTOR, dr.dbi_flag from dbi_request dr, dbi_contacts dc, dbi_statuses ds where request_id = :REQUEST_ID and requestor_id = contact_id and dr.dbi_status = ds.dbi_status"
+1a="select * from DBI_REQUEST"
+2="select * from dbi_execution where request_id = :REQUEST_ID AND EXECUTION_ID >-1"
+3="select * from dbi_execution_results where REQUEST_ID = :REQUEST_ID AND EXECUTION_STAGE = :STAGE and EXECUTION_ID = :EX_ID AND EXECUTION_ID >-1"
+4="select PROD_INSTANCE, TEST_INSTANCE from dbi_instances"
+5="select distinct getcontactstring(CONTACT_ID) as CONTACT_STRING from DBI_LOCKS where LAST_CONTACT > (select nvl(max(LAST_CONTACT), to_date('1900-01-01', 'YYYY-MM-DD')) from DBI_LOCKS where CONTACT_ID = :CONTACT_ID and REQUEST_ID = :REQUEST_ID) and CONTACT_ID <> :CONTACT_ID and REQUEST_ID = :REQUEST_ID"
+6="insert into DBI_LOCKS (REQUEST_ID, CONTACT_ID, LAST_CONTACT) values (:REQUEST_ID, :CONTACT_ID, SYSDATE)"
+7="delete from DBI_LOCKS where round(to_number(SYSDATE - LAST_CONTACT) * 1440) > :TIME_OUT"
+8="select MARKET from dbi_sw_versions where sw_version= :SW_VERSION"
+
+
+[DBICLASS]
+1="select DS.DBI_STATUS_DESC, dr.*, to_char(dr.request_date, 'YYYY-MM-DD') req_date, dc.contact_last_name || ', '||dc.contact_first_name|| ' ('||dc.contact_phone||') '||dc.contact_dept||', '||dc.contact_position REQUESTOR from dbi_request dr, dbi_contacts dc, dbi_statuses ds where request_id = :REQUEST_ID and requestor_id = contact_id and dr.dbi_status = ds.dbi_status"
+2="select * from dbi_execution where request_id = :REQUEST_ID"
+3="update dbi_request set operator_id = :OPERATOR_ID, update_date=sysdate where request_id = :REQUEST_ID"
+4="select db_instance from dbi_execution where EXECUTION_STAGE =:EXECUTION_STAGE and REQUEST_ID= :REQUEST_ID group by DB_USER, DB_INSTANCE"
+5="delete from dbi_execution_results where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+6="delete from dbi_execution where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+7="select count(*) from dbi_request_history where request_id=:REQUEST_ID and (operator_id=:CONTACT_ID or requestor_id=:CONTACT_ID)"
+;7="select REQUESTOR_ID, SDE_ID, ADBA_ID, DBI_INSTRUCTIONS, r.dbi_status, r.sw_version, dbi_status_desc, market from dbi_request r, dbi_statuses s, dbi_sw_versions v where request_id = :REQUEST_ID and r.dbi_status = s.dbi_status and r.sw_version = v.sw_version"
+;;8="select MARKET from dbi_sw_versions where sw_version= :SW_VERSION"
+;9="select DB_USER, DB_INSTANCE, max(execution_id) EXECUTION from dbi_execution where execution_stage='Prod' and request_id = :REQUEST_ID group by db_user,db_instance"
+;;10="select DB_USER, DB_INSTANCE, max(EXECUTION_ID) EXECUTION from dbi_execution where EXECUTION_STAGE =:EXECUTION_STAGE and REQUEST_ID= :REQUEST_ID group by DB_USER,DB_INSTANCE"
+;;11="select DB_USER,DB_INSTANCE,max(execution_id) EXECUTION from dbi_execution where execution_stage='Test' and request_id = :REQUEST_ID group by db_user,db_instance"
+12="select prod_instance from dbi_instances where test_instance=:DB_INSTANCE"
+13="update dbi_execution set execution_id = 0, EXECUTION_DATE = NULL, RUN_TIME_MINUTES = NULL where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+14="SELECT COUNT(*) AS ANZAHL FROM DBI_EXECUTION_RESULTS WHERE (ACT_ROWS < 1 OR ACT_ROWS IS NULL) AND REQUEST_ID = :REQUEST_ID"
+15="SELECT COUNT(*) AS ANZAHL FROM DBI_EXECUTION WHERE TRIM(EXECUTION_COMMENTS) IS NULL AND REQUEST_ID = :REQUEST_ID"
+;16="select log_id,name,to_char(update_date,'DD.MM.YYYY HH24:MI:SS') update_date,getcontactstring(executer_id) Executor from dbi_logs where request_id=:REQUEST_ID"
+16="select log_id,name,to_char(update_date,'YYYY-MM-DD HH24:MI:SS') update_date,getcontactstring(executer_id) Executor from dbi_logs where request_id=:REQUEST_ID"
+17="select script_id,name,to_char(update_date,'DD.MM.YYYY HH24:MI:SS') update_date from dbi_scripts where request_id=:REQUEST_ID"
+
+
+[EXECUTE_SQL]
+1="select APPROVED_OPERATOR, r.dbi_status, dbi_status_desc from dbi_request r, dbi_statuses s where request_id = :REQUEST_ID and s.dbi_status = r.dbi_status"
+2="select count(request_id) from dbi_execution where request_id = :REQUEST_ID and execution_stage = :EXECUTION_STAGE"
+3="select REQUESTOR_ID, SDE_ID, DBI_INSTRUCTIONS, r.dbi_status, sw_version, dbi_status_desc from dbi_request r, dbi_statuses s where request_id = :REQUEST_ID and r.dbi_status = s.dbi_status"
+4="select MARKET from dbi_sw_versions where sw_version= :SW_VERSION"
+5="select DB_USER, DB_INSTANCE, max(execution_id) EXECUTION from dbi_execution where execution_stage='Prod' and request_id = :REQUEST_ID group by db_user,db_instance"
+6="select DB_USER,DB_INSTANCE,max(execution_id) EXECUTION from dbi_execution where execution_stage='Test' and request_id = :REQUEST_ID group by db_user,db_instance"
+7="select PROD_INSTANCE,TEST_INSTANCE from dbi_instances where market=:MARKET"
+8="select r.execution_stage STAGE,r.db_instance INSTANCE,r.DB_USER,l.sql_action_desc ACTION,r.TABLE_NAME,r.EXECUTION_ID EX_ID,r.EXP_ROWS,r.ACT_ROWS from dbi_execution_results r, dbi_lov_control l where request_id=:REQUEST_ID and r.sql_action=l.sql_action order by Stage,row_id"
+9="select nvl(execution_comments,'') COMMENTS from dbi_execution where request_id=:REQUEST_ID and execution_stage='Prod' and db_instance=:DB_INSTANCE and db_user=:DB_USER and execution_id=:EXECUTION_ID"
+10="select nvl(execution_comments,'') COMMENTS from dbi_execution where request_id=:REQUEST_ID and execution_stage='Test'and db_instance=:DB_INSTANCE and db_user=:DB_USER and execution_id=:EXECUTION_ID"
+11="select db_instance INSTANCE,DB_USER,TEMP_TABLE_NAME,TEMP_TYPE, to_char(drop_date,'DD.MM.YYYY') DROPDATE,TEMP_TABLE_STATUS,TEMP_SQL from dbi_temp_tables where request_id=:REQUEST_ID"
+12="select distinct TEMP_TYPE,TEMP_TYPE_DESC from dbi_lov_control where not temp_type is null"
+13="select PROD_INSTANCE INSTANCE from dbi_instances where market=:MARKET union select TEST_INSTANCE INSTANCE from dbi_instances where market=:MARKET and not test_instance is null"
+14="select distinct TEMP_TYPE,TEMP_TYPE_DESC from dbi_lov_control where not temp_type is null"
+15="select to_char(sysdate+30,'DD.MM.YYYY') ddate from dual"
+16="select DB_INSTANCE,DB_USER,EXECUTION_ID from dbi_execution where request_id=:REQUEST_ID and execution_id >-1 and execution_stage='Prod'"
+17="select POSITION_ID POS,TABLE_NAME,ALIAS_NAME,TEMP_TABLE_DRIVEN from dbi_template where request_id=:REQUEST_ID order by position_id"
+18="select DISTINCT DB_USER,TEMP_TABLE_NAME from dbi_temp_tables where request_id=:REQUEST_ID and temp_table_name=:TABLE_NAME"
+19="select DB_INSTANCE,DB_USER, EXECUTION_ID from dbi_execution where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+20="select ACT_ROWS from dbi_execution_results where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+21="update dbi_execution set execution_id = :EXECUTION_ID where db_user=:DB_USER and db_instance=:DB_INSTANCE and execution_stage=:EXECUTION_STAGE and request_id = :REQUEST_ID"
+22="update dbi_execution_results set execution_id = :EXECUTION_ID where db_user=:DB_USER and db_instance=:DB_INSTANCE and execution_stage=:EXECUTION_STAGE and request_id = :REQUEST_ID"
+23="select max(execution_id) EXECUTION from dbi_execution_results where execution_stage=:EXECUTION_STAGE and request_id = :REQUEST_ID"
+;24="select DBI_TYPE, PRIORITY_ID, DBI_STATUS, DBI_TYPE, PRIORITY_ID, scriptfile,scripttyp,scripthash from dbi_request where request_id=:REQUEST_ID"
+24="select DBI_TYPE, PRIORITY_ID, DBI_STATUS, DBI_TYPE, PRIORITY_ID from dbi_request where request_id=:REQUEST_ID"
+25="select DB_INSTANCE,DB_USER,EXECUTION_ID from dbi_execution where request_id=:REQUEST_ID and execution_stage=:STAGE order by execution_id desc"
+26="select TABLE_NAME, SQL_ACTION from dbi_execution_results where request_id = :REQUEST_ID and DB_INSTANCE = :DB_INSTANCE"
+27="update dbi_execution set execution_id=0 where request_id=:REQUEST_ID and execution_stage='Test'"
+28="update dbi_execution_results set execution_id=0 where request_id=:REQUEST_ID and execution_stage='Test'"
+29="select DB_INSTANCE,DB_USER,EXECUTION_ID from dbi_execution where request_id=:REQUEST_ID and execution_id >-1 and execution_stage='Prod'"
+30="select POSITION_ID POS,TABLE_NAME,ALIAS_NAME from dbi_template where request_id=:REQUEST_ID and temp_table_driven=0 order by position_id"
+31="select dbi_oper_long from dbi_operator where dbi_oper_short=:OPERATOR"
+32="update dbi_request set dbi_status=:STATUS, update_date=sysdate,operator_id=:OPERATOR where request_id=:REQUEST_ID"
+33="select contact_email from dbi_contacts where contact_id in (select distinct operator_id from dbi_notifications where request_id=:REQUEST_ID and notify='Y')"
+
+[EXECUTION_RESULTS]
+;3="delete from dbi_execution_results where request_id=:REQUEST_ID and execution_id=:EXECUTION_ID and execution_stage='Test'"
+;5="select DB_USER, DB_INSTANCE from dbi_execution where execution_stage='Prod' and request_id = :REQUEST_ID"
+;6="select count(request_id) from dbi_execution_results where request_id=:REQUEST_ID and execution_stage='Test' and execution_id=:EXECUTION_ID and act_rows is null"
+;7="delete from dbi_execution_results where request_id=:REQUEST_ID and execution_stage='Prod'"
+;8="delete from dbi_execution where request_id=:REQUEST_ID and execution_stage='Prod'"
+;9="insert into dbi_execution (request_id,execution_stage,db_instance,execution_id,db_user,operator_id,update_date) values(:REQUEST_ID,'Prod',:PROD_INSTANCE,0,:PROD_USER,:OPERATOR,sysdate)"
+;10="insert into dbi_execution_results (request_id,execution_stage,db_instance,execution_id,table_name,sql_action,exp_rows,row_id,db_user,operator_id,update_date) select :REQUEST_ID, 'Prod', :PROD_INST, 0, TABLE_NAME, SQL_ACTION, ACT_ROWS, -(ROW_ID+1000), :PROD_USER, :OPERATOR, sysdate from dbi_execution_results where request_id=:REQUEST_ID and execution_stage='Test' and execution_id=:EXECUTION_ID"
+;11="update dbi_request set operator_id=:OPERATOR,update_date=sysdate , dbi_status=:STATUS,status_date=sysdate where request_id=:REQUEST_ID"
+;14="insert into dbi_execution_results (request_id, Execution_stage, db_instance, execution_id, table_name, sql_action, db_user) values (:REQUEST_ID, 'Test', :DB_INSTANCE, 0, :TABLE_NAME, :SQL_ACTION, :DB_USER)"
+1="select max(execution_id) max_ex_id, dbi_status_desc status, db_instance from dbi_execution_results er, dbi_request dr, dbi_statuses ds where ds.dbi_status = dr.dbi_status and er.request_id = dr.request_id and dr.request_id = :REQUEST_ID and EXECUTION_STAGE = :EXECUTION_STAGE group by dbi_status_desc, db_instance"
+
+[DBIWORKFLOW]
+1="select * from dbi_request where request_id = :REQUEST_ID"
+2="select DB_INSTANCE from dbi_execution where execution_stage='Prod' and request_id = :REQUEST_ID"
+3="select TEST_INSTANCE from dbi_instances where prod_instance = :PROD_INSTANCE"
+4="select count(request_id) from dbi_execution where execution_stage='Test' and request_id = :REQUEST_ID and DB_INSTANCE = :DB_INSTANCE "
+5="select count(request_id) from dbi_execution_results where execution_stage=:EXECUTION_STAGE and request_id = :REQUEST_ID and DB_INSTANCE = :DB_INSTANCE "
+6="select EXP_ROWS from dbi_execution_results where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+7="select count(DB_INSTANCE) from dbi_execution where execution_stage=:EXECUTION_STAGE and request_id = :REQUEST_ID"
+8="select count(request_id) from dbi_execution_results where execution_stage=:EXECUTION_STAGE and request_id = :REQUEST_ID"
+9="select min(nvl(execution_id, 0)) MAX_EXECUTION_ID from dbi_execution where execution_stage=:EXECUTION_STAGE and request_id = :REQUEST_ID"
+10="select ACT_ROWS from dbi_execution_results where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+11="select count(request_id) from dbi_execution where request_id=:REQUEST_ID and execution_id >-1 and execution_stage='Prod'"
+12="select to_number(scheduled_month)+to_number(scheduled_DATE)+to_number(scheduled_WEEKDAY)+to_number(scheduled_hour)+to_number(scheduled_minute) from da_crontab where key1= :REQUEST_ID"
+13="select 'ALL' col, count(request_id) anz from dbi_template where request_id = :REQUEST_ID union select 'NOT_NULL' col, count(request_id) anz from dbi_template where alias_name is not null and request_id = :REQUEST_ID union select 'NO_TEMP_TAB' col, count(request_id) anz from dbi_template where table_name in (select table_name from dbi_available_tables) and request_id = :REQUEST_ID"
+14="select min(execution_id) from dbi_execution_results where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE and execution_id != 99"
+15="select dbi_oper_long from dbi_operator where dbi_oper_short=:OPERATOR"
+16="select APPROVED_OPERATOR, requestor_id, sde_id, adba_id, r.dbi_status, dbi_status_desc from dbi_request r, dbi_statuses s where request_id = :REQUEST_ID and s.dbi_status = r.dbi_status"
+;17="select dbi_next_status||' '||dbi_operator_allowed st_op from dbi_next_status where dbi_curr_status = :DBI_STATUS and dbi_type = :DBI_TYPE and DBI_FLAG = :DBI_FLAG"
+17="select dbi_next_status from dbi_next_status where dbi_operator_allowed = :DBI_OPERATOR_ALLOWED and dbi_curr_status = :DBI_STATUS and dbi_type = :DBI_TYPE and DBI_FLAG = :DBI_FLAG"
+18="select count(db_instance) from dbi_execution, dbi_instances where request_id = :REQUEST_ID and db_instance = test_instance"
+19="select count(*) from dbi_template where request_id = :REQUEST_ID"
+
+[DBI_DETAILS]
+1="select script_id, PATH, NAME, SCRIPTTYP, APPROVED from DBI_SCRIPTS where REQUEST_ID = :REQUEST_ID"
+;1="SELECT dr.dbi_instructions, dr.on_hold_flag, TO_CHAR (dr.dbi_expiration_date, 'YYYY-MM-DD') dbi_expiration_date, DECODE (dc2.contact_last_name, NULL, '', getcontactstring (dc2.contact_id)) sde_approval, DECODE (dc3.contact_last_name, NULL, '', getcontactstring (dc3.contact_id)) da_approval FROM dbi_request dr, dbi_contacts dc2, dbi_contacts dc3 WHERE dr.sde_id = dc2.contact_id(+) AND dr.adba_id = dc3.contact_id(+) AND dr.request_id = :request_id"
+2="select distinct sql_action,sql_action_desc from dbi_lov_control where not sql_action is null"
+3="select dr.DBI_STATUS, ds.DBI_STATUS_DESC, dsv.MARKET from DBI_REQUEST dr, DBI_STATUSES ds, DBI_SW_VERSIONS dsv where dr.REQUEST_ID = :REQUEST_ID and ds.DBI_STATUS = dr.DBI_STATUS and dr.SW_VERSION = dsv.SW_VERSION"
+4="select rownum, DB_USER, DB_INSTANCE, max(EXECUTION_ID) EXECUTION from dbi_execution where EXECUTION_STAGE =:EXECUTION_STAGE and REQUEST_ID= :REQUEST_ID group by DB_USER,DB_INSTANCE, rownum"
+5="select PROD_INSTANCE from DBI_INSTANCES where MARKET =:MARKET order by PROD_INSTANCE"
+6="select * from dbi_execution where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+7="insert into dbi_execution(request_id,execution_stage,db_instance,execution_id,db_user,operator_id,update_date)values(:REQUEST_ID,:EXECUTION_STAGE,:DB_INSTANCE,0,:DB_USER, :OPERATOR_ID, sysdate )"
+8="update dbi_execution set db_instance=:DB_INSTANCE, db_user=:DB_USER, operator_id=:OPERATOR_ID, update_date=sysdate where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+9="delete from dbi_execution_results where request_id =:REQUEST_ID and execution_id =:EXECUTION_ID and execution_stage = :EXECUTION_STAGE"
+10="SELECT test_instance, to_char(downtime_begin, 'HH24:MI') downtime_begin, to_char(downtime_end, 'HH24:MI') downtime_end FROM dbi_instances WHERE prod_instance= :PROD_INSTANCE"
+11="delete from dbi_execution_results where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+12="insert into dbi_execution_results (request_id, execution_stage, db_instance, execution_id, table_name, sql_action, exp_rows,row_id,db_user, operator_id,update_date)values(:REQUEST_ID, :EXECUTION_STAGE, :DB_INSTANCE, 0, :TABLE_NAME, :SQL_ACTION, 0, :ROW_ID, :DB_USER, :OPERATOR_ID, sysdate)"
+13="delete from dbi_temp_tables where request_id=:REQUEST_ID"
+14="insert into dbi_temp_tables (request_id,  db_instance,  temp_table_name,  db_user, temp_type,   drop_date, operator_id,update_date) values (:REQUEST_ID, :DB_INSTANCE, :TEMP_TABLE_NAME, :DB_USER, 'R', trunc(sysdate)+30, :OPERATOR_ID, sysdate)"
+15="select scripttyp,scriptext from dbi_lov_control where not(scripttyp is null)";
+16="Alter session set nls_date_format='YYYY-MM-DD HH24:MI:SS'"
+17="select * from dbi_request where request_id=:REQUEST_ID"
+18="update dbi_request set on_hold_flag = :ON_HOLD, DBI_EXPIRATION_DATE = to_date(:DBI_EXPIRATION_DATE, 'YYYY-MM-DD'), dbi_instructions = :DBI_INSTRUCTIONS,start_script=:SCRIPT_ID, update_date=sysdate where request_id = :REQUEST_ID"
+19="select count(table_name) from dbi_available_tables where upper(db_instance)=upper(:DB_INSTANCE) and upper(table_name)=upper(:TABLE_NAME)"
+20="delete from dbi_execution where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+;21="delete from dbi_template where request_id = :REQUEST_ID"
+;22="insert into dbi_template (request_id, table_name, position_id, alias_name,creation_date, operator_id, update_date) values(:REQUEST_ID, :TABLE_NAME, :POSITION_ID, :POSITION_ID, sysdate, :OPERATOR_ID, sysdate)"
+23="update dbi_execution set execution_id = :EXECUTION_ID, update_date=sysdate where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+24="delete from dbi_execution_selects where request_id=:REQUEST_ID"
+25="insert into dbi_execution_selects (request_id, table_name) values(:REQUEST_ID, :TABLE_NAME)"
+
+
+[TEMP_TABLES]
+;1="select REQUESTOR_ID, SDE_ID, DBI_INSTRUCTIONS, r.dbi_status, r.sw_version, dbi_status_desc, market from dbi_request r, dbi_statuses s, dbi_sw_versions v where request_id = :REQUEST_ID and r.dbi_status = s.dbi_status and r.sw_version = v.sw_version"
+2="select MARKET from dbi_sw_versions where sw_version in (select sw_version from dbi_request where request_id=:REQUEST_ID)"
+;3="select DB_USER, DB_INSTANCE, max(execution_id) EXECUTION from dbi_execution where execution_stage='Prod' and request_id = :REQUEST_ID group by db_user,db_instance"
+;4="select DB_USER, DB_INSTANCE, max(EXECUTION_ID) EXECUTION from dbi_execution where EXECUTION_STAGE =:EXECUTION_STAGE and REQUEST_ID= :REQUEST_ID group by DB_USER,DB_INSTANCE"
+;5="select DB_USER,DB_INSTANCE,max(execution_id) EXECUTION from dbi_execution where execution_stage='Test' and request_id = :REQUEST_ID group by db_user,db_instance"
+6="select db_instance instance,db_user,temp_table_name,temp_type, to_char(drop_date,'YYYY-MM-DD') dropdate,temp_table_status,temp_sql from dbi_temp_tables where request_id=:REQUEST_ID "
+7="select distinct temp_type,temp_type_desc from dbi_lov_control where not temp_type is null"
+8="select prod_instance instance from dbi_instances where market=:MARKET union select test_instance instance from dbi_instances where market=:MARKET and not test_instance is null"
+9="select to_char(sysdate+30,'YYYY-MM-DD') ddate from dual"
+10="delete from dbi_temp_tables where request_id=:REQUEST_ID"
+11="insert into dbi_temp_tables (request_id,operator_id,update_date,TEMP_TABLE_NAME,DB_INSTANCE, DB_USER, TEMP_TYPE, DROP_DATE, TEMP_SQL) values (:REQUEST_ID,:OPERATOR_ID,sysdate,:TEMP_TABLE_NAME,:DB_INSTANCE, :DB_USER, :TEMP_TYPE, to_date(:DROP_DATE, 'YYYY-MM-DD'), :TEMP_SQL)"
+12="select distinct DB_INSTANCE from dbi_execution where REQUEST_ID= :REQUEST_ID"
+
+[DBI_TEMPLATES]
+1="select position_id pos, table_name, alias_name alias_column, decode(temp_table_driven,-1,'Yes',0,'No','No') Table_driven from dbi_template where request_id=:REQUEST_ID order by position_id, table_name"
+2="SELECT table_name FROM (SELECT '(T) ' || temp_table_name table_name, 1 tmp FROM dbi_temp_tables WHERE request_id = :request_id UNION SELECT '(R) ' || table_name, 2 tmp FROM dbi_execution_results WHERE request_id = :request_id UNION SELECT '(S) ' || table_name, 3 tmp FROM dbi_execution_selects es WHERE request_id = :request_id) ORDER BY tmp, table_name"
+3="delete from dbi_template where request_id = :REQUEST_ID"
+4="insert into dbi_template (request_id, table_name, position_id, alias_name, creation_date, operator_id, update_date, temp_table_driven) values (:REQUEST_ID, :TABLE_NAME, :POSITION_ID, :ALIAS_NAME, sysdate, :OPERATOR_ID, sysdate, :TTD)"
+
+[AVAILABLE_TABLES]
+1="SELECT db_instance, table_name FROM (select * from (SELECT '<b>'||db_instance||'</b>' db_instance, '<b>'||table_name||'</b>' table_name FROM dbi_available_tables at, dbi_instances i, dbi_sw_versions sv, dbi_request r WHERE at.db_instance = :INSTANCE AND at.db_instance = i.PROD_INSTANCE and i.MARKET = sv.MARKET and sv.SW_VERSION = r.SW_VERSION and r.REQUEST_ID = :REQUEST_ID order by table_name) UNION select * from (SELECT db_instance, table_name FROM dbi_available_tables at, dbi_instances i, dbi_sw_versions sv, dbi_request r WHERE at.db_instance <> :INSTANCE AND at.db_instance = i.PROD_INSTANCE and i.MARKET = sv.MARKET and sv.SW_VERSION = r.SW_VERSION and r.REQUEST_ID = :REQUEST_ID order by table_name))"
+
+[DBI_COPY]
+;1="BEGIN COPY_DBI (:DBI_IN, :REQUESTOR_ID, :DBI_OUT, :STATUS, :MESSAGE); END;"
+GET_ID = "select dbi_request_1sq.nextval from dual"
+GET_SW_VERSION = "select SW2.sw_version from dbi_sw_versions SW1, dbi_sw_versions SW2 where SW1.market = SW2.market and SW2.current_ind='Y' and SW1.sw_version = :SW_VERSION"
+INSERT_DBI_REQUEST = "INSERT INTO DBI_REQUEST (REQUEST_ID, DBI_STATUS, REQUESTOR_ID, SW_VERSION, PRIORITY_ID, REQUEST_DATE, STATUS_DATE, BRIEF_DESC, PROBLEM_DESC, BUSINESS_IMPACT, SERF_CR_ID, DBI_EXPIRATION_DATE, DBI_INSTRUCTIONS, REFERENCE_DBI, DBI_TYPE, ON_HOLD_FLAG, OPERATOR_ID, REQUEST_COMMENTS, DBI_FLAG) VALUES (:REQUEST_ID, :DBI_STATUS, :REQUESTOR_ID, :SW_VERSION, :PRIORITY_ID, sysdate, sysdate, :BRIEF_DESC, :PROBLEM_DESC, :BUSINESS_IMPACT, :SERF_CR_ID, :DBI_EXPIRATION_DATE, :DBI_INSTRUCTIONS, :REFERENCE_DBI, :DBI_TYPE, :ON_HOLD_FLAG, :OPERATOR_ID, :REQUEST_COMMENTS, :DBI_FLAG)"
+UPDATE_DBI_REQUEST = "UPDATE DBI_REQUEST SET  WHERE REQUEST_ID = :REQUEST_ID"
+
+;INSERT_DBI_EXECUTION = "insert into DBI_EXECUTION (REQUEST_ID, EXECUTION_STAGE, DB_INSTANCE, EXECUTION_ID, DB_USER, OPERATOR_ID, EXECUTION_DATE, RUN_TIME_MINUTES, EXECUTION_COMMENTS) SELECT :NEW_REQUEST_ID, decode(test_instance,null,'Prod','Test'), nvl(test_instance,prod_instance), 0, db_user, :REQUESTOR_ID, sysdate, null, execution_comments from DBI_EXECUTION DE, DBI_INSTANCES DI where de.DB_INSTANCE = di.PROD_INSTANCE and request_id = :REQUEST_ID and execution_stage = 'Prod' and execution_id >0"
+INSERT_DBI_EXECUTION = "insert into DBI_EXECUTION (REQUEST_ID, EXECUTION_STAGE, DB_INSTANCE, EXECUTION_ID, DB_USER, OPERATOR_ID, EXECUTION_DATE, RUN_TIME_MINUTES, EXECUTION_COMMENTS, MASCHINE) SELECT :NEW_REQUEST_ID, execution_stage, db_instance, 0, db_user, :REQUESTOR_ID, sysdate, null, execution_comments,maschine from DBI_EXECUTION DE where request_id = :REQUEST_ID"
+;INSERT_DBI_EXEC_RESULTS = "insert into DBI_EXECUTION_RESULTS (REQUEST_ID, EXECUTION_STAGE, DB_INSTANCE, EXECUTION_ID, TABLE_NAME, SQL_ACTION, EXP_ROWS, ACT_ROWS, ROW_ID, DB_USER, OPERATOR_ID) SELECT :NEW_REQUEST_ID, decode(test_instance,null,'Test','Test'), nvl(test_instance,prod_instance), 0, table_name, sql_action, null, null, nvl(abs(row_id),1), de.db_user, :REQUESTOR_ID from DBI_EXECUTION_RESULTS DR, DBI_INSTANCES DI, DBI_EXECUTION DE where de.DB_INSTANCE = di.PROD_INSTANCE and de.request_id = :REQUEST_ID and de.execution_stage = 'Prod' and de.execution_id > 0 and dr.REQUEST_ID=de.request_id and dr.DB_INSTANCE=de.DB_INSTANCE and dr.EXECUTION_STAGE=de.EXECUTION_STAGE and dr.EXECUTION_ID=de.EXECUTION_ID"
+INSERT_DBI_EXEC_RESULTS = "insert into DBI_EXECUTION_RESULTS (REQUEST_ID, EXECUTION_STAGE, DB_INSTANCE, EXECUTION_ID, TABLE_NAME, SQL_ACTION, EXP_ROWS, ACT_ROWS, ROW_ID, DB_USER, OPERATOR_ID) SELECT distinct :NEW_REQUEST_ID, decode(test_instance,null,'Test','Test'), nvl(test_instance,prod_instance), 0, table_name, sql_action, null, null, 0, de.db_user, :REQUESTOR_ID from DBI_EXECUTION_RESULTS DR, DBI_INSTANCES DI, DBI_EXECUTION DE where de.DB_INSTANCE = di.PROD_INSTANCE and de.request_id = :REQUEST_ID and dr.REQUEST_ID=de.request_id and dr.DB_INSTANCE=de.DB_INSTANCE and dr.EXECUTION_STAGE=de.EXECUTION_STAGE and dr.EXECUTION_ID=de.EXECUTION_ID"
+INSERT_DBI_EXEC_SELECTS	= "insert into DBI_EXECUTION_SELECTS (REQUEST_ID, TABLE_NAME) SELECT :NEW_REQUEST_ID, TABLE_NAME from DBI_EXECUTION_SELECTS where request_id = :REQUEST_ID"
+INSERT_DBI_TEMP_TABLES = "insert into DBI_TEMP_TABLES (REQUEST_ID, DB_INSTANCE, TEMP_TABLE_NAME, DB_USER, TEMP_TYPE, TEMP_SQL, DROP_DATE, OPERATOR_ID, UPDATE_DATE, TEMP_TABLE_STATUS) SELECT :NEW_REQUEST_ID, DB_INSTANCE, TEMP_TABLE_NAME, DB_USER, TEMP_TYPE, TEMP_SQL, sysdate+30, :REQUESTOR_ID, sysdate, TEMP_TABLE_STATUS from DBI_TEMP_TABLES where request_id = :REQUEST_ID"
+INSERT_DBI_TEMPLATE = "insert into DBI_TEMPLATE (REQUEST_ID, TABLE_NAME, POSITION_ID, ALIAS_NAME, CREATION_DATE, OPERATOR_ID, UPDATE_DATE, TEMP_TABLE_DRIVEN, FORM_DIRTY) SELECT :NEW_REQUEST_ID, TABLE_NAME, POSITION_ID, ALIAS_NAME, sysdate, :REQUESTOR_ID, null, TEMP_TABLE_DRIVEN, FORM_DIRTY from DBI_TEMPLATE where request_id = :REQUEST_ID"
+INSERT_DA_CRONTAB = "insert into DA_CRONTAB (ID, SYS_CREATION_DATE, OPERATOR_ID, SYS_UPDATE_DATE, SCHEDULED_MONTH, SCHEDULED_DATE, SCHEDULED_WEEKDAY, SCHEDULED_HOUR, SCHEDULED_MINUTE, SCHEDULED_STATUS, LINK_ID, KEY1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9, KEY10, SCHEDULE_COMMENTS, ON_HOLD) SELECT DBI_CONTACTS_1SQ.nextval, sysdate, :REQUESTOR_ID, null, SCHEDULED_MONTH, SCHEDULED_DATE, SCHEDULED_WEEKDAY, SCHEDULED_HOUR, SCHEDULED_MINUTE, SCHEDULED_STATUS, LINK_ID, :NEW_REQUEST_ID, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9, KEY10, SCHEDULE_COMMENTS, 'Y' from DA_CRONTAB where key1 = :REQUEST_ID"
+GET_SCRIPT_ID = "select dbi_scripts_1sq.nextval from dual"
+INSERT_DBI_SCRIPT = "insert into DBI_SCRIPTS (SCRIPT_ID, REQUEST_ID, PATH, NAME, SCRIPTTYP, KEY, RUNABLE, OPERATOR_ID) select :NEW_SCRIPT_ID, :NEW_REQUEST_ID, PATH, NAME, SCRIPTTYP, KEY, RUNABLE, :REQUESTOR_ID from DBI_SCRIPTS where SCRIPT_ID = :SCRIPT_ID"
+INSERT_DBI_SCRIPT_TEXT = "insert into DBI_SCRIPTS_TEXT (SCRIPT_ID, BFILELOC) select :NEW_SCRIPT_ID, BFILELOC from DBI_SCRIPTS_TEXT where SCRIPT_ID = :SCRIPT_ID"
+
+[SHOW_DBI_LOGFILES]
+1="select name,path from dbi_logs where log_id=:LOG_ID"
+
+[SHOW_SQL_FILE]
+1="select name,path,scripttyp from dbi_scripts where script_id=:SCRIPT_ID"
+2="select script_id,name,path,scripttyp from dbi_scripts where request_id=:REQUEST_ID"
+
+
+
+
+
+[SHOW_DBI_HISTORY]
+1="SELECT to_char(H.EFFECTIVE_DATE,'YYYY-MM-DD HH24:MI:SS'), S.DBI_STATUS_DESC, getContactString(OPERATOR_ID) FROM DBI_REQUEST_HISTORY H, DBI_STATUSES S WHERE H.DBI_STATUS = S.DBI_STATUS AND H.REQUEST_ID= :REQUEST_ID"
+
+[CLEANUP]
+1="select db_instance from dbi_cleanup_instances"
+
+[AJAX]
+1="select TEST_INSTANCE from DBI_INSTANCES i, DBI_REQUEST r, DBI_SW_VERSIONS v where i.MARKET = v.MARKET AND r.SW_VERSION = v.SW_VERSION AND v.CURRENT_IND = 'Y' AND r.REQUEST_ID = :REQUEST_ID AND i.PROD_INSTANCE = :PROD_INSTANCE"
+
+[SCRIPTS]
+1="select script_id, PATH, NAME, SCRIPTTYP, APPROVED from DBI_SCRIPTS where REQUEST_ID = :REQUEST_ID"
+2="select dbi_scripts_1sq.nextval from dual"
+3="insert into DBI_SCRIPTS (script_id, request_id, path, name, scripttyp, key, operator_id, update_date) values (:ID, :REQUEST_ID, :PATH, :NAME, :SCRIPTTYP, :KEY, :OPERATOR_ID, sysdate)"
+;3a="insert into DBI_SCRIPTS_TEXT (script_id, script_text) values (:ID, :SCRIPT_TEXT)"
+3a="insert into DBI_SCRIPTS_TEXT (script_id, bfileloc) values (:ID, bfilename(:DIR,:NAME))"
+4="select * from DBI_SCRIPTS where script_id = :ID"
+4a="select bfileloc from DBI_SCRIPTS_TEXT where script_id = :ID"
+5="update DBI_SCRIPTS set SCRIPTTYP = :SCRIPTTYP, PATH = :PATH, NAME = :NAME , KEY = :KEY, OPERATOR_ID = :OPERATOR_ID, update_date=sysdate where script_id = :ID"
+;5a="update DBI_SCRIPTS_TEXT set SCRIPT_TEXT = :SCRIPT_TEXT where script_id = :ID"
+5a="update DBI_SCRIPTS_TEXT set BFILELOC = bfilename(:DIR,:NAME) where script_id = :ID"
+6="update DBI_REQUEST set START_SCRIPT = :START_SCRIPT, update_date=sysdate where request_id = :REQUEST_ID"
+7="select count(*) from DBI_SCRIPTS where request_id = :REQUEST_ID"
+8="delete from DBI_SCRIPTS where script_id = :ID"
+9="update DBI_SCRIPTS set APPROVED = :APPROVED , update_date=sysdate where script_id = :ID"
+10="select count(*) from DBI_SCRIPTS where REQUEST_ID = :REQUEST_ID and (APPROVED != :APPROVED or APPROVED IS NULL)";
+11="update DBI_SCRIPTS set APPROVED = NULL, update_date=sysdate where REQUEST_ID = :REQUEST_ID"
+12="begin ctx_ddl.sync_index('DBI_SCRIPTS_TEXT_CTX1');end;"
+
+[HOST]
+1="select * from DBI_EXECUTION where REQUEST_ID = :REQUEST_ID"
+2="insert into DBI_EXECUTION (REQUEST_ID, EXECUTION_STAGE, DB_INSTANCE, EXECUTION_ID, DB_USER, OPERATOR_ID, MASCHINE) values (:REQUEST_ID, :EXECUTION_STAGE, :DB_INSTANCE, :EXECUTION_ID, :DB_USER, :OPERATOR_ID, :MASCHINE)"
+3="update DBI_EXECUTION set DB_INSTANCE = : DB_INSTANCE, DB_USER  = :DB_USER, OPERATOR_ID = :OPERATOR_ID, MASCHINE = :MASCHINE where REQUEST_ID = :REQUEST_ID"
+4="update DBI_REQUEST set DBI_EXPIRATION_DATE = to_date(:DBI_EXPIRATION_DATE, 'YYYY-MM-DD'), DBI_INSTRUCTIONS  = :DBI_INSTRUCTIONS where REQUEST_ID = :REQUEST_ID"
+5="select PROD_INSTANCE from DBI_INSTANCES I, DBI_SW_VERSIONS SW, DBI_REQUEST R where I.MARKET = SW.MARKET AND SW.SW_VERSION = R.SW_VERSION AND R.REQUEST_ID = :REQUEST_ID ORDER BY PROD_INSTANCE"
+
+[PROC_DETAILS]
+1="select rownum, DB_USER, DB_INSTANCE, max(EXECUTION_ID) EXECUTION from dbi_execution where EXECUTION_STAGE =:EXECUTION_STAGE and REQUEST_ID= :REQUEST_ID group by DB_USER,DB_INSTANCE, rownum"
+2="insert into dbi_execution(request_id,execution_stage,db_instance,execution_id,db_user,procname,operator_id,update_date)values(:REQUEST_ID,:EXECUTION_STAGE,:DB_INSTANCE,0,:DB_USER, :PROC_NAME,:OPERATOR_ID, sysdate )"
+3="update dbi_execution set db_instance=:DB_INSTANCE, db_user=:DB_USER, operator_id=:OPERATOR_ID, procname=:PROC_NAME,update_date=sysdate where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+
+
+[EXECUTE_PROC]
+1="select DB_INSTANCE,DB_USER, EXECUTION_ID from dbi_execution where request_id=:REQUEST_ID and execution_stage=:EXECUTION_STAGE"
+
+
+
+
+
+{include file="$head_tpl"}
+
+{include file="$sub_nav_tpl"}
+<!-- main column start -->
+<td valign="top" width="100%">
+  {include file="dbi_workflow.tpl"}
+  <h1>{$headline}</h1>
+  <br>
+  <br>
+
+  {catform FORM="$formname" flashFocus="TRUE"}
+  {html_form_start name="$formname" action="$formaction" method="POST"}
+  
+  {html_form_head text=$headtext}
+  {if $request_id}
+    {if $externalDBI}
+      {html_form_text label='DBI category' text='External'}
+    {elseif $procedure}
+      {html_form_text label='DBI category' text='Procedure'}
+    {/if}
+  {else}
+    {html_form_radio label='DBI category' name='CATEGORY' values=$ids onClick='form.submit();' checked=$checked separator='&nbsp;' output=$names}
+  {/if}
+  {html_form_select label='Priority' name='PRIORITY_ID' options=$priority_options selected=$priority_selected style='class="txtBox boxW200"' disabled=$disabled}
+  {html_form_select label='Market' name='SW_VERSION' options=$market_options selected=$market_selected style='class="txtBox boxW200"' disabled=$disabled}
+  {if !$procedure}
+    {html_form_select label='DBI type' name='DBI_TYPE' options=$type_options selected=$type_selected style='class="txtBox boxW200"' disabled=$disabled}
+  {else}
+    <input type="hidden" name="DBI_TYPE" value="O">
+  {/if}
+  {* now with TT/Serf for Typ E/P
+  {if !$externalDBI && !$procedure}
+  *}
+    {*html_form_input label='TT number' name='TT_ID' value=$tt_number size=10 maxlength=10 style='class="txtBox boxW90"' disabled=$disabled extra="onBlur=\"return checkTT(this, false);\""*}
+    {*html_form_input label='Serf/CR' name='SERF_CR_ID' value=$serf_cr_id size=12 maxlength=12 style='class="txtBox boxW90"' disabled=$disabled extra="onBlur=\"return checkSerf(this, false);\""*}
+    {html_form_input label='TT number' name='TT_ID' value=$tt_number size=20 maxlength=20 style='class="txtBox boxW90"' disabled=$disabled}
+    {html_form_input label='Serf/CR' name='SERF_CR_ID' value=$serf_cr_id size=12 maxlength=12 style='class="txtBox boxW90"' disabled=$disabled}
+    {html_form_input label='Reference DBI' name='REFERENCE_DBI' value=$reference_dbi maxlength=6 style='class="txtBox boxW90"' disabled=$disabled}
+    {formcat check="isRegExp" field='REFERENCE_DBI' expression="(db[0-9][0-9][0-9][0-9])*" message="invalid dbi number format" reverse="false" focus="true"}
+    {*{/if}*}
+  {html_form_foot}
+
+  {html_form_head text='&nbsp;'}
+  {html_form_textarea label='Brief description*' name='BRIEF_DESC' text=$brief_desc rows=4 style='class="boxW500"' disabled=$disabled maxlength="20"}
+  {formcat check="notEmpty" field="BRIEF_DESC" message="The brief description can not be empty"}
+  {formcat check="isLength" field="BRIEF_DESC" min="0" max="200" message="The brief description can have a maximum size of 200 characters"}
+
+  {html_form_textarea label='Problem description' name='PROBLEM_DESC' text=$problem_desc rows=4 style='class="boxW500"' disabled=$disabled}
+  {*formcat check="notEmpty" field="PROBLEM_DESC" message="The problem description can not be empty"*}
+  {formcat check="isLength" field="PROBLEM_DESC" min="0" max="1000" message="The problem description can have a maximum size of 1000 characters"}
+
+  {html_form_textarea label='Business impact' name='BUSINESS_IMPACT' text=$business_impact rows=4 style='class="boxW500"' disabled=$disabled}
+  {*formcat check="notEmpty" field="BUSINESS_IMPACT" message="The business impact can not be empty"*}
+  {formcat check="isLength" field="BUSINESS_IMPACT" min="0" max="1000" message="The business impact can have a maximum size of 1000 characters"}
+
+  <!--<input type="text" name="fs" value="{$flow_selected}">-->
+
+  {if $request_id}
+    {html_form_submit name="button" value="$buttonText" name2="button" value2="$buttonTextClear"}
+  {else}
+    {html_form_submit name="button" value="$buttonText"}
+  {/if}
+
+  {html_form_end}
+  {/catform}
+
+</td>
+<!-- main column end -->
+
+{include file="$foot_tpl"}
