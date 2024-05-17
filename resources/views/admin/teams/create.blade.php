@@ -46,3 +46,67 @@
         </div>
     </div>
 </x-app-layout>
+
+<style>
+    .sidebar {
+        width: 250px; /* Adjust width as needed */
+        height: 100%;
+        background-color: #f4f4f4;
+        padding: 20px;
+        float: left; /* Added to align sidebar to left */
+    }
+
+    .sidebar-menu {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar-menu li {
+        margin-bottom: 10px;
+    }
+
+    .sidebar-menu li a {
+        display: block;
+        padding: 10px 15px;
+        text-decoration: none;
+        color: #333;
+        transition: background-color 0.3s;
+    }
+
+    .sidebar-menu li a:hover {
+        background-color: #ddd;
+    }
+
+    
+
+    .card {
+        margin-top: 20px;
+    }
+
+    .sidebar-menu ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .sidebar-menu ul li {
+        margin-left: 20px; /* Adjust indentation as needed */
+    }
+
+    .sidebar-menu ul li a {
+        display: block;
+        padding: 8px 15px;
+        color: #666;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+    .sidebar-menu ul li a:hover {
+        background-color: #f0f0f0;
+    }
+
+    .text-red-500 {
+        color:red;
+    }
+</style>

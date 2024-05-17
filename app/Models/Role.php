@@ -18,16 +18,11 @@ class Role extends Model
         return $this->belongsToMany(User::class, 'user_role_right', 'role_id', 'user_id')->withTimestamps();
     }
 
-    public function roleRights()
-    {
-        return $this->belongsToMany(Right::class, 'user_role_right', 'role_id', 'right_id')->distinct()->withTimestamps();
-    }
+    
 
     public function rights()
     {
         return $this->belongsToMany(Right::class);
-
-        //return $this->belongsToMany(Right::class, 'right_role', 'role_id', 'right_id')->withTimestamps();
     }
 
 }

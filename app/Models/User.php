@@ -41,14 +41,18 @@ class User extends Authenticatable implements AuthenticatableContract{
         'email_verified_at' => 'datetime',
     ];
 
-    public function userRoles()
-{
-    return $this->belongsToMany(Role::class, 'user_role_right', 'user_id', 'role_id')->withTimestamps();
-}
+        public function userRoles()
+    {
+        return $this->belongsToMany(Role::class, 'user_role_right', 'user_id', 'role_id')->withTimestamps();
+    }
 
-public function userRights()
-{
-    return $this->belongsToMany(Right::class, 'user_role_right', 'user_id', 'right_id')->distinct()->withTimestamps();
-}
+    public function team()
+    {
+        return $this->belongsTo(Team::class);
+    }
 
+    public function assignedUser()
+    {
+        return $this->belongsToMany(User::class, 'user_assigned_users', 'user_id', 'assigned_user_id');
+    }
 }

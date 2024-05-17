@@ -25,12 +25,14 @@
                         {{ __('DBI Tool') }}
                     </x-nav-link>
                 </div>
+                @if(Auth::user()->team_id == 4)
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                     <x-nav-link :href="route('users.index')" :active="request()->routeIs('admin')"
                                 class="{{ request()->routeIs('admin') ? 'active-tab' : '' }}">
                         {{ __('Administration') }}
                     </x-nav-link>
                 </div>
+                @endif
             </div>
 
             <!-- Settings Dropdown -->

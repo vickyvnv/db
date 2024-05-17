@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\TeamController;
 
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -31,6 +32,10 @@ Route::middleware('auth')->group(function () {
     // DBI ROutes
     Route::resource('dbi-tool/dbi', DbiRequestController::class);
 
+});
+
+Route::middleware('is_admin')->group(function () {
+
     // Rights
     Route::resource('/admin/rights', RightsController::class);
 
@@ -40,7 +45,7 @@ Route::middleware('auth')->group(function () {
     // Teams
     Route::resource('teams', TeamController::class);
 
-    // Admin  User CRUD operations
+    // User
     Route::get('/admin/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/admin/users/create', [UserController::class, 'create'])->name('users.create');
     Route::post('/admin/users', [UserController::class, 'store'])->name('users.store');
@@ -50,6 +55,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/roles/{roleId}/rights', [UserController::class, 'getRightsForRole']);
     Route::get('/admin//users/{user}/reset-password', [UserController::class, 'showResetPasswordForm'])->name('users.reset-password');
     Route::put('/admin//users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.update-password');
+    Route::post('/admin/users/assigned-users', [UserController::class, 'getAssignedUsers'])->name('users.assigned-users');
+
+
 });
 
 

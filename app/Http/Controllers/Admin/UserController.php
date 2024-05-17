@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Role;
 use App\Models\Right;
 use App\Models\User;
+use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -72,6 +73,7 @@ class UserController extends Controller
      */
     public function create()
     {
+
         // Return the create user form
         return view('admin.users.create');
     }
@@ -95,7 +97,7 @@ class UserController extends Controller
                 // 'user_function' => ['required', 'string', 'max:100'],
                 // 'user_contractor' => ['required', 'string', 'max:100'],
                 // 'team_id' => ['required', 'string', 'max:64'],
-                'username' => ['required', 'string', 'max:255'],
+                'username' => ['required', 'string', 'max:255','unique:users,username'],
                 'mobile' => ['required', 'string', 'max:10'],
                 'user_department' => ['required', 'string', 'max:31'],
                 'company' => ['required', 'string', 'max:100'],
@@ -150,29 +152,6 @@ class UserController extends Controller
 
         return view('admin.users.show', compact('user'));
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //dd($user);
-        
-        
-        //dd($user);
-        //$user = User::findOrFail($id);
-        $roles = Role::with('rights')->get();;
-        
-
-        // Retrieve the user by ID
-        $user = User::findOrFail($id);
-
-        return view('admin.users.edit', compact('user',  'roles'));
-    }
-
     public function getRightsForRole($roleId)
     {
         $role = Role::findOrFail($roleId);
@@ -182,12 +161,53 @@ class UserController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Show the form for editing the specified resource.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    public function edit($id)
+    {
+        $roles = Role::get();
+        $teams = Team::all();
+        $user = User::with('userRoles', 'assignedUser')->findOrFail($id);
+        //dd($user);
+        // Get the current user's team ID and role ID
+        $currentTeamId = $user->team_id;
+        $currentRoleId = $user->userRoles->pluck('id')->first();
+
+        // Retrieve assigned users based on the user's team_id and role conditions
+        $assignedUsers = User::whereHas('userRoles', function ($query) use ($currentRoleId) {
+            $query->where('role_id', $currentRoleId);
+        })
+        ->where('team_id', $currentTeamId)
+        ->whereHas('userRoles', function ($query) {
+            $query->where('role_id', 5); // Requester role ID
+        })
+        ->where('id', '!=', $user->id)
+        ->with('userRoles')
+        ->get();
+
+        return view('admin.users.edit', compact('user', 'roles', 'teams', 'assignedUsers', 'currentRoleId'));
+    }
+
+    public function getAssignedUsers(Request $request)
+    {
+        $teamId = $request->input('team_id');
+        $roleId = $request->input('role_id');
+        $userId = $request->input('user_id');
+
+        $assignedUsers = User::whereHas('userRoles', function ($query) use ($roleId) {
+            $query->where('role_id', $roleId);
+        })
+        ->where('team_id', $teamId)
+        ->where('id', '!=', $userId)
+        ->with('userRoles')
+        ->get();
+
+        return response()->json($assignedUsers);
+    }
+
     public function update(Request $request, User $user)
     {
         try {
@@ -203,8 +223,11 @@ class UserController extends Controller
                 'company' => ['required', 'string', 'max:100'],
                 'position' => ['required', 'string', 'max:100'],
                 'phone' => ['required', 'string', 'max:100'],
+                'team_id' => ['required', 'max:100'],
+                'role_id' => ['required', 'exists:roles,id'],
+                'assigned_user_id' => ['required_if:role_id,5', 'nullable', 'exists:users,id'],
             ]);
-            
+
             // Redirect back with errors if validation fails
             if ($validator->fails()) {
                 return redirect()->back()->withErrors($validator)->withInput();
@@ -222,33 +245,36 @@ class UserController extends Controller
                 'position' => $request->position,
                 'phone' => $request->phone,
                 'user_department' => $request->user_department,
+                'team_id' => $request->team_id,
+                'assigned_user_id' => $request->assigned_user_id,
             ]);
+
+            // Update user roles
+            $user->userRoles()->sync([$request->role_id]);
             
-            $roleId = $request->role_id;
-            $userId = $user->id;
-            $rightIds = $request->right_id;
-
-            // Detach existing records associated with the specific user
-            $user->userRoles()->wherePivot('user_id', $userId)->detach();
-
-            // Attach the new records
-            foreach ($rightIds as $rightId) {
-                $user->userRoles()->attach($roleId, ['right_id' => $rightId]);
+            
+            if(isset($request->assigned_user_id) && $request->assigned_user_id != null) {
+                // Update assigned user relation
+                if ($request->has('assigned_user_id')) {
+                    $assignedUser = User::findOrFail($request->assigned_user_id);
+                    $user->assignedUser()->sync([$assignedUser->id => ['team_id' => $request->team_id]]);
+                } else {
+                    $user->assignedUser()->detach();
+                }
             }
-
-
+            
             // Log successful user update
-            Log::channel('daily')->info('User details updated successfully by: ' . Auth::user()->email . '. Updated user is: ' . $user->email);
-        
+            Log::channel('daily')->info('User details updated successfully by: ' . auth()->user()->email . '. Updated user is: ' . $user->email);
+
             // Redirect to user index page after successful update
             return redirect()->route('users.index')->with('success', 'User details updated successfully!');
         } catch (\Exception $e) {
             // Log the error if update fails
             Log::channel('daily')->error('Error during user update: ' . $e->getMessage());
-        
+
             // Redirect back to the edit page with an error message
             return redirect()->back()->withInput()->withErrors(['error' => 'An error occurred during user update. Please try again.']);
-        }   
+        }
     }
 
     /**

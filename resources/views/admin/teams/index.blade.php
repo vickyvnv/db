@@ -63,3 +63,110 @@
         </div>
     </div>
 </x-app-layout>
+<style>
+   .sidebar {
+        width: 250px; /* Adjust width as needed */
+        height: 100%;
+        background-color: #f4f4f4;
+        padding: 20px;
+        float: left; /* Added to align sidebar to left */
+    }
+
+    .sidebar-menu {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar-menu li {
+        margin-bottom: 10px;
+    }
+
+    .sidebar-menu li a {
+        display: block;
+        padding: 10px 15px;
+        text-decoration: none;
+        color: #333;
+        transition: background-color 0.3s;
+    }
+
+    .sidebar-menu li a:hover {
+        background-color: #ddd;
+    }
+
+    .card {
+        margin-top: 20px;
+    }
+
+    .sidebar-menu ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .sidebar-menu ul li {
+        margin-left: 20px; /* Adjust indentation as needed */
+    }
+
+    .sidebar-menu ul li a {
+        display: block;
+        padding: 8px 15px;
+        color: #666;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+    .sidebar-menu ul li a:hover {
+        background-color: #f0f0f0;
+    }
+
+    .table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.table th,
+.table td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #333;
+}
+
+.table td {
+    background-color: #fff;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+</style>
