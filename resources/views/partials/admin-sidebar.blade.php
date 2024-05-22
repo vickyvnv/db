@@ -50,8 +50,9 @@
                 <i class="fas fa-chevron-down dropdown-icon"></i>
             </a>
             <ul class="submenu">
-                <li><a href="{{ route('rights.index') }}">Rights</a></li>
-                <li><a href="{{ route('roles.index') }}">Role</a></li>
+                <li><a href="{{ route('pwconnects.index') }}">PW Connects</a></li>
+                <li><a href="{{ route('pwroles.index') }}">PW Roles</a></li>
+                <li><a href="{{ route('pwgroups.index') }}">PW Groups</a></li>
             </ul>
         </li>
     </ul>

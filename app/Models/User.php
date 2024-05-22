@@ -55,4 +55,9 @@ class User extends Authenticatable implements AuthenticatableContract{
     {
         return $this->belongsToMany(User::class, 'user_assigned_users', 'user_id', 'assigned_user_id');
     }
+
+    public function pwgroups()
+    {
+        return $this->belongsToMany(Pwgroup::class, 'pwgroup_user');
+    }
 }

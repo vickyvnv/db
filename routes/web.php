@@ -6,8 +6,10 @@ use App\Http\Controllers\DBI\DbiRequestController;
 use App\Http\Controllers\Admin\RightsController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\TeamController;
-
+use App\Http\Controllers\Admin\TeamController;
+use App\Http\Controllers\Admin\PwgroupController;
+use App\Http\Controllers\Admin\PwroleController;
+use App\Http\Controllers\Admin\PwconnectController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,7 +45,7 @@ Route::middleware('is_admin')->group(function () {
     Route::resource('/admin/roles', RoleController::class);
 
     // Teams
-    Route::resource('teams', TeamController::class);
+    Route::resource('/admin/teams', TeamController::class);
 
     // User
     Route::get('/admin/users', [UserController::class, 'index'])->name('users.index');
@@ -57,6 +59,25 @@ Route::middleware('is_admin')->group(function () {
     Route::put('/admin//users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.update-password');
     Route::post('/admin/users/assigned-users', [UserController::class, 'getAssignedUsers'])->name('users.assigned-users');
 
+    // PW Groups
+    Route::resource('/admin/pwgroups', PwgroupController::class);
+    
+    // PW Roles
+    Route::resource('/admin/pwroles', PwroleController::class);
+
+    // PW Connects
+    Route::resource('/admin/pwconnects', PwconnectController::class);
+    Route::get('/pwconnects/{pwconnect}/users', [PwconnectController::class, 'users'])->name('pwconnects.users');
+    Route::post('/pwconnects/{pwconnect}/users/{user}', [PwconnectController::class, 'assignUser'])->name('pwconnects.assignUser');
+    Route::delete('/pwconnects/{pwconnect}/users/{user}', [PwconnectController::class, 'removeUser'])->name('pwconnects.removeUser');
+    
+    Route::get('/pwconnects/{pwconnect}/roles', [PwconnectController::class, 'roles'])->name('pwconnects.roles');
+    Route::post('/pwconnects/{pwconnect}/roles/{role}', [PwconnectController::class, 'assignRole'])->name('pwconnects.assignRole');
+    Route::delete('/pwconnects/{pwconnect}/roles/{role}', [PwconnectController::class, 'removeRole'])->name('pwconnects.removeRole');
+
+    Route::get('/admin/pwgroups/{pwgroup}/change-users', [PwgroupController::class, 'changeUsers'])->name('pwgroups.changeUsers');
+    Route::post('/admin/pwgroups/{pwgroup}/users/{user}', [PwgroupController::class, 'addUser'])->name('pwgroups.addUser');
+    Route::delete('/admin/pwgroups/{pwgroup}/users/{user}', [PwgroupController::class, 'removeUser'])->name('pwgroups.removeUser');
 
 });
 

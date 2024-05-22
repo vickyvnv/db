@@ -48,63 +48,42 @@
     </div>
 </x-app-layout>
 <style>
-    .sidebar {
-        width: 250px; /* Adjust width as needed */
-        height: 100%;
-        background-color: #f4f4f4;
-        padding: 20px;
-        float: left; /* Added to align sidebar to left */
-    }
+  .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -15px;
+    margin-right: -15px;
+  }
 
-    .sidebar-menu {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-    }
+  .form-group {
+    flex: 1;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
 
-    .sidebar-menu li {
-        margin-bottom: 10px;
-    }
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+  }
 
-    .sidebar-menu li a {
-        display: block;
-        padding: 10px 15px;
-        text-decoration: none;
-        color: #333;
-        transition: background-color 0.3s;
-    }
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
 
-    .sidebar-menu li a:hover {
-        background-color: #ddd;
-    }
+  .form-group textarea {
+    resize: vertical;
+  }
 
-    .container {
-        float: left; /* Added to align main content to left */
-    }
-
-    .card {
-        margin-top: 20px;
-    }
-
-    .sidebar-menu ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-    }
-
-    .sidebar-menu ul li {
-        margin-left: 20px; /* Adjust indentation as needed */
-    }
-
-    .sidebar-menu ul li a {
-        display: block;
-        padding: 8px 15px;
-        color: #666;
-        text-decoration: none;
-        transition: background-color 0.3s;
-    }
-
-    .sidebar-menu ul li a:hover {
-        background-color: #f0f0f0;
-    }
+  .btn-primary {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
 </style>

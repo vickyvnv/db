@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Create Team') }}
+            {{ __('Edit Group') }}
         </h2>
     </x-slot>
 
@@ -20,18 +20,22 @@
                                     <div class="row justify-content-center">
                                         <div class="col-md-10">
                                             <div class="card-body d-flex justify-content-center">
-                                                <div class="card-header">Create Team</div>
-
+                                                <div class="card-header">Edit Group</div>
                                                 <div class="card-body">
-                                                    <a href="{{ route('teams.index') }}" class="btn btn-secondary mb-3">Back</a>
-
-                                                    <form action="{{ route('teams.store') }}" method="POST">
+                                                    <a href="{{ route('pwgroups.index') }}" class="btn btn-secondary mb-3">Back</a>
+                                                    <!-- Display success or error messages if needed -->
+                                                    <form action="{{ route('pwgroups.update', $pwgroup) }}" method="POST">
                                                         @csrf
+                                                        @method('PUT')
                                                         <div class="form-group">
                                                             <label for="name">Name</label>
-                                                            <input type="text" name="name" id="name" class="form-control" required>
+                                                            <input type="text" name="name" id="name" class="form-control" value="{{ $pwgroup->name }}" required>
                                                         </div>
-                                                        <button type="submit" class="btn btn-primary">Create</button>
+                                                        <div class="form-group">
+                                                            <label for="description">Description</label>
+                                                            <textarea name="description" id="description" class="form-control">{{ $pwgroup->description }}</textarea>
+                                                        </div>
+                                                        <button type="submit" class="btn btn-primary">Update</button>
                                                     </form>
                                                 </div>
                                             </div>
@@ -46,7 +50,6 @@
         </div>
     </div>
 </x-app-layout>
-
 <style>
   .form-row {
     display: flex;
