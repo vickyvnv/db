@@ -195,16 +195,15 @@ class UserController extends Controller
     {
         $teamId = $request->input('team_id');
         $roleId = $request->input('role_id');
-        $userId = $request->input('user_id');
+        $userId = $request->input('user_id'); 
 
         $assignedUsers = User::whereHas('userRoles', function ($query) use ($roleId) {
             $query->where('role_id', $roleId);
         })
         ->where('team_id', $teamId)
-        ->where('id', '!=', $userId)
         ->with('userRoles')
         ->get();
-
+        //dd($assignedUsers);
         return response()->json($assignedUsers);
     }
 

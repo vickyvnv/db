@@ -7,18 +7,8 @@
 
     <div class="flex">
         <!-- Sidebar -->
-        <div class="sidebar">
-            <ul class="sidebar-menu">
-                <li><a href="{{ route('dbi.index') }}">DBI Home</a></li>
-                <li><a href="#">Change Role</a></li>
-                <li><a href="#">Search DBI</a></li>
-                <li><a href="#">List My DBI</a></li>
-                <li><a href="#">New DBI</a></li>
-                <li><a href="#">Cleanup</a></li>
-                <li><a href="#">Documentation</a></li>
-                <!-- Add more sidebar links here -->
-            </ul>
-        </div>
+        @include('partials.dbi-sidebar')
+
         <div class="w-3/4">
             <div class="content">
                 <!-- Your content here -->
@@ -152,36 +142,7 @@
 </x-app-layout>
 
 <style>
-    .sidebar {
-        width: 250px; /* Adjust width as needed */
-        height: 100%;
-        background-color: #f4f4f4;
-        padding: 20px;
-        float: left; /* Added to align sidebar to left */
-    }
-
-    .sidebar-menu {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .sidebar-menu li {
-        margin-bottom: 10px;
-    }
-
-    .sidebar-menu li a {
-        display: block;
-        padding: 10px 15px;
-        text-decoration: none;
-        color: #333;
-        transition: background-color 0.3s;
-    }
-
-    .sidebar-menu li a:hover {
-        background-color: #ddd;
-    }
-
+    
     .card {
         margin-top: 20px;
     }

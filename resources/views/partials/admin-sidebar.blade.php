@@ -11,7 +11,7 @@
                 <li><a href="{{ route('users.create') }}">Create New User</a></li>
             </ul>
         </li>
-        <li>
+        <!-- <li>
             <a href="#" class="sidebar-link">
                 <i class="fas fa-compass"></i>
                 <span>Navigation</span>
@@ -21,7 +21,7 @@
                 <li><a href="#">Main Menu or Application</a></li>
                 <li><a href="#">Submenus</a></li>
             </ul>
-        </li>
+        </li> -->
         <li>
             <a href="#" class="sidebar-link">
                 <i class="fas fa-users-cog"></i>
@@ -50,6 +50,7 @@
                 <i class="fas fa-chevron-down dropdown-icon"></i>
             </a>
             <ul class="submenu">
+                <li><a href="{{ route('database-info.index') }}">DB Info</a></li>
                 <li><a href="{{ route('pwconnects.index') }}">PW Connects</a></li>
                 <li><a href="{{ route('pwroles.index') }}">PW Roles</a></li>
                 <li><a href="{{ route('pwgroups.index') }}">PW Groups</a></li>

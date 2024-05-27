@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\PwgroupController;
 use App\Http\Controllers\Admin\PwroleController;
 use App\Http\Controllers\Admin\PwconnectController;
+use App\Http\Controllers\Admin\DatabaseInfoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +34,13 @@ Route::middleware('auth')->group(function () {
     
     // DBI ROutes
     Route::resource('dbi-tool/dbi', DbiRequestController::class);
+    Route::get('/dbi-tool/dbi/{dbiRequest}/selectdb', [DbiRequestController::class, 'selectdb'])->name('dbi.selectdb');
+    Route::put('/dbi-tool/dbi/{dbiRequest}/selectdb', [DbiRequestController::class, 'updateSelectDb'])->name('dbi.updateSelectDb');
+    Route::get('/dbi-tool/dbi/{dbiRequest}/createsqlfile', [DbiRequestController::class, 'createsqlfile'])->name('dbi.createsqlfile');
+    Route::get('/dbi-tool/dbi/{dbiRequestId}/additionalinfo', [DbiRequestController::class, 'additionalinfo'])->name('dbi.additionalinfo');
+    Route::post('/dbi-tool/dbi/{dbiRequestId}/temporarytable', [DbiRequestController::class, 'storeTemporaryTable'])->name('dbi.storeTemporaryTable');
+    Route::get('/dbi-tool/dbi/{dbiRequestId}/testDBI', [DbiRequestController::class, 'testDBI'])->name('dbi.testDBI');
+    Route::post('/dbi-tool/dbi/{dbiRequest}/test', [DbiRequestController::class, 'testDbiQuery'])->name('dbi.testDbi');
 
 });
 
@@ -58,6 +66,9 @@ Route::middleware('is_admin')->group(function () {
     Route::get('/admin//users/{user}/reset-password', [UserController::class, 'showResetPasswordForm'])->name('users.reset-password');
     Route::put('/admin//users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.update-password');
     Route::post('/admin/users/assigned-users', [UserController::class, 'getAssignedUsers'])->name('users.assigned-users');
+
+    // Database Info
+    Route::resource('/admin/database-info', DatabaseInfoController::class);
 
     // PW Groups
     Route::resource('/admin/pwgroups', PwgroupController::class);

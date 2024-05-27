@@ -11,8 +11,8 @@ class CreateDbiRequestsTable extends Migration
         Schema::create('dbi_requests', function (Blueprint $table) {
             $table->id()->unique()->primary();
             $table->string('request_id')->nullable();
-            $table->string('requestor_id')->nullable();
-            $table->string('operator_id')->nullable();
+            $table->string('requestor_id')->nullable(); // DBI User 
+            $table->string('operator_id')->nullable();  // Assigned SDE user
             $table->string('category');
             $table->string('priority_id');
             $table->string('sw_version');

@@ -7,71 +7,162 @@
 
     <div class="flex">
         <!-- Sidebar -->
-        <div class="sidebar">
-            <ul class="sidebar-menu">
-                <li><a href="{{ route('dbi.index') }}">DBI Home</a></li>
-                <li><a href="#">Change Role</a></li>
-                <li><a href="#">Search DBI</a></li>
-                <li><a href="#">List My DBI</a></li>
-                <li><a href="#">New DBI</a></li>
-                <li><a href="#">Cleanup</a></li>
-                <li><a href="#">Documentation</a></li>
-                <!-- Add more sidebar links here -->
-            </ul>
-        </div>
+        @include('partials.dbi-sidebar')
 
         <!-- Main Content -->
-        <div class="w-3/4">
-            <div class="content">
-                <!-- Your content here -->
-                <div class="py-12">
-                    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                            <div class="p-6 text-gray-900 dark:text-gray-100">
-                                <div class="container">
-                                    <div class="row justify-content-center">
-                                        <button class="btn btn-primary" type="submit"><a href="{{ route('dbi.index') }}" class="btn btn-primary">Back</a></button>
-                                        <div class="col-md-10">
-                                            
-                                            <div class="card-body d-flex justify-content-center">
-                                                <div class="card-header">DBI Request Details</div>
+        <div class="w-3/4 p-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <a href="{{ route('dbi.index') }}" class="btn btn-secondary mb-3">Back</a>
 
-                                                <div class="card-body">
-                                                <a href="{{ route('dbi.index') }}" class="btn btn-secondary mb-3">Back</a>
+            <!-- Display success or error messages if needed -->
+            @if (session('status'))
+                <div class="alert alert-success" role="alert">
+                    {{ session('status') }}
+                </div>
+            @endif
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-                                                    <!-- Display success or error messages if needed -->
-                                                    @if (session('status'))
-                                                        <div class="alert alert-success" role="alert">
-                                                            {{ session('status') }}
-                                                        </div>
-                                                    @endif
-                                                    @if ($errors->any())
-                                                        <div class="alert alert-danger">
-                                                            <ul>
-                                                                @foreach ($errors->all() as $error)
-                                                                    <li>{{ $error }}</li>
-                                                                @endforeach
-                                                            </ul>
-                                                        </div>
-                                                    @endif
-
-                                                    <!-- Display DBI request details -->
-                                                    <p>DBI Category: {{ $dbiRequest->category }}</p>
-                                                    <p>Priority: {{ $dbiRequest->priority_id }}</p>
-                                                    <p>Market: {{ $dbiRequest->sw_version }}</p>
-                                                    <p>DBI Type: {{ $dbiRequest->dbi_type }}</p>
-                                                    <p>TT Number: {{ $dbiRequest->tt_id }}</p>
-                                                    <p>Serf/CR: {{ $dbiRequest->serf_cr_id }}</p>
-                                                    <p>Reference DBI: {{ $dbiRequest->reference_dbi }}</p>
-                                                    <p>Brief Description: {{ $dbiRequest->brief_desc }}</p>
-                                                    <p>Problem Description: {{ $dbiRequest->problem_desc }}</p>
-                                                    <p>Business Impact: {{ $dbiRequest->business_impact }}</p>
-                                                </div>
-                                            </div>
+            <!-- Display DBI request details -->
+            <div class="grid grid-cols-2 gap-6">
+                <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-md">
+                    <h3 class="text-lg font-bold mb-2">DBI Request Details</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                    <div class="grid grid-cols-2 gap-6">
+                            <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-md">
+                                @foreach ($assigned as $user)
+                                    @if ($user['id'] == $dbiRequest->requestor_id && $user['user_roles'][0]['name'] == 'Requester')
+                                        <h3 class="text-lg font-bold mb-2">Requestor</h3>
+                                        <div>
+                                            <p class="font-bold">Name:</p>
+                                            <p>{{ $user['user_firstname'] }} {{ $user['user_lastname'] }}</p>
                                         </div>
-                                    </div>
-                                </div>
+                                        <div>
+                                            <p class="font-bold">Email:</p>
+                                            <p>{{ $user['email'] }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold">Role:</p>
+                                            <p>{{ $user['user_roles'][0]['name'] }}</p>
+                                        </div>
+                                    @endif
+                                @endforeach
                             </div>
+                            <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-md">
+                                @foreach ($assigned as $user)
+                                    @if ($user['id'] == $dbiRequest->operator_id && $user['user_roles'][0]['name'] == 'SDE')
+                                        <h3 class="text-lg font-bold mb-2">Operator</h3>
+                                        <div>
+                                            <p class="font-bold">Name:</p>
+                                            <p>{{ $user['user_firstname'] }} {{ $user['user_lastname'] }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold">Email:</p>
+                                            <p>{{ $user['email'] }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold">Role:</p>
+                                            <p>{{ $user['user_roles'][0]['name'] }}</p>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                            @if($assigned[0]['user_roles'][0]['name'] === 'DAT')
+                            <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-md">
+                                @foreach ($assigned as $user)
+                                    @if ($user['id'] == $dbiRequest->operator_id && $user['user_roles'][0]['name'] == 'DAT')
+                                        <h3 class="text-lg font-bold mb-2">Operator & Requestor</h3>
+                                        <div>
+                                            <p class="font-bold">Name:</p>
+                                            <p>{{ $user['user_firstname'] }} {{ $user['user_lastname'] }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold">Email:</p>
+                                            <p>{{ $user['email'] }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold">Role:</p>
+                                            <p>{{ $user['user_roles'][0]['name'] }}</p>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                            @endif
+                        </div><br>
+                        <div>
+                            <p class="font-bold">DBI Category:</p>
+                            <p>{{ $dbiRequest->category }}</p>
+                        </div>
+                        
+                        <div>
+                            <p class="font-bold">Priority:</p>
+                            <p>{{ $dbiRequest->priority_id }}</p>
+                        </div>
+                        <div>
+                            <p class="font-bold">Market:</p>
+                            <p>{{ $dbiRequest->sw_version }}</p>
+                        </div>
+                        <div>
+                            <p class="font-bold">DBI Type:</p>
+                            <p>{{ $dbiRequest->dbi_type }}</p>
+                        </div>
+                        <div>
+                            <p class="font-bold">TT Number:</p>
+                            <p>{{ $dbiRequest->tt_id }}</p>
+                        </div>
+                        <div>
+                            <p class="font-bold">Serf/CR:</p>
+                            <p>{{ $dbiRequest->serf_cr_id }}</p>
+                        </div>
+                        <div>
+                            <p class="font-bold">Reference DBI:</p>
+                            <p>{{ $dbiRequest->reference_dbi }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-md">
+                    <h3 class="text-lg font-bold mb-2">Description</h3>
+                    <div class="grid grid-cols-1 gap-2">
+                        <div>
+                            <p class="font-bold">Brief Description:</p>
+                            <p>{{ $dbiRequest->brief_desc }}</p>
+                        </div>
+                        <div>
+                            <p class="font-bold">Problem Description:</p>
+                            <p>{{ $dbiRequest->problem_desc }}</p>
+                        </div>
+                        <div>
+                            <p class="font-bold">Business Impact:</p>
+                            <p>{{ $dbiRequest->business_impact }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-md">
+                    <h3 class="text-lg font-bold mb-2">Technical Details</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <p class="font-bold">Source Code:</p>
+                            <p>{{ $dbiRequest->source_code }}</p>
+                        </div>
+                        <div>
+                            <p class="font-bold">DB Instance:</p>
+                            <p>{{ $dbiRequest->db_instance }}</p>
+                        </div>
+                        <div>
+                            <p class="font-bold">SQL File Path:</p>
+                            <p>{{ $dbiRequest->sql_file_path }}</p>
+                        </div>
+                        <div>
+                            <p class="font-bold">SQL Logs Info:</p>
+                        </div>
+                        <div class="mt-4">
+                            <textarea class="form-control" rows="10" disabled>{{ $dbiRequest->sql_logs_info }}</textarea>
                         </div>
                     </div>
                 </div>
@@ -81,41 +172,38 @@
 </x-app-layout>
 
 <style>
-    .sidebar {
-        width: 250px; /* Adjust width as needed */
-        height: 100%;
-        background-color: #f4f4f4;
-        padding: 20px;
-        float: left; /* Added to align sidebar to left */
-    }
-
-    .sidebar-menu {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .sidebar-menu li {
-        margin-bottom: 10px;
-    }
-
-    .sidebar-menu li a {
-        display: block;
-        padding: 10px 15px;
-        text-decoration: none;
-        color: #333;
-        transition: background-color 0.3s;
-    }
-
+    textarea.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+}
     .sidebar-menu li a:hover {
         background-color: #ddd;
     }
 
     .container {
-        float: left; /* Added to align main content to left */
+        float: left;
     }
 
     .card {
         margin-top: 20px;
+    }
+    .font-bold {
+        font-weight: bold;
+    }
+
+    
+
+    .p-4 {
+        padding: 1rem;
+    }
+
+    .rounded-lg {
+        border-radius: 0.5rem;
+    }
+
+    .shadow-md {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
 </style>

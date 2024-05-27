@@ -24,5 +24,9 @@ class DbiRequest extends Model
         'problem_desc',
         'business_impact',
         'dbi_flag',
+        'source_code',
+        'db_instance',
+        'sql_file_path',
+        'sql_logs_info'
     ];
 }

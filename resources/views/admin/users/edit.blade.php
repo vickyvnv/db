@@ -222,7 +222,7 @@
         var roleId = document.getElementById('roleSelect').value;
         var userId = {{ $user->id }};
 
-        if (roleId == 5) {
+        if (roleId == 3) {
             // Enable and show the assigned user container
             document.getElementById('assignedUserContainer').style.display = 'block';
 
@@ -235,7 +235,7 @@
                 },
                 body: JSON.stringify({
                     team_id: teamId,
-                    role_id: roleId,
+                    role_id: 2,  // Always SDE role pass
                     user_id: userId
                 })
             })
