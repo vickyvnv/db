@@ -104,7 +104,7 @@
 
 
 <style>
-    .edit-button {
+     .edit-button {
         color: inherit;
     text-decoration: inherit;
     padding: 12px 20px;
@@ -181,7 +181,7 @@ button:hover {
     background-color: #0056b3;
 }
 
-   
+
     .card {
         margin-top: 20px;
     }
@@ -189,19 +189,64 @@ button:hover {
     .table {
         width: 100%;
         border-collapse: collapse;
+        font-family: Arial, sans-serif;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     }
 
-    .table th, .table td {
-        border: 1px solid #ddd;
-        padding: 8px;
+    .table th,
+    .table td {
+        padding: 12px 15px;
         text-align: left;
+        border-bottom: 1px solid #ddd;
     }
 
-    .table th {
-        background-color: #f2f2f2;
+    .table thead th {
+        background-color: #ed0929;
+        color: white;
     }
 
     .table tr:nth-child(even) {
         background-color: #f2f2f2;
+    }
+
+    .table tr:hover {
+        background-color: #e6e6e6;
+    }
+
+    .table td:last-child {
+        text-align: center;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 6px 12px;
+        margin-bottom: 0;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.42857143;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        cursor: pointer;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        color: #fff;
+        background-color: #4CAF50;
+        border-color: #4CAF50;
+    }
+
+    .btn-secondary {
+        color: #333;
+        background-color: #f2f2f2;
+        border-color: #ccc;
+    }
+
+    .btn-primary:hover,
+    .btn-secondary:hover {
+        opacity: 0.8;
     }
 </style>

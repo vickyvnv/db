@@ -80,9 +80,9 @@
                                                         <div class="form-group">
                                                             <label>DBI Type:</label>
                                                             <select name="dbi_type" class="form-control">
-                                                                <option value="One Time" {{ $dbiRequest->dbi_type === 'One Time' ? 'selected' : '' }}>One Time</option>
-                                                                <option value="Recurring" {{ $dbiRequest->dbi_type === 'Recurring' ? 'selected' : '' }}>Recurring</option>
-                                                                <option value="Template" {{ $dbiRequest->dbi_type === 'Template' ? 'selected' : '' }}>Template</option>
+                                                                <option value="OT" {{ $dbiRequest->dbi_type === 'OT' ? 'selected' : '' }}>One Time</option>
+                                                                <option value="RE" {{ $dbiRequest->dbi_type === 'RE' ? 'selected' : '' }}>Recurring</option>
+                                                                <option value="TP" {{ $dbiRequest->dbi_type === 'TP' ? 'selected' : '' }}>Template</option>
                                                             </select>
                                                         </div>
 

@@ -10,7 +10,7 @@
         @include('partials.dbi-sidebar')
 
         <!-- Main Content -->
-        <div class="w-3/4">
+        <div class="w-3/4 overflow-x-auto">
             <div class="content">
                 <div class="py-12">
                     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -35,15 +35,11 @@
                                     <thead>
                                         <tr>
                                             <th>ID</th>
+                                            <th>Requestor</th>
+                                            <th>Operator</th>
                                             <th>Priority ID</th>
                                             <th>Software Version</th>
                                             <th>DBI Type</th>
-                                            <th>TT ID</th>
-                                            <th>SERF CR ID</th>
-                                            <th>Reference DBI</th>
-                                            <th>Brief Description</th>
-                                            <th>Problem Description</th>
-                                            <th>Business Impact</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -51,18 +47,16 @@
                                         @foreach ($dbiRequests as $dbiRequest)
                                             <tr>
                                                 <td>{{ $dbiRequest->id }}</td>
+                                                <td>{{ $dbiRequest->requestor->email }}</td>
+                                                <td>{{ $dbiRequest->operator->email }}</td>
                                                 <td>{{ $dbiRequest->priority_id }}</td>
                                                 <td>{{ $dbiRequest->sw_version }}</td>
                                                 <td>{{ $dbiRequest->dbi_type }}</td>
-                                                <td>{{ $dbiRequest->tt_id }}</td>
-                                                <td>{{ $dbiRequest->serf_cr_id }}</td>
-                                                <td>{{ $dbiRequest->reference_dbi }}</td>
-                                                <td>{{ $dbiRequest->brief_desc }}</td>
-                                                <td>{{ $dbiRequest->problem_desc }}</td>
-                                                <td>{{ $dbiRequest->business_impact }}</td>
                                                 <td>
                                                     <a href="{{ route('dbi.show', $dbiRequest->id) }}" class="btn btn-primary">View</a>
+                                                    @if(Auth::user()->userRoles[0]->name !== 'SDE' && Auth::user()->id == $dbiRequest->requestor_id)
                                                     <a href="{{ route('dbi.edit', $dbiRequest->id) }}" class="btn btn-secondary">Edit</a>
+                                                    @endif
                                                     <!-- Add delete button with form submission if needed -->
                                                 </td>
                                             </tr>
@@ -165,19 +159,64 @@ button:hover {
     .table {
         width: 100%;
         border-collapse: collapse;
+        font-family: Arial, sans-serif;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     }
 
-    .table th, .table td {
-        border: 1px solid #ddd;
-        padding: 8px;
+    .table th,
+    .table td {
+        padding: 12px 15px;
         text-align: left;
+        border-bottom: 1px solid #ddd;
     }
 
     .table th {
-        background-color: #f2f2f2;
+        background-color: #ed0929;
+        color: white;
     }
 
     .table tr:nth-child(even) {
         background-color: #f2f2f2;
+    }
+
+    .table tr:hover {
+        background-color: #e6e6e6;
+    }
+
+    .table td:last-child {
+        text-align: center;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 6px 12px;
+        margin-bottom: 0;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.42857143;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        cursor: pointer;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        color: #fff;
+        background-color: #4CAF50;
+        border-color: #4CAF50;
+    }
+
+    .btn-secondary {
+        color: #333;
+        background-color: #f2f2f2;
+        border-color: #ccc;
+    }
+
+    .btn-primary:hover,
+    .btn-secondary:hover {
+        opacity: 0.8;
     }
 </style>

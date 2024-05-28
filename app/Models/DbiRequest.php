@@ -12,8 +12,8 @@ class DbiRequest extends Model
     protected $fillable = [
         'category',
         'request_id',
-        'requestor_id',
-        'operator_id',
+        'requestor_id', // requester user id
+        'operator_id', // SDE user id
         'priority_id',
         'sw_version',
         'dbi_type',
@@ -29,4 +29,20 @@ class DbiRequest extends Model
         'sql_file_path',
         'sql_logs_info'
     ];
+
+    /**
+     * Get the requestor associated with the DBI request.
+     */
+    public function requestor()
+    {
+        return $this->belongsTo(User::class, 'requestor_id');
+    }
+
+    /**
+     * Get the operator associated with the DBI request.
+     */
+    public function operator()
+    {
+        return $this->belongsTo(User::class, 'operator_id');
+    }
 }

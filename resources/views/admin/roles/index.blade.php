@@ -83,53 +83,67 @@
 
 <style>
   
-    .table {
+  .table {
         width: 100%;
         border-collapse: collapse;
-        border-spacing: 0;
+        font-family: Arial, sans-serif;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     }
 
     .table th,
     .table td {
-        padding: 8px;
-        border-bottom: 1px solid #ddd;
+        padding: 12px 15px;
         text-align: left;
+        border-bottom: 1px solid #ddd;
     }
 
-    .table th {
+    .table thead th {
+        background-color: #ed0929;
+        color: white;
+    }
+
+    .table tr:nth-child(even) {
         background-color: #f2f2f2;
-        font-weight: bold;
-        color: #333;
     }
 
-    .table td {
-        background-color: #fff;
+    .table tr:hover {
+        background-color: #e6e6e6;
+    }
+
+    .table td:last-child {
+        text-align: center;
     }
 
     .btn {
-        padding: 8px 16px;
-        border: none;
-        border-radius: 4px;
+        display: inline-block;
+        padding: 6px 12px;
+        margin-bottom: 0;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.42857143;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
         cursor: pointer;
-        transition: background-color 0.3s;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        text-decoration: none;
     }
 
     .btn-primary {
-        background-color: #007bff;
         color: #fff;
+        background-color: #4CAF50;
+        border-color: #4CAF50;
     }
 
-    .btn-primary:hover {
-        background-color: #0056b3;
+    .btn-secondary {
+        color: #333;
+        background-color: #f2f2f2;
+        border-color: #ccc;
     }
 
-    .btn-danger {
-        background-color: #dc3545;
-        color: #fff;
+    .btn-primary:hover,
+    .btn-secondary:hover {
+        opacity: 0.8;
     }
-
-    .btn-danger:hover {
-        background-color: #c82333;
-    }
-
 </style>

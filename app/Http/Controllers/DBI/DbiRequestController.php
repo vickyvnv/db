@@ -35,13 +35,32 @@ class DbiRequestController extends Controller
         try {
             // Fetch all DbiRequests
             if (Auth::user()->userRoles[0]->name === 'DAT') {
-                $dbiRequests = DbiRequest::all();
+                $dbiRequests = DbiRequest::with(['requestor' => function($query) {
+                    $query->select('id', 'user_firstname', 'user_lastname', 'email');
+                }, 'operator' => function($query) {
+                    $query->select('id', 'user_firstname', 'user_lastname', 'email');
+                }])
+                ->get();
+                //$dbiRequests = DbiRequest::with('requestor', 'operator')->get();
             } else if(Auth::user()->userRoles[0]->name === 'SDE') {
-                $dbiRequests = DbiRequest::where('operator_id', Auth::user()->id)->get();
+                $dbiRequests = DbiRequest::with(['requestor' => function($query) {
+                    $query->select('id', 'user_firstname', 'user_lastname', 'email');
+                }, 'operator' => function($query) {
+                    $query->select('id', 'user_firstname', 'user_lastname', 'email');
+                }])
+                ->where('operator_id', Auth::user()->id)
+                ->get();
+                //$dbiRequests = DbiRequest::with('requestor', 'operator')->where('operator_id', Auth::user()->id)->get();
             } else {
-                $dbiRequests = DbiRequest::where('requestor_id', Auth::user()->id)->get();
+                $dbiRequests = DbiRequest::with(['requestor' => function($query) {
+                    $query->select('id', 'user_firstname', 'user_lastname', 'email');
+                }, 'operator' => function($query) {
+                    $query->select('id', 'user_firstname', 'user_lastname', 'email');
+                }])
+                ->where('requestor_id', Auth::user()->id)
+                ->get();
             }
-            
+            //dd($dbiRequests);
             // Log successful retrieval of DbiRequests
             Log::channel('daily')->info('Fetched all Dbi Requests successfully DbiRequestController::index(). User id:' . Auth::user()->id . ' email: ' . Auth::user()->email);
 
@@ -236,7 +255,8 @@ class DbiRequestController extends Controller
 
             // Log successful update of DbiRequest
             Log::info('Dbi Request updated successfully. DbiRequestController::update() User id:' . Auth::user()->id . ' email: ' . Auth::user()->email . ' Data: ' . $dbiRequest);
-            return redirect()->route('dbi.index')->with('success', 'Dbi Request updated successfully.');
+            return redirect()->route('dbi.selectdb', $id)->with('success', 'Dbi Request updated successfully.');
+            //return redirect()->route('dbi.index')->with('success', 'Dbi Request updated successfully.');
         } catch (\Exception $e) {
             // Log error if updating DbiRequest fails
             Log::error('Error occurred while updating Dbi Request: ' . $e->getMessage() . ' DbiRequestController::update() User id:' . Auth::user()->id . ' email: ' . Auth::user()->email);
@@ -467,8 +487,25 @@ public function testDbiQuery(Request $request, DbiRequest $dbiRequest)
         $tempFile = tempnam(sys_get_temp_dir(), 'sql_script');
         File::put($tempFile, $sourceCode);
 
-        $command = "sqlplus  $dbUser/$dbPassword@$dbInstance @$tempFile 2>&1";
+        $command = "sqlplus $dbUser/$dbPassword@$dbInstance @$tempFile 2>&1";
         $terminalLog = shell_exec($command);
+
+        // Get the current date and time
+        $currentDate = date('D M d H:i:s Y');
+
+        // Prepare the additional information
+        $additionalInfo = "Date: $currentDate" . PHP_EOL;
+        $additionalInfo .= "DBI No.: $dbiRequest->id" . PHP_EOL;
+        $additionalInfo .= "DB: $dbInstance" . PHP_EOL;
+        $additionalInfo .= "DB-User: $dbUser" . PHP_EOL;
+        $additionalInfo .= "Requestor: " .$dbiRequest->requestor->user_firstname ." ". $dbiRequest->requestor->user_lastname ." " . PHP_EOL;
+        $additionalInfo .= "Operator: " .$dbiRequest->operator->user_firstname ." " . $dbiRequest->operator->user_lastname."" . PHP_EOL;
+        $additionalInfo .= "Team: " . Auth::user()->team->name . PHP_EOL;
+
+        // Prepend the additional information to the $terminalLog
+        $terminalLog = $additionalInfo . PHP_EOL . $terminalLog;
+
+        //dd($terminalLog);
 
         if ($terminalLog === false) {
             echo "Command execution failed.\n";
