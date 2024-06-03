@@ -55,15 +55,7 @@
                                                     </div>
 
                                                     <div class="form-row">
-                                                        <!-- Market -->
-                                                        <div class="form-group">
-                                                            <label for="sw_version">Market:</label>
-                                                            <select name="sw_version" class="form-control">
-                                                                @foreach ($markets as $market)
-                                                                <option value="{{ $market->subname }}">{{ $market->name }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
+                                                        
 
                                                         <!-- Priority -->
                                                         <div class="form-group">

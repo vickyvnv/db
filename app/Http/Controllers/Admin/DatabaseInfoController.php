@@ -44,7 +44,7 @@ class DatabaseInfoController extends Controller
             $validatedData = $request->validate([
                 'db_user_name' => 'required',
                 'db_user_password' => 'required',
-                'db_name' => 'required',
+                //'db_name' => 'required',
             ]);
 
             $encryptedPassword = Crypt::encryptString($validatedData['db_user_password']);
@@ -78,7 +78,7 @@ class DatabaseInfoController extends Controller
             $validatedData = $request->validate([
                 'db_user_name' => 'required',
                 'db_user_password' => 'required',
-                'db_name' => 'required',
+                //'db_name' => 'required',
             ]);
 
             $encryptedPassword = Crypt::encryptString($validatedData['db_user_password']);

@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\DatabaseInfo;
+use App\Models\DbInstance;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
@@ -40,6 +41,8 @@ class DbiRequestController extends Controller
                 }, 'operator' => function($query) {
                     $query->select('id', 'user_firstname', 'user_lastname', 'email');
                 }])
+                ->where('is_requestor_submit', 1)
+                ->where('is_operator_approve', 1)
                 ->get();
                 //$dbiRequests = DbiRequest::with('requestor', 'operator')->get();
             } else if(Auth::user()->userRoles[0]->name === 'SDE') {
@@ -49,6 +52,7 @@ class DbiRequestController extends Controller
                     $query->select('id', 'user_firstname', 'user_lastname', 'email');
                 }])
                 ->where('operator_id', Auth::user()->id)
+                ->where('is_requestor_submit', 1)
                 ->get();
                 //$dbiRequests = DbiRequest::with('requestor', 'operator')->where('operator_id', Auth::user()->id)->get();
             } else {
@@ -84,11 +88,11 @@ class DbiRequestController extends Controller
         // Retrieve all categories, priorities, markets, and dbiTypes
         $categories = Category::all();
         $priorities = Priority::all();
-        $markets = Market::all();
+        
         $dbiTypes = DbiType::all();
 
         // Render the create form
-        return view('dbi.create', compact('categories', 'priorities', 'markets', 'dbiTypes'));
+        return view('dbi.create', compact('categories', 'priorities', 'dbiTypes'));
     }
 
     /**
@@ -103,7 +107,7 @@ class DbiRequestController extends Controller
         $rules = [
             'category' => 'required',
             'priority_id' => 'required',
-            'sw_version' => 'required',
+            //'sw_version' => 'required',
             'tt_id' => 'required',
             'serf_cr_id' => 'required',
             'reference_dbi' => 'required',
@@ -194,12 +198,17 @@ class DbiRequestController extends Controller
     public function edit($id)
     {
         try {
+            $categories = Category::all();
+            $priorities = Priority::all();
+            
+            $dbiTypes = DbiType::all();
+
             // Find the DbiRequest to edit
             $dbiRequest = DbiRequest::findOrFail($id);
 
             // Log access to edit DbiRequest page
             Log::info('Dbi Request edit. DbiRequestController::edit()' . ' User id:' . Auth::user()->id . ' email: ' . Auth::user()->email);
-            return view('dbi.edit', compact('dbiRequest'));
+            return view('dbi.edit', compact('dbiRequest', 'categories', 'priorities', 'dbiTypes'));
         } catch (\Exception $e) {
             // Log error if fetching DbiRequest for editing fails
             Log::error('Error occurred while fetching Dbi Request for editing: DbiRequestController::edit()' . $e->getMessage() . 'User id:' . Auth::user()->id . ' email: ' . Auth::user()->email);
@@ -220,7 +229,7 @@ class DbiRequestController extends Controller
         $validator = Validator::make($request->all(), [
             'category' => 'required',
             'priority_id' => 'required',
-            'sw_version' => 'required',
+            //'sw_version' => 'required',
             'dbi_type' => 'required',
             'tt_id' => 'required',
             'serf_cr_id' => 'required',
@@ -295,12 +304,63 @@ class DbiRequestController extends Controller
      */
     public function selectdb(DbiRequest $dbiRequest)
     {
-        // Retrieve the list of databases grouped by db_user_name
-        $dbList = DatabaseInfo::select('db_user_name', DB::raw('CAST(LISTAGG(DISTINCT db_name, \',\') WITHIN GROUP (ORDER BY db_name) AS VARCHAR2(4000)) AS db_names'))
-            ->groupBy('db_user_name')
-            ->get();
+        $markets = Market::all();
 
-        return view('dbi.selectdb', compact('dbiRequest', 'dbList'));
+        // $username = 'DB_DEBIT';
+        // $tables = DB::connection('oracle')
+        //     ->select("SELECT TABLE_NAME FROM ALL_TABLES WHERE OWNER = ?", [$username]);
+        // dd($tables);
+
+        // $usernames = ["MNDBARW", "DB_CREDIT", "DB_DEBIT", "TOAKDBI", "RFEGADE"];
+        // $placeholders = implode(',', array_fill(0, count($usernames), '?'));
+
+        // $users = DB::connection('oracle')
+        //     ->select("SELECT * FROM ALL_USERS WHERE USERNAME IN ($placeholders)", $usernames);
+
+       // $users = $connection->select("SELECT USERNAME, ACCOUNT_STATUS, LOCK_DATE, EXPIRY_DATE FROM DBA_USERS WHERE USERNAME = 'DB_NK'");
+        //dd($users);
+        // Retrieve the list of databases grouped by db_user_name
+        // $dbList = DatabaseInfo::select('db_user_name', DB::raw('CAST(LISTAGG(DISTINCT db_name, \',\') WITHIN GROUP (ORDER BY db_name) AS VARCHAR2(4000)) AS db_names'))
+        //     ->groupBy('db_user_name')
+        //     ->get();
+
+        return view('dbi.selectdb', compact('dbiRequest', 'markets'));
+    }
+
+    public function getDbUser(Request $request)
+    {
+        $dbUser = Databaseinfo::get();
+
+        try {
+            // $marketDB = DB::connection('oracle')
+            //     ->select("select * from $dbUser.DBI_INSTANCE");
+            $marketDB = DbInstance::where('market_id', $request->sw_version)->get();
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            $errorCode = $e->getCode();
+            $errorMessage = $e->getMessage();
+            
+            if ($errorCode === '942') {
+                // Handle the specific error when the table or view does not exist
+                $marketDB = [];
+                $errorMessage = "The table or view '$dbUser.DBI_INSTANCE' does not exist.";
+            } else {
+                // Handle other types of database errors
+                $marketDB = [];
+                $errorMessage = "An error occurred while fetching data from the database.";
+            }
+            
+            // Log the error for debugging purposes
+            //\Log::error($errorMessage);
+        }
+        
+        $databaseUsersdata = [
+            "dbuser" => $dbUser,
+            "marketDB" => $marketDB,
+            "error" => isset($errorMessage) ? $errorMessage : null
+        ];
+        //dd($databaseUsersdata);
+        return response()->json($databaseUsersdata);
     }
 
     /**
@@ -312,11 +372,14 @@ class DbiRequestController extends Controller
      */
     public function updateSelectDb(Request $request, DbiRequest $dbiRequest)
     {
+        //dd($request);
         // Validate the request data
         $validatedData = $request->validate([
+            'sw_version' => 'required',
             'db_user' => 'required',
             'source_code' => 'required',
-            'db_instance' => 'required',
+            'prod_instance' => 'required',
+            'test_instance' => 'required',
         ]);
 
         try {
@@ -324,12 +387,26 @@ class DbiRequestController extends Controller
             $dbiRequest->update($validatedData);
 
             // Create a new DbiStatus for the current user
-            $dbiStatus = new DbiStatus();
-            $dbiStatus->dbi_id = $dbiRequest->id;
-            $dbiStatus->user_id = Auth::user()->id;
-            $dbiStatus->status_detail = "DB Selected";
-            $dbiStatus->filled = 2;
-            $dbiStatus->save();
+            // Check if the dbiStatus already exists for the given dbiRequest and user
+            $dbiStatus = DbiStatus::where('id', $dbiRequest->id)
+            ->where('user_id', Auth::user()->id)
+            ->where('filled', 2)
+            ->first();
+
+            if ($dbiStatus) {
+                // If the dbiStatus exists, update it
+                $dbiStatus->status_detail = "DB Selected";
+                $dbiStatus->filled = 2;
+                $dbiStatus->save();
+            } else {
+                // If the dbiStatus doesn't exist, create a new one
+                $dbiStatus = new DbiStatus();
+                $dbiStatus->dbi_id = $dbiRequest->id;
+                $dbiStatus->user_id = Auth::user()->id;
+                $dbiStatus->status_detail = "DB Selected";
+                $dbiStatus->filled = 2;
+                $dbiStatus->save();
+            }
 
             // Generate the SQL file name and save the source code content
             $sqlfile = 'dbi_' . $dbiRequest->id . '_' . time() . '.sql';
@@ -382,243 +459,222 @@ class DbiRequestController extends Controller
     }
 
     /**
- * Store temporary tables for a DbiRequest.
- *
- * @param  \Illuminate\Http\Request  $request
- * @param  int  $dbiRequestId
- * @return \Illuminate\Http\RedirectResponse
- */
-public function storeTemporaryTable(Request $request, $dbiRequestId)
-{
-    // Find the DbiRequest by ID
-    $dbiRequest = DbiRequest::findOrFail($dbiRequestId);
+     * Store temporary tables for a DbiRequest.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $dbiRequestId
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function storeTemporaryTable(Request $request, $dbiRequestId)
+    {
+        // Find the DbiRequest by ID
+        $dbiRequest = DbiRequest::findOrFail($dbiRequestId);
 
-    // Get the input data from the request
-    $instances = $request->input('instance');
-    $users = $request->input('user');
-    $tables = $request->input('table');
-    $types = $request->input('type');
-    $dropDates = $request->input('drop_date');
-    $sqls = $request->input('sql');
+        // Get the input data from the request
+        $instances = $request->input('instance');
+        $users = $request->input('user');
+        $tables = $request->input('table');
+        $types = $request->input('type');
+        $dropDates = $request->input('drop_date');
+        $sqls = $request->input('sql');
 
-    // Loop through the instances and create temporary tables
-    for ($i = 0; $i < count($instances); $i++) {
-        $temporaryTable = new TemporaryTable();
-        $temporaryTable->dbi_request_id = $dbiRequest->id;
-        $temporaryTable->user_id = Auth::user()->id;
-        $temporaryTable->table_name = $tables[$i];
-        $temporaryTable->type = $types[$i];
-        $temporaryTable->drop_date = $dropDates[$i];
-        $temporaryTable->sql = $sqls[$i];
-        $temporaryTable->save();
+        // Loop through the instances and create temporary tables
+        for ($i = 0; $i < count($instances); $i++) {
+            $temporaryTable = new TemporaryTable();
+            $temporaryTable->dbi_request_id = $dbiRequest->id;
+            $temporaryTable->user_id = Auth::user()->id;
+            $temporaryTable->table_name = $tables[$i];
+            $temporaryTable->type = $types[$i];
+            $temporaryTable->drop_date = $dropDates[$i];
+            $temporaryTable->sql = $sqls[$i];
+            $temporaryTable->save();
 
-        // Create the temporary table in the database
-        DB::statement('CREATE TABLE ' . $temporaryTable->table_name . ' (' . $temporaryTable->sql . ')');
-    }
-
-    // Create a new DbiStatus for the current user
-    $dbiStatus = new DbiStatus();
-    $dbiStatus->dbi_id = $dbiRequest->id;
-    $dbiStatus->user_id = Auth::user()->id;
-    $dbiStatus->status_detail = "Additional Info";
-    $dbiStatus->filled = 3;
-    $dbiStatus->save();
-
-    // Redirect to the additional info route for the DbiRequest
-    return redirect()->route('dbi.additionalinfo', $dbiRequest->id);
-}
-
-/**
- * Display the test DBI form for a DbiRequest.
- *
- * @param  \Illuminate\Http\Request  $request
- * @param  int  $dbiRequestId
- * @return \Illuminate\View\View
- */
-public function testDBI(Request $request, $dbiRequestId)
-{
-    // Find the DbiRequest by ID
-    $dbiRequest = DbiRequest::findOrFail($dbiRequestId);
-
-    // Return the test DBI view with the DbiRequest data
-    return view('dbi.testDBI', compact('dbiRequest'));
-}
-
-/**
- * Execute the test DBI query for a DbiRequest.
- *
- * @param  \Illuminate\Http\Request  $request
- * @param  \App\Models\DbiRequest  $dbiRequest
- * @return \Illuminate\Http\RedirectResponse
- */
-public function testDbiQuery(Request $request, DbiRequest $dbiRequest)
-{
-    try {
-        // Validate the request data
-        $validatedData = $request->validate([
-            'db_user' => 'required',
-            'db_instance' => 'required',
-            'source_code' => 'required',
-        ]);
-
-        // Find the database information based on the validated data
-        $databaseInfo = DatabaseInfo::where('db_user_name', $validatedData['db_user'])
-            ->where('db_name', $validatedData['db_instance'])
-            ->first();
-
-        // If the database information is not found, log an error and redirect back with an error message
-        if (!$databaseInfo) {
-            Log::error('Error Database info ' . $dbiRequest->id . '. Error: ');
-            return redirect()->back()->with('error', 'Database information not found.');
+            // Create the temporary table in the database
+            DB::statement('CREATE TABLE ' . $temporaryTable->table_name . ' (' . $temporaryTable->sql . ')');
         }
-
-        // Decrypt the password
-        $decryptedPassword = Crypt::decryptString($databaseInfo->db_user_password);
-
-        // Generate the SQL log file name
-        $outputFileName = 'output' . $dbiRequest->id . '_' . time() . '.txt';
-
-        // Get the necessary data for executing the SQL query
-        $dbUser = $dbiRequest->db_user;
-        $dbPassword = $decryptedPassword;
-        $dbInstance = $dbiRequest->db_instance;
-        $sourceCode = $dbiRequest->source_code;
-
-        $tempFile = tempnam(sys_get_temp_dir(), 'sql_script');
-        File::put($tempFile, $sourceCode);
-
-        $command = "sqlplus $dbUser/$dbPassword@$dbInstance @$tempFile 2>&1";
-        $terminalLog = shell_exec($command);
-
-        // Get the current date and time
-        $currentDate = date('D M d H:i:s Y');
-
-        // Prepare the additional information
-        $additionalInfo = "Date: $currentDate" . PHP_EOL;
-        $additionalInfo .= "DBI No.: $dbiRequest->id" . PHP_EOL;
-        $additionalInfo .= "DB: $dbInstance" . PHP_EOL;
-        $additionalInfo .= "DB-User: $dbUser" . PHP_EOL;
-        $additionalInfo .= "Requestor: " .$dbiRequest->requestor->user_firstname ." ". $dbiRequest->requestor->user_lastname ." " . PHP_EOL;
-        $additionalInfo .= "Operator: " .$dbiRequest->operator->user_firstname ." " . $dbiRequest->operator->user_lastname."" . PHP_EOL;
-        $additionalInfo .= "Team: " . Auth::user()->team->name . PHP_EOL;
-
-        // Prepend the additional information to the $terminalLog
-        $terminalLog = $additionalInfo . PHP_EOL . $terminalLog;
-
-        //dd($terminalLog);
-
-        if ($terminalLog === false) {
-            echo "Command execution failed.\n";
-        } else {
-            $logFile = storage_path('app/sql_logs/' . $outputFileName);
-            File::put($logFile, $terminalLog);
-            echo "SQL script executed successfully.\n";
-        }
-
-        // Remove the temporary file
-        File::delete($tempFile);
-
-        // Store the file output in the sql_log_info field
-        $dbiRequest->sql_log_file = $outputFileName;
-        $dbiRequest->sql_logs_info = $terminalLog;
-        $dbiRequest->save();
 
         // Create a new DbiStatus for the current user
         $dbiStatus = new DbiStatus();
         $dbiStatus->dbi_id = $dbiRequest->id;
         $dbiStatus->user_id = Auth::user()->id;
-        $dbiStatus->status_detail = "Test DBI";
-        $dbiStatus->filled = 4;
+        $dbiStatus->status_detail = "Additional Info";
+        $dbiStatus->filled = 3;
         $dbiStatus->save();
 
-        // Set the command for executing SQLplus
-        // $command = "sqlplus -s /nolog";
+        // Redirect to the additional info route for the DbiRequest
+        return redirect()->route('dbi.additionalinfo', $dbiRequest->id);
+    }
 
-        // // Set the log file path and open it in append mode
-        // $logFile = storage_path('app/sql_logs/' . $outputFileName);
-        // $logFileHandle = fopen($logFile, 'a');
+    /**
+     * Display the test DBI form for a DbiRequest.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $dbiRequestId
+     * @return \Illuminate\View\View
+     */
+    public function testDBI(Request $request, $dbiRequestId)
+    {
+        // Find the DbiRequest by ID
+        $dbiRequest = DbiRequest::findOrFail($dbiRequestId);
 
-        // // Set the descriptor specification for the process
-        // $descriptorSpec = [
-        //     0 => ["pipe", "r"], // stdin
-        //     1 => ["pipe", "w"], // stdout
-        //     2 => ["pipe", "w"]  // stderr
-        // ];
+        // Return the test DBI view with the DbiRequest data
+        return view('dbi.testDBI', compact('dbiRequest'));
+    }
 
-        // // Open the process for executing the command
-        // $process = proc_open($command, $descriptorSpec, $pipes);
+    /**
+     * Execute the test DBI query for a DbiRequest.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\DbiRequest  $dbiRequest
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function testDbiQuery(Request $request, DbiRequest $dbiRequest)
+    {
+        try {
+            DB::beginTransaction(); // Start a database transaction
 
-        // // If the process is successfully opened
-        // if (is_resource($process)) {
-        //     // Write each line of the query to the log file
-        //     fwrite($logFileHandle, "connect $dbUser/$dbPassword@$dbInstance\n");
-        //     fwrite($logFileHandle, "$sourceCode\n");
-        //     fwrite($logFileHandle, "exit;\n");
+            // // Find the database information based on the validated data
+            $databaseInfo = DatabaseInfo::where('db_user_name', $dbiRequest->db_user)
+                ->firstOrFail();
 
-        //     // Write each line of the query to the stdin pipe
-        //     fwrite($pipes[0], "connect $dbUser/$dbPassword@$dbInstance\n");
-        //     fwrite($pipes[0], "$sourceCode\n");
-        //     fwrite($pipes[0], "exit;\n");
-        //     fclose($pipes[0]);
+            // // Decrypt the password
+            $decryptedPassword = Crypt::decryptString($databaseInfo->db_user_password);
 
-        //     // Initialize the terminal log variable
-        //     $terminalLog = '';
+            // Generate the SQL log file name
+            $outputFileName = 'output' . $dbiRequest->id . '_' . time() . '.txt';
 
-        //     // Read the output from the stdout pipe and append it to the terminal log and log file
-        //     while (!feof($pipes[1])) {
-        //         $line = fgets($pipes[1]);
-        //         $terminalLog .= $line;
-        //         fwrite($logFileHandle, $line);
-        //     }
-        //     fclose($pipes[1]);
+            $dbUser = $dbiRequest->db_user;  //$dbiRequest->db_user;   // mndbarw
+            $dbPassword = $decryptedPassword;   //$decryptedPassword;  // Mndb_123
+            $dbtestInstance = $dbiRequest->test_instance; //$dbiRequest->db_instance;  // U_PORCL1
+            $sourceCode = $dbiRequest->source_code; //$dbiRequest->source_code;  // INSERT INTO test (id, name) VALUES (1, 'vicky');
+            //dd($dbtestInstance);
+            // Modify the source code to set the current schema and execute the insert query
+            $modifiedSourceCode = "ALTER SESSION SET CURRENT_SCHEMA = $dbtestInstance;\n";
+            $modifiedSourceCode .= $sourceCode . ";\n";
+            $modifiedSourceCode .= "COMMIT;";
+            
+            $tempFile = tempnam(sys_get_temp_dir(), 'sql_script');
+            File::put($tempFile, $modifiedSourceCode);
 
-        //     // Read the error output from the stderr pipe and append it to the terminal log and log file
-        //     while (!feof($pipes[2])) {
-        //         $line = fgets($pipes[2]);
-        //         $terminalLog .= $line;
-        //         fwrite($logFileHandle, $line);
-        //     }
-        //     fclose($pipes[2]);
+            $command = "sqlplus $dbUser/$dbPassword @$tempFile 2>&1";
+            $terminalLog = shell_exec($command);
+            //dd($terminalLog);
+            // Get the current date and time
+            $currentDate = date('D M d H:i:s Y');
 
-        //     // Close the process and get the return value
-        //     $returnValue = proc_close($process);
+            // Prepare the additional information
+            $additionalInfo = "Date: $currentDate" . PHP_EOL;
+            $additionalInfo .= "DBI No.: $dbiRequest->id" . PHP_EOL;
+            $additionalInfo .= "DB: $dbtestInstance" . PHP_EOL;
+            $additionalInfo .= "DB-User: $dbUser" . PHP_EOL;
+            $additionalInfo .= "Requestor: " . $dbiRequest->requestor->user_firstname . " " . $dbiRequest->requestor->user_lastname . " " . PHP_EOL;
+            $additionalInfo .= "Operator: " . $dbiRequest->operator->user_firstname . " " . $dbiRequest->operator->user_lastname . "" . PHP_EOL;
+            $additionalInfo .= "Team: " . Auth::user()->team->name . PHP_EOL;
 
-        //     // Log the SQLplus command return value
-        //     Log::info('SQLplus command return value: ' . $returnValue);
-        // }
+            // Prepend the additional information to the $terminalLog
+            $terminalLog = $additionalInfo . PHP_EOL . $terminalLog;
 
-        // // Close the log file handle
-        // fclose($logFileHandle);
+            if ($terminalLog === false) {
+                Log::error("Command execution failed for DBI request: " . $dbiRequest->id);
+                throw new \Exception("Command execution failed.");
+            } else {
+                $logFile = storage_path('app/sql_logs/' . $outputFileName);
+                File::put($logFile, $terminalLog);
+                Log::info("SQL script executed successfully for DBI request: " . $dbiRequest->id);
+            }
 
-        // // Store the file output in the sql_log_info field
-        // $dbiRequest->sql_log_file = $outputFileName;
-        // $dbiRequest->sql_logs_info = $terminalLog;
-        // $dbiRequest->save();
+            // Remove the temporary file
+            File::delete($tempFile);
 
-        // Log the action
-        Log::info('SQL query executed and log file generated for DBI request: ' . $dbiRequest->id);
+            // Store the file output in the sql_log_info field
+            $dbiRequest->sql_log_file = $outputFileName;
+            $dbiRequest->sql_logs_info = $terminalLog;
+            $dbiRequest->save();
 
-        // Redirect back with a success message
-        return redirect()->route('dbi.show', $dbiRequest->id);
-        //return redirect()->back()->with('success', 'SQL query executed successfully. Log file generated.');
-    } catch (\Exception $e) {
-        // Log the error
-        Log::error('Error executing SQL query for DBI request: ' . $dbiRequest->id . '. Error: ' . $e->getMessage());
+            // Check if the dbiStatus already exists for the given dbiRequest and user
+            $dbiStatus = DbiStatus::where('dbi_id', $dbiRequest->id)
+            ->where('user_id', Auth::user()->id)
+            ->first();
+            
+            // Create a new DbiStatus for the current user
+            if ($dbiStatus) {
+                // If the dbiStatus exists, update it
+                $dbiStatus->status_detail = "Test DBI";
+                $dbiStatus->filled = 4;
+                $dbiStatus->save();
+            } else {
+                // If the dbiStatus doesn't exist, create a new one
+                $dbiStatus = new DbiStatus();
+                $dbiStatus->dbi_id = $dbiRequest->id;
+                $dbiStatus->user_id = Auth::user()->id;
+                $dbiStatus->status_detail = "Test DBI";
+                $dbiStatus->filled = 4;
+                $dbiStatus->save();
+            }
+            
+            DB::commit(); // Commit the database transaction
 
-        // Generate the error log file name
-        $errorLogFileName = 'error_log_' . $dbiRequest->id . '_' . time() . '.txt';
-        $errorLogFilePath = storage_path('app/sql_logs/' . $errorLogFileName);
+            // Redirect with a success message
+            return redirect()->route('dbi.show', $dbiRequest->id)->with('success', 'SQL query executed successfully. Log file generated.');
+        } catch (\Exception $e) {
+            DB::rollBack(); // Rollback the database transaction
 
-        // Save the error log file
-        file_put_contents($errorLogFilePath, $e->getMessage());
+            // Log the error
+            Log::error('Error executing SQL query for DBI request: ' . $dbiRequest->id . '. Error: ' . $e->getMessage());
 
-        // Update the dbi_request record with the error log file path, error message, and shell output
-        $dbiRequest->sql_log_file = $errorLogFileName;
-        $dbiRequest->sql_logs_info = $e->getMessage();
+            // Generate the error log file name
+            $errorLogFileName = 'error_log_' . $dbiRequest->id . '_' . time() . '.txt';
+            $errorLogFilePath = storage_path('app/sql_logs/' . $errorLogFileName);
+
+            // Save the error log file
+            file_put_contents($errorLogFilePath, $e->getMessage());
+
+            // Update the dbi_request record with the error log file path, error message, and shell output
+            $dbiRequest->sql_log_file = $errorLogFileName;
+            $dbiRequest->sql_logs_info = $e->getMessage();
+            $dbiRequest->save();
+
+            // Redirect with an error message
+            return redirect()->back()->with('error', 'An error occurred while executing the SQL query. Error log generated.');
+        }
+    }
+
+    /**
+     * Execute the submit request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\DbiRequest  $dbiRequest
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function submitToSDE(Request $request, DbiRequest $dbiRequest)
+    {
+        $dbiRequest->is_requestor_submit = 1;
         $dbiRequest->save();
 
-        // Redirect back with an error message
-        return redirect()->back()->with('error', 'An error occurred while executing the SQL query. Error log generated.');
+        // Redirect with a success message
+        return redirect()->route('dbi.show', $dbiRequest->id)->with('success', 'SQL query executed successfully. Log file generated.');
     }
-}
+
+    /**
+     * Execute the submit request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\DbiRequest  $dbiRequest
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function sdeApprovedOrReject(Request $request, DbiRequest $dbiRequest)
+    {
+        if($request->approvalorreject == 'approve') {
+            $dbiRequest->is_requestor_submit = 1;
+            $dbiRequest->is_operator_approve = 1; // approve
+        } elseif($request->approvalorreject == 'reject') {
+            $dbiRequest->is_requestor_submit = 1;
+            $dbiRequest->is_operator_approve = 2;  // reject
+        }
+
+        $dbiRequest->save();
+
+        // Redirect with a success message
+        return redirect()->route('dbi.show', $dbiRequest->id)->with('success', 'SQL query executed successfully. Log file generated.');
+    }
 }

@@ -25,27 +25,49 @@
                                             <div class="card-body">
                                                 <h1>Select Database</h1>
                                                 <p>DBI ID: {{ $dbiRequest->id }}</p>
+                                                
                                                 <form method="POST" action="{{ route('dbi.updateSelectDb', $dbiRequest->id) }}" class="custom-form">
                                                     @csrf
                                                     @method('PUT')
 
                                                     <div class="form-row">
+                                                            <!-- Market -->
+                                                        <div class="form-group">
+                                                            <label for="sw_version">Market:</label>
+                                                            <select name="sw_version" id="sw_version" class="form-control">
+                                                                <option value="">Select Market</option>
+                                                                @foreach ($markets as $market)
+                                                                <option value="{{ $market->id }}">{{ $market->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
                                                         <!-- Reference DBI -->
                                                         <div class="form-group">
                                                             <div class="form-group" id="dbList">
                                                                 <label for="db_user">DB User:</label>
-                                                                <select name="db_user" class="form-control">
-                                                                    @foreach ($dbList as $db)
-                                                                    <option value="{{ $db->db_user_name }}">{{ $db->db_user_name }}</option>
-                                                                    @endforeach
-                                                                </select>
+                                                                <input type="type" id="db-user-input1" disabled>
+                                                                <input type="hidden" id="db-user-input" name="db_user">
                                                             </div>
                                                             @error('db_user')
                                                             <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                                             @enderror
                                                         </div>
                                                     </div>
+                                                    <!-- User Roles -->
+                                                    <div class="mt-4">
+                                                        <label for="roles" class="block font-medium text-sm text-gray-700">Prod Instance</label>
+                                                        <select id="prod-instance-container" name="prod_instance" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" >
+                                                         <option value="">Please select Prod Instance</option>   
+                                                        </select>
+                                                        
+                                                    </div>
 
+                                                    <div class="mt-4">
+                                                        <label for="roles" class="block font-medium text-sm text-gray-700">Test Instance</label>
+                                                        <input type="type" id="test-instance-container1" disabled>
+                                                        <input type="hidden" id="test-instance-container" name="test_instance">
+                                                        <label ></label>
+                                                    </div>
                                                     <!-- Source Code -->
                                                     <div class="form-group">
                                                         <label>Source Code:</label>
@@ -53,23 +75,6 @@
                                                         @error('source_code')
                                                         <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                                         @enderror
-                                                    </div>
-
-                                                    <div class="form-row">
-                                                        <!-- DBI Type -->
-                                                        <div class="form-group" id="dbList">
-                                                            <label for="dbList">Prod Instance:</label>
-                                                            <select name="db_instance" class="form-control">
-                                                                @foreach ($dbList as $db)
-                                                                    @php
-                                                                        $dbNames = is_string($db->db_names) ? explode(',', $db->db_names) : $db->db_names;
-                                                                    @endphp
-                                                                    @foreach ($dbNames as $dbName)
-                                                                        <option value="{{ $dbName }}">{{ $dbName }}</option>
-                                                                    @endforeach
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
                                                     </div>
 
                                                     <!-- Submit Button -->
@@ -170,3 +175,120 @@
         font-size: 14px;
     }
 </style>
+<script>
+$(document).ready(function() {
+    $('#sw_version').change(function() {
+        var swVersion = $(this).val();
+        var dbUserSelect = $('#db_user');
+        // Clear existing options
+        dbUserSelect.empty();
+        // Disable the db_user select if no sw_version is selected
+        if (swVersion === '') {
+            dbUserSelect.append('<option value="">Select DB User</option>');
+            dbUserSelect.prop('disabled', true);
+            return;
+        }
+        // Enable the db_user select
+        dbUserSelect.prop('disabled', false);
+        // Make a POST request to fetch the db_user based on sw_version
+        fetch('/dbi-tool/dbi/get-db-user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                sw_version: swVersion
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Clear the db_user select options
+            dbUserSelect.innerHTML = '';
+            // Populate the db_user select options
+            if (data) {
+                const dbUserInput = document.getElementById('db-user-input');
+                const dbUserInput1 = document.getElementById('db-user-input1');
+                if (data) {
+                    console.log(data);
+                    dbUserInput.value = data.dbuser[0].db_user_name;
+                    dbUserInput1.value = data.dbuser[0].db_user_name;
+                    dbUserInput1.disabled = true;
+                    dbUserInput.name = "db_user";
+                    dbUserInput.type = "hidden";
+
+                    if (data.error) {
+                        console.error('Error fetching market data:', data.error);
+                        // Display an error message to the user or handle the error as needed
+                        alert(data.error);
+                    } else {
+                        // Get references to the prod_instance and test_instance select elements
+                        const prodInstanceSelect = document.getElementById('prod-instance-container');
+                        const testInstanceSelect = document.getElementById('test-instance-container');
+                        const testInstanceSelect1 = document.getElementById('test-instance-container1');
+
+                        // Clear existing options
+                        prodInstanceSelect.innerHTML = '';
+                        testInstanceSelect.innerHTML = '';
+                        
+                        const prodOption1 = document.createElement('option');
+                        prodOption1.value = "";
+                        prodOption1.text = "Please select prod instance";
+                        prodInstanceSelect.add(prodOption1);
+                        
+                        testInstanceSelect.value = '';
+                        
+                        // Loop through the marketDB array
+                        data.marketDB.forEach(instance => {
+                            // Create options for prod_instance
+                            const prodOption = document.createElement('option');
+                            prodOption.value = instance.prod;
+                            prodOption.text = instance.prod;
+                            prodInstanceSelect.add(prodOption);
+
+                            // Create options for test_instance
+                            //testInstanceSelect.value = instance.test_instance;
+                        });
+
+                        // Add an event listener to the prod_instance select element
+                        prodInstanceSelect.addEventListener('change', () => {
+                            const selectedProdInstance = prodInstanceSelect.value;
+
+                            // Find the corresponding test_instance value
+                            const correspondingTestInstance = data.marketDB.find(instance => instance.prod === selectedProdInstance)?.preprod;
+                            
+                            // Update the test_instance input field
+                            if (correspondingTestInstance) {
+                                testInstanceSelect.value = correspondingTestInstance;
+                                testInstanceSelect1.value = correspondingTestInstance;
+                                testInstanceSelect1.disabled = true;
+                                testInstanceSelect.name = "test_instance";
+                                testInstanceSelect.type = "hidden"; // Disable the input field
+                            } else {
+                                testInstanceSelect.value = '';
+                                testInstanceSelect.name = "test_instance";
+                                testInstanceSelect.type = "hidden";// Enable the input field
+                            }
+                        });
+                    }
+                } else {
+                    dbUserInput.value = '';
+                    alert('No DB User found');
+                }
+            } else {
+                var option = document.createElement('option');
+                option.value = '';
+                option.text = 'No DB User found';
+                dbUserSelect.add(option);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching DB User:', error);
+            var option = document.createElement('option');
+            option.value = '';
+            option.text = 'Error fetching DB User';
+            dbUserSelect.add(option);
+        });
+    });
+});
+</script>

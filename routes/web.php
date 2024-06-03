@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\PwgroupController;
 use App\Http\Controllers\Admin\PwroleController;
 use App\Http\Controllers\Admin\PwconnectController;
 use App\Http\Controllers\Admin\DatabaseInfoController;
+use App\Http\Controllers\DBI\MarketController;
+use App\Http\Controllers\Admin\DbInstanceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,7 +43,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/dbi-tool/dbi/{dbiRequestId}/temporarytable', [DbiRequestController::class, 'storeTemporaryTable'])->name('dbi.storeTemporaryTable');
     Route::get('/dbi-tool/dbi/{dbiRequestId}/testDBI', [DbiRequestController::class, 'testDBI'])->name('dbi.testDBI');
     Route::post('/dbi-tool/dbi/{dbiRequest}/test', [DbiRequestController::class, 'testDbiQuery'])->name('dbi.testDbi');
+    Route::post('/dbi-tool/dbi/get-db-user', [DbiRequestController::class, 'getDbUser'])->name('dbi.getDbUser');
 
+    Route::post('/dbi-tool/dbi/{dbiRequest}/submit-to-sde', [DbiRequestController::class, 'submitToSDE'])->name('dbi.submitToSDE');
+    Route::post('/dbi-tool/dbi/{dbiRequest}/sdeApprovedOrReject', [DbiRequestController::class, 'sdeApprovedOrReject'])->name('dbi.sdeApprovedOrReject');
 });
 
 Route::middleware('is_admin')->group(function () {
@@ -66,6 +71,12 @@ Route::middleware('is_admin')->group(function () {
     Route::get('/admin//users/{user}/reset-password', [UserController::class, 'showResetPasswordForm'])->name('users.reset-password');
     Route::put('/admin//users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.update-password');
     Route::post('/admin/users/assigned-users', [UserController::class, 'getAssignedUsers'])->name('users.assigned-users');
+
+    // Markets
+    Route::resource('/admin/markets', MarketController::class);
+
+    // DB Instance
+    Route::resource('/admin/db-instances', DbInstanceController::class);
 
     // Database Info
     Route::resource('/admin/database-info', DatabaseInfoController::class);

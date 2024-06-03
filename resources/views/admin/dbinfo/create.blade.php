@@ -35,7 +35,7 @@
                                                         </div>
                                                         <div class="form-group">
                                                             <label for="db_name">DB Name</label>
-                                                            <input type="text" name="db_name" id="db_name" class="form-control" required>
+                                                            <input type="text" name="db_name" id="db_name" class="form-control">
                                                         </div>
                                                         <button type="submit" class="btn btn-primary">Create</button>
                                                     </form>

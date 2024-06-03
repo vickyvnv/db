@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Administration') }}
+            {{ __('Create Market') }}
         </h2>
     </x-slot>
 
@@ -18,27 +18,34 @@
                             <div class="p-6 text-gray-900 dark:text-gray-100">
                                 <div class="container">
                                     <div class="row justify-content-center">
-                                        <button class="btn btn-primary" type="submit"><a href="{{ route('database-info.index') }}" class="btn btn-primary">Back</a></button>
                                         <div class="col-md-10">
                                             <div class="card-body d-flex justify-content-center">
-                                                <div class="card-header">Edit Database Info</div>
+                                                <div class="card-header">Create Market</div>
+
                                                 <div class="card-body">
-                                                    <form action="{{ route('database-info.update', $databaseInfo->id) }}" method="POST">
+                                                    <a href="{{ route('markets.index') }}" class="btn btn-secondary mb-3">Back</a>
+
+                                                    @if ($errors->any())
+                                                        <div class="alert alert-danger">
+                                                            <ul>
+                                                                @foreach ($errors->all() as $error)
+                                                                    <li>{{ $error }}</li>
+                                                                @endforeach
+                                                            </ul>
+                                                        </div>
+                                                    @endif
+
+                                                    <form action="{{ route('markets.store') }}" method="POST">
                                                         @csrf
-                                                        @method('PUT')
                                                         <div class="form-group">
-                                                            <label for="db_user_name">DB User Name</label>
-                                                            <input type="text" name="db_user_name" id="db_user_name" class="form-control" value="{{ $databaseInfo->db_user_name }}" required>
+                                                            <label for="name">Name</label>
+                                                            <input type="text" name="name" id="name" class="form-control" value="{{ old('name') }}" required>
                                                         </div>
                                                         <div class="form-group">
-                                                            <label for="db_user_password">DB User Password</label>
-                                                            <input type="password" name="db_user_password" id="db_user_password" class="form-control" required>
+                                                            <label for="subname">Subname</label>
+                                                            <input type="text" name="subname" id="subname" class="form-control" value="{{ old('subname') }}" required>
                                                         </div>
-                                                        <div class="form-group">
-                                                            <label for="db_name">DB Name</label>
-                                                            <input type="text" name="db_name" id="db_name" class="form-control" value="{{ $databaseInfo->db_name }}">
-                                                        </div>
-                                                        <button type="submit" class="btn btn-primary">Update</button>
+                                                        <button type="submit" class="btn btn-primary">Create</button>
                                                     </form>
                                                 </div>
                                             </div>

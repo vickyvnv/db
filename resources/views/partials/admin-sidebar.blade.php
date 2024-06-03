@@ -46,14 +46,13 @@
         <li>
             <a href="#" class="sidebar-link">
                 <i class="fas fa-cogs"></i>
-                <span>PW Services</span>
+                <span>DB and Market</span>
                 <i class="fas fa-chevron-down dropdown-icon"></i>
             </a>
             <ul class="submenu">
                 <li><a href="{{ route('database-info.index') }}">DB Info</a></li>
-                <li><a href="{{ route('pwconnects.index') }}">PW Connects</a></li>
-                <li><a href="{{ route('pwroles.index') }}">PW Roles</a></li>
-                <li><a href="{{ route('pwgroups.index') }}">PW Groups</a></li>
+                <li><a href="{{ route('markets.index') }}">Markets</a></li>
+                <li><a href="{{ route('db-instances.index') }}">Database List</a></li>
             </ul>
         </li>
     </ul>

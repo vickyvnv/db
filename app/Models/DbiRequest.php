@@ -25,7 +25,8 @@ class DbiRequest extends Model
         'business_impact',
         'dbi_flag',
         'source_code',
-        'db_instance',
+        'prod_instance',
+        'test_instance',
         'sql_file_path',
         'sql_logs_info'
     ];
@@ -44,5 +45,14 @@ class DbiRequest extends Model
     public function operator()
     {
         return $this->belongsTo(User::class, 'operator_id');
+    }
+
+    /**
+     * Get the market for the software version.
+     */
+    public function swVersionMarket()
+    {
+        return $this->belongsTo(Market::class, 'sw_version');
+
     }
 }

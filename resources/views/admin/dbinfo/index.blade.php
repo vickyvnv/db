@@ -50,7 +50,7 @@
                                                                 <th scope="col">#</th>
                                                                 <th scope="col">DB User Name</th>
                                                                 <th scope="col">DB Name</th>
-                                                                <th scope="col">Actions</th>
+                                                                <!-- <th scope="col">Actions</th> -->
                                                             </tr>
                                                         </thead>
                                                         <tbody>
@@ -59,7 +59,7 @@
                                                                     <th scope="row">{{ $databaseInfo->id }}</th>
                                                                     <td>{{ $databaseInfo->db_user_name }}</td>
                                                                     <td>{{ $databaseInfo->db_name }}</td>
-                                                                    <td>
+                                                                    <!-- <td>
                                                                         <div class="btn-group" role="group">
                                                                             <a href="{{ route('database-info.edit', $databaseInfo->id) }}" class="btn btn-sm btn-primary">Edit</a></br>
                                                                             <form action="{{ route('database-info.destroy', $databaseInfo->id) }}" method="POST" class="d-inline">
@@ -69,7 +69,7 @@
                                                                                 <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this database info?')">Delete</button>
                                                                             </form>
                                                                         </div>
-                                                                    </td>
+                                                                    </td> -->
                                                                 </tr>
                                                             @endforeach
                                                         </tbody>

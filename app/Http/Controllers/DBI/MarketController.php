@@ -2,49 +2,156 @@
 
 namespace App\Http\Controllers\DBI;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Market;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Controller;
 
 class MarketController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function index()
     {
-        $markets = Market::all();
-        return response()->json(['markets' => $markets]);
+        $markets = Market::latest()->get();
+
+        return view('admin.markets.index', compact('markets'));
     }
 
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return view('admin.markets.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|unique:markets|max:255',
+        // Validate the form data
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'subname' => 'required|string|max:255',
         ]);
 
-        $market = Market::create($request->all());
-        return response()->json(['market' => $market], 201);
+        // If validation fails, redirect back with errors
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            // Create a new market
+            $market = Market::create($request->all());
+
+            // Log the successful creation
+            Log::info('New market created', ['market' => $market]);
+
+            // Redirect with success message
+            return redirect()->route('markets.index')->with('success', 'Market created successfully.');
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Error creating market', ['error' => $e->getMessage()]);
+
+            // Redirect with error message
+            return redirect()->back()->with('error', 'An error occurred while creating the market.');
+        }
     }
 
-    public function show($id)
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Models\Market  $market
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Market $market)
     {
-        $market = Market::findOrFail($id);
-        return response()->json(['market' => $market]);
+        return view('admin.markets.show', compact('market'));
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \App\Models\Market  $market
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Market $market)
     {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:markets,name,' . $id,
+        return view('admin.markets.edit', compact('market'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Market  $market
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, Market $market)
+    {
+        // Validate the form data
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'subname' => 'required|string|max:255',
         ]);
 
-        $market = Market::findOrFail($id);
-        $market->update($request->all());
-        return response()->json(['market' => $market]);
+        // If validation fails, redirect back with errors
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            // Update the market
+            $market->update($request->all());
+
+            // Log the successful update
+            Log::info('Market updated', ['market' => $market]);
+
+            // Redirect with success message
+            return redirect()->route('markets.index')->with('success', 'Market updated successfully.');
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Error updating market', ['error' => $e->getMessage()]);
+
+            // Redirect with error message
+            return redirect()->back()->with('error', 'An error occurred while updating the market.');
+        }
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\Market  $market
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Market $market)
     {
-        $market = Market::findOrFail($id);
-        $market->delete();
-        return response()->json(['message' => 'Market deleted successfully']);
+        try {
+            // Delete the market
+            $market->delete();
+
+            // Log the successful deletion
+            Log::info('Market deleted', ['market' => $market]);
+
+            // Redirect with success message
+            return redirect()->route('markets.index')->with('success', 'Market deleted successfully.');
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Error deleting market', ['error' => $e->getMessage()]);
+
+            // Redirect with error message
+            return redirect()->back()->with('error', 'An error occurred while deleting the market.');
+        }
     }
 }
