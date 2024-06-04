@@ -41,7 +41,12 @@
                                                     @endif
 
                                                     <!-- Submit Button -->
-                                                    <form action="{{ route('dbi.additionalinfo', $dbiRequest->id) }}" method="GET">
+                                                    <!-- <form action="{{ route('dbi.additionalinfo', $dbiRequest->id) }}" method="GET">
+                                                        <div class="form-group">
+                                                            <button type="submit" class="btn btn-primary">Next</button>
+                                                        </div>
+                                                    </form> -->
+                                                    <form action="{{ route('dbi.testDBI', $dbiRequest->id) }}" method="GET">
                                                         <div class="form-group">
                                                             <button type="submit" class="btn btn-primary">Next</button>
                                                         </div>

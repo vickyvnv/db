@@ -31,13 +31,13 @@
                                                     @method('PUT')
 
                                                     <div class="form-row">
-                                                            <!-- Market -->
+                                                        <!-- Market -->
                                                         <div class="form-group">
                                                             <label for="sw_version">Market:</label>
                                                             <select name="sw_version" id="sw_version" class="form-control">
-                                                                <option value="">Select Market</option>
+                                                                <option value="">Select Market {{$selectedMarket}}</option>
                                                                 @foreach ($markets as $market)
-                                                                <option value="{{ $market->id }}">{{ $market->name }}</option>
+                                                                    <option value="{{ $market->id }}" {{ $selectedMarket == $market->id ? 'selected' : '' }}>{{ $market->name }}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -45,35 +45,35 @@
                                                         <div class="form-group">
                                                             <div class="form-group" id="dbList">
                                                                 <label for="db_user">DB User:</label>
-                                                                <input type="type" id="db-user-input1" disabled>
-                                                                <input type="hidden" id="db-user-input" name="db_user">
+                                                                <input type="type" id="db-user-input1" value="{{ $selectedDbUser }}" disabled>
+                                                                <input type="hidden" id="db-user-input" name="db_user" value="{{ $selectedDbUser }}">
                                                             </div>
                                                             @error('db_user')
-                                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                                <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                                             @enderror
                                                         </div>
                                                     </div>
                                                     <!-- User Roles -->
                                                     <div class="mt-4">
                                                         <label for="roles" class="block font-medium text-sm text-gray-700">Prod Instance</label>
-                                                        <select id="prod-instance-container" name="prod_instance" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" >
-                                                         <option value="">Please select Prod Instance</option>   
+                                                        <select id="prod-instance-container" name="prod_instance" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                                            <option value="">Please select Prod Instance</option>
+                                                            <!-- Populate options based on the selected market -->
                                                         </select>
-                                                        
                                                     </div>
 
                                                     <div class="mt-4">
                                                         <label for="roles" class="block font-medium text-sm text-gray-700">Test Instance</label>
-                                                        <input type="type" id="test-instance-container1" disabled>
-                                                        <input type="hidden" id="test-instance-container" name="test_instance">
-                                                        <label ></label>
+                                                        <input type="type" id="test-instance-container1" value="{{ $selectedTestInstance }}" disabled>
+                                                        <input type="hidden" id="test-instance-container" name="test_instance" value="{{ $selectedTestInstance }}">
+                                                        <label></label>
                                                     </div>
                                                     <!-- Source Code -->
                                                     <div class="form-group">
                                                         <label>Source Code:</label>
-                                                        <textarea name="source_code" rows="4" class="form-control @error('source_code') is-invalid @enderror"></textarea>
+                                                        <textarea name="source_code" rows="4" class="form-control @error('source_code') is-invalid @enderror">{{ $sourceCode }}</textarea>
                                                         @error('source_code')
-                                                        <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                                         @enderror
                                                     </div>
 
@@ -177,6 +177,11 @@
 </style>
 <script>
 $(document).ready(function() {
+    // Trigger the change event on page load to fetch the DB user and populate the form fields
+    $(document).ready(function() {
+  $('#sw_version').trigger('change');
+});
+
     $('#sw_version').change(function() {
         var swVersion = $(this).val();
         var dbUserSelect = $('#db_user');
@@ -250,26 +255,13 @@ $(document).ready(function() {
                             //testInstanceSelect.value = instance.test_instance;
                         });
 
-                        // Add an event listener to the prod_instance select element
-                        prodInstanceSelect.addEventListener('change', () => {
-                            const selectedProdInstance = prodInstanceSelect.value;
+                        // Set the selected prod instance and test instance
+                        prodInstanceSelect.value = '{{ $selectedProdInstance }}';
+                        testInstanceSelect.value = '{{ $selectedTestInstance }}';
+                        testInstanceSelect1.value = '{{ $selectedTestInstance }}';
 
-                            // Find the corresponding test_instance value
-                            const correspondingTestInstance = data.marketDB.find(instance => instance.prod === selectedProdInstance)?.preprod;
-                            
-                            // Update the test_instance input field
-                            if (correspondingTestInstance) {
-                                testInstanceSelect.value = correspondingTestInstance;
-                                testInstanceSelect1.value = correspondingTestInstance;
-                                testInstanceSelect1.disabled = true;
-                                testInstanceSelect.name = "test_instance";
-                                testInstanceSelect.type = "hidden"; // Disable the input field
-                            } else {
-                                testInstanceSelect.value = '';
-                                testInstanceSelect.name = "test_instance";
-                                testInstanceSelect.type = "hidden";// Enable the input field
-                            }
-                        });
+                        // Trigger the change event on the prod_instance select element to update the test_instance
+                        prodInstanceSelect.dispatchEvent(new Event('change'));
                     }
                 } else {
                     dbUserInput.value = '';

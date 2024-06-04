@@ -34,14 +34,14 @@
                 <div class="bg-gray-100 dark:bg-gray-700 p-6 rounded-lg shadow-lg">
                     <h3 class="text-xl font-bold mb-4">DBI Request Details</h3>
                     <div class="grid grid-cols-2 gap-4">
-                        @if($assigned[0]['user_roles'][0]['name'] === 'Requester')
+                        @if($userAssigned[0]['role_name'][0] === 'Requester')
                             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                                @foreach ($assigned as $user)
-                                    @if ($user['id'] == $dbiRequest->requestor_id && $user['user_roles'][0]['name'] == 'Requester')
+                                @foreach ($userAssigned as $user)
+                                    @if ($user['user_id'] == $dbiRequest->requestor_id && $user['role_name'][0] == 'Requester')
                                         <h3 class="text-lg font-bold mb-4">Requestor</h3>
                                         <div class="mb-2">
                                             <p class="font-bold text-gray-600">Name:</p>
-                                            <p class="text-gray-800">{{ $user['user_firstname'] }} {{ $user['user_lastname'] }}</p>
+                                            <p class="text-gray-800">{{ $user['first_name'] }} {{ $user['last_name'] }}</p>
                                         </div>
                                         <div class="mb-2">
                                             <p class="font-bold text-gray-600">Email:</p>
@@ -49,24 +49,23 @@
                                         </div>
                                         <div>
                                             <p class="font-bold text-gray-600">Role:</p>
-                                            <p class="text-gray-800">{{ $user['user_roles'][0]['name'] }}</p>
+                                            <p class="text-gray-800">{{ $user['role_name'][0] }}</p>
                                         </div>
-                                        
                                     @endif
                                 @endforeach
                             </div>
                         @endif
                         @if((
-                            (isset($assigned[0]['user_roles'][0]['name']) && !empty($assigned[0]['user_roles'][0]['name']) && $assigned[0]['user_roles'][0]['name'] == 'SDE') ||
-                            (isset($assigned[1]['user_roles'][0]['name']) && !empty($assigned[1]['user_roles'][0]['name']) && $assigned[1]['user_roles'][0]['name'] == 'SDE')
+                            (isset($userAssigned[0]['role_name'][0]) && !empty($userAssigned[0]['role_name'][0]) && $userAssigned[0]['role_name'][0] == 'SDE') ||
+                            (isset($userAssigned[1]['role_name'][0]) && !empty($userAssigned[1]['role_name'][0]) && $userAssigned[1]['role_name'][0] == 'SDE')
                         ))
                             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                                @foreach ($assigned as $user)
-                                    @if ($user['id'] == $dbiRequest->operator_id && $user['user_roles'][0]['name'] == 'SDE')
+                                @foreach ($userAssigned as $user)
+                                    @if ($user['user_id'] == $dbiRequest->operator_id && $user['role_name'][0] == 'SDE')
                                         <h3 class="text-lg font-bold mb-4">Operator</h3>
                                         <div class="mb-2">
                                             <p class="font-bold text-gray-600">Name:</p>
-                                            <p class="text-gray-800">{{ $user['user_firstname'] }} {{ $user['user_lastname'] }}</p>
+                                            <p class="text-gray-800">{{ $user['first_name'] }} {{ $user['last_name'] }}</p>
                                         </div>
                                         <div class="mb-2">
                                             <p class="font-bold text-gray-600">Email:</p>
@@ -74,141 +73,77 @@
                                         </div>
                                         <div>
                                             <p class="font-bold text-gray-600">Role:</p>
-                                            <p class="text-gray-800">{{ $user['user_roles'][0]['name'] }}</p>
+                                            <p class="text-gray-800">{{ $user['role_name'][0] }}</p>
                                         </div>
                                     @endif
                                 @endforeach
                             </div>
                         @endif
 
-                        @if($assigned[0]['user_roles'][0]['name'] === 'DAT')
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                            @foreach ($assigned as $user)
-                                @if ($user['id'] == $dbiRequest->operator_id && $user['user_roles'][0]['name'] == 'DAT')
-                                    <h3 class="text-lg font-bold mb-4">Operator & Requestor</h3>
-                                    <div class="mb-2">
-                                        <p class="font-bold text-gray-600">Name:</p>
-                                        <p class="text-gray-800">{{ $user['user_firstname'] }} {{ $user['user_lastname'] }}</p>
-                                    </div>
-                                    <div class="mb-2">
-                                        <p class="font-bold text-gray-600">Email:</p>
-                                        <p class="text-gray-800">{{ $user['email'] }}</p>
-                                    </div>
-                                    <div>
-                                        <p class="font-bold text-gray-600">Role:</p>
-                                        <p class="text-gray-800">{{ $user['user_roles'][0]['name'] }}</p>
-                                    </div>
-                                @endif
-                            @endforeach
-                        </div>
+                        @if($userAssigned[0]['role_name'][0] === 'DAT')
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                                @foreach ($userAssigned as $user)
+                                    @if ($user['user_id'] == $dbiRequest->operator_id && $user['role_name'][0] == 'DAT')
+                                        <h3 class="text-lg font-bold mb-4">Operator & Requestor</h3>
+                                        <div class="mb-2">
+                                            <p class="font-bold text-gray-600">Name:</p>
+                                            <p class="text-gray-800">{{ $user['first_name'] }} {{ $user['last_name'] }}</p>
+                                        </div>
+                                        <div class="mb-2">
+                                            <p class="font-bold text-gray-600">Email:</p>
+                                            <p class="text-gray-800">{{ $user['email'] }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-gray-600">Role:</p>
+                                            <p class="text-gray-800">{{ $user['role_name'][0] }}</p>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
                         @endif
                         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                            <p class="font-bold text-gray-600">DBI Request Status:</p>
+                            <p class="font-bold text-gray-600">DBI Request Log:</p>
                             <p class="text-gray-800">
-                                @if($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 0 && $dbiRequest->is_admin_approve == 0)
-                                    <h1>Request submitted to SDE: {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
-                                    <h1>Email: {{ $dbiRequest->operator->email }}</h1>
-                                @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 2 && $dbiRequest->is_admin_approve === 0)
-                                    <h1>Request rejected by SDE: {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
-                                    <h1>Email: {{ $dbiRequest->operator->email }}</h1>
-                                @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 1 && $dbiRequest->is_admin_approve == 0)
-                                    <h1>Request Approved by SDE : {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
-                                    <h1>Email: {{ $dbiRequest->operator->email }}</h1>
-                                @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 1 && $dbiRequest->is_admin_approve == 1)
-                                    <h1>Request Approved by DAT</h1>
-                                @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 1 && $dbiRequest->is_admin_approve == 2)
-                                <h1>Request rejected by DAT</h1>
-                                @else
-                                <h1>Request is pending</h1>
-                                @endif
-
+                            <div class="mt-4">
+                                <textarea class="form-control" rows="10">{{ $dbiRequest->sql_logs_info }}</textarea>
+                            </div>
                             </p>
                         </div>
                         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                            <div class="mb-2">
-                                <p class="font-bold text-gray-600">DBI Category:</p>
-                                <p class="text-gray-800">{{ $dbiRequest->category }}</p>
-                            </div>
-                            <div class="mb-2">
-                                <p class="font-bold text-gray-600">Priority:</p>
-                                <p class="text-gray-800">{{ $dbiRequest->priority_id }}</p>
-                            </div>
-                            <div class="mb-2">
-                                <p class="font-bold text-gray-600">Market:</p>
-                                <p class="text-gray-800">{{ $dbiRequest->sw_version }}</p>
-                            </div>
-                            <div class="mb-2">
-                                <p class="font-bold text-gray-600">DBI Type:</p>
-                                <p class="text-gray-800">{{ $dbiRequest->dbi_type }}</p>
-                            </div>
-                            <div class="mb-2">
-                                <p class="font-bold text-gray-600">TT Number:</p>
-                                <p class="text-gray-800">{{ $dbiRequest->tt_id }}</p>
-                            </div>
-                            <div class="mb-2">
-                                <p class="font-bold text-gray-600">Serf/CR:</p>
-                                <p class="text-gray-800">{{ $dbiRequest->serf_cr_id }}</p>
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-600">Reference DBI:</p>
-                                <p class="text-gray-800">{{ $dbiRequest->reference_dbi }}</p>
-                            </div>
+                            <p class="font-bold text-gray-600">DBI Request Status:</p>
+                            <p class="text-gray-800">
+                                @if($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0)
+                                    <h1>Request submitted to SDE: {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
+                                    <h1>Email: {{ $dbiRequest->operator->email }}</h1>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 2 && $dbiRequest->dbiRequestStatus->dat_status === 0)
+                                    <h1>Request rejected by SDE: {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
+                                    <h1>Email: {{ $dbiRequest->operator->email }}</h1>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 0)
+                                    <h1>Request Approved by SDE : {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
+                                    <h1>Email: {{ $dbiRequest->operator->email }}</h1>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1)
+                                    <h1>Request Approved by DAT</h1>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 2)
+                                    <h1>Request rejected by DAT</h1>
+                                @else
+                                    <h1>Request is pending</h1>
+                                @endif
+                            </p>
                         </div>
+                        <!-- ... -->
                         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                            <h3 class="text-xl font-bold mb-4">Description</h3>
-                            <div class="grid grid-cols-1 gap-4">
-                                <div class="mb-4">
-                                    <p class="font-bold text-gray-600">Brief Description:</p>
-                                    <p class="text-gray-800">{{ $dbiRequest->brief_desc }}</p>
-                                </div>
-                                <div class="mb-4">
-                                    <p class="font-bold text-gray-600">Problem Description:</p>
-                                    <p class="text-gray-800">{{ $dbiRequest->problem_desc }}</p>
-                                </div>
-                                <div>
-                                    <p class="font-bold text-gray-600">Business Impact:</p>
-                                    <p class="text-gray-800">{{ $dbiRequest->business_impact }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                            <h3 class="text-xl font-bold mb-4">Technical Details</h3>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="mb-2">
-                                    <p class="font-bold text-gray-600">Source Code:</p>
-                                    <p class="text-gray-800">{{ $dbiRequest->source_code }}</p>
-                                </div>
-                                <div class="mb-2">
-                                    <p class="font-bold text-gray-600">DB Instance:</p>
-                                    <p class="text-gray-800">{{ $dbiRequest->db_instance }}</p>
-                                </div>
-                                <div class="mb-2">
-                                    <p class="font-bold text-gray-600">SQL File Path:</p>
-                                    <p class="text-gray-800">{{ $dbiRequest->sql_file_path }}</p>
-                                </div>
-                                <div class="mb-2">
-                                    <p class="font-bold text-gray-600">SQL Logs Info:</p>
-                                </div>
-                                <div class="col-span-2">
-                                    <textarea class="form-control" rows="10" disabled>{{ $dbiRequest->sql_logs_info }}</textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                            @if($dbiRequest->is_requestor_submit == 0 && $assigned[0]['user_roles'][0]['name'] == 'Requester')
+                            @if($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0 && $userAssigned[0]['role_name'][0] == 'Requester')
                                 <form action="{{ route('dbi.submitToSDE', $dbiRequest->id) }}" method="POST">
                                     @csrf
-                                    <input type="hidden" name="is_requestor_submit" value="0">
                                     <button type="submit" class="btn btn-primary">Submit to SDE</button>
                                 </form>
-                            @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 0 && ((isset($assigned[0]['user_roles'][0]['name']) && !empty($assigned[0]['user_roles'][0]['name']) && $assigned[0]['user_roles'][0]['name'] == 'SDE') ||
-                                    (isset($assigned[1]['user_roles'][0]['name']) && !empty($assigned[1]['user_roles'][0]['name']) && $assigned[1]['user_roles'][0]['name'] == 'SDE')
+                            @elseif($dbiRequest->operator_id == Auth::user()->id && $dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0 && ((isset($userAssigned[0]['role_name'][0]) && !empty($userAssigned[0]['role_name'][0]) && $userAssigned[0]['role_name'][0] == 'SDE') ||
+                                    (isset($userAssigned[1]['role_name'][0]) && !empty($userAssigned[1]['role_name'][0]) && $userAssigned[1]['role_name'][0] == 'SDE')
                                 ))
                                 <form action="{{ route('dbi.sdeApprovedOrReject', $dbiRequest->id) }}" method="POST">
                                     @csrf
-                                    <input type="hidden" name="is_requestor_submit" value="1">
                                     <div class="mb-4">
-                                    <label>Status: </label>
+                                        <label>Status: </label>
                                         <div class="flex items-center">
                                             <input type="radio" id="approve" name="approvalorreject" value="approve" class="mr-2" required>
                                             <label for="approve" class="text-gray-700 font-bold">Approve</label>
@@ -220,16 +155,15 @@
                                     </div>
                                     <div class="mb-4">
                                         <label>Comment Status: </label>
-                                    <input type="text" id="statuscomment" name="operator_comment" class="mr-2" required>
+                                        <input type="text" id="statuscomment" name="operator_comment" class="mr-2" required>
                                     </div>
                                     <button type="submit" class="btn btn-primary">Submit</button>
                                 </form>
-                                @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 1 && $dbiRequest->is_admin_approve == 0 &&   Auth::user()->userRoles[0]->name === 'DAT')
+                            @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 0 && Auth::user()->userRoles[0]->name === 'DAT')
                                 <form action="{{ route('dbi.datApprovedOrReject', $dbiRequest->id) }}" method="POST">
                                     @csrf
-                                    <input type="hidden" name="is_requestor_submit" value="1">
                                     <div class="mb-4">
-                                    <label>sStatus: </label>
+                                        <label>Status: </label>
                                         <div class="flex items-center">
                                             <input type="radio" id="approvalorreject" name="approvalorreject" value="approve" class="mr-2" required>
                                             <label for="approve" class="text-gray-700 font-bold">Approve</label>
@@ -240,29 +174,28 @@
                                         </div>
                                     </div>
                                     <div class="mb-4">
-                                    <label>Comment Status: </label>
-                                    <input type="text" id="statuscomment" name="dat_comment" class="mr-2" required>
+                                        <label>Comment Status: </label>
+                                        <input type="text" id="statuscomment" name="dat_comment" class="mr-2" required>
                                     </div>
                                     <button type="submit" class="btn btn-primary">Submit</button>
                                 </form>
-                            @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 1)
+                            @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 0)
                                 <h1><b>DBI Request is submitted to DAT user</b></h1>
-                            @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 0)
+                            @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0)
                                 <h1><b>DBI Request is submitted to SDE user</b></h1>
-                            @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 2)
-                                <h1><b>DBI Request is rejected SDE user</b></h1>
-                            @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 1 && $dbiRequest->is_admin_approve == 1)
+                            @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 2 && $dbiRequest->dbiRequestStatus->dat_status == 0)
+                                <h1><b>DBI Request is rejected by SDE user</b></h1>
+                                @if(Auth::user()->userRoles[0]->name !== 'SDE' && Auth::user()->id == $dbiRequest->requestor_id)
+                                    <a href="{{ route('dbi.edit', $dbiRequest->id) }}" class="btn btn-secondary">Edit</a>
+                                @endif
+                            @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1)
                                 <h1><b>DBI Request is Approved by DAT user</b></h1>
                             @else
                                 <h1><b>DBI Request is submitted</b></h1>
                             @endif
-
                         </div>
                     </div>
-                    
                 </div>
-               
-               
             </div>
         </div>
     </div>

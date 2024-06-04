@@ -41,21 +41,31 @@ class DbiRequestController extends Controller
                     $query->select('id', 'user_firstname', 'user_lastname', 'email');
                 }, 'operator' => function($query) {
                     $query->select('id', 'user_firstname', 'user_lastname', 'email');
+                }, 'dbiRequestStatus' => function($query) {
+                    $query->where('request_status', 1)
+                          ->where('operator_status', 1);
                 }])
-                ->where('is_requestor_submit', 1)
-                ->where('is_operator_approve', 1)
-                ->orWhere('requestor_id', Auth::user()->id)
+                ->whereHas('dbiRequestStatus', function($query) {
+                    $query->where('request_status', 1)
+                          ->where('operator_status', 1);
+                })
                 ->get();
+                //dd($dbiRequests);
                 //$dbiRequests = DbiRequest::with('requestor', 'operator')->get();
             } else if(Auth::user()->userRoles[0]->name === 'SDE') {
                 $dbiRequests = DbiRequest::with(['requestor' => function($query) {
                     $query->select('id', 'user_firstname', 'user_lastname', 'email');
                 }, 'operator' => function($query) {
                     $query->select('id', 'user_firstname', 'user_lastname', 'email');
+                }, 'dbiRequestStatus' => function($query) {
+                    $query->where('request_status', 1);
                 }])
                 ->where('operator_id', Auth::user()->id)
-                ->where('is_requestor_submit', 1)
+                ->whereHas('dbiRequestStatus', function($query) {
+                    $query->where('request_status', 1);
+                })
                 ->get();
+
                 //$dbiRequests = DbiRequest::with('requestor', 'operator')->where('operator_id', Auth::user()->id)->get();
             } else {
                 $dbiRequests = DbiRequest::with(['requestor' => function($query) {
@@ -178,12 +188,60 @@ class DbiRequestController extends Controller
             // Find the specified DbiRequest
             $dbiRequest = DbiRequest::findOrFail($id);
 
-            $userAssigned = User::with('userRoles')->whereIn('id', [$dbiRequest->requestor_id, $dbiRequest->operator_id])->get();
-            $assigned = $userAssigned->toArray();
-            //dd($assigned);
+            // $userAssigned = User::with('userRoles')->whereIn('id', [$dbiRequest->requestor_id, $dbiRequest->operator_id])->get();
+            $requestorId = $dbiRequest->requestor_id;
+            $operatorId = $dbiRequest->operator_id;
+
+            $userAssigned = User::with('userRoles')
+            ->whereIn('id', [$requestorId, $operatorId])
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'user_id' => $user->id,
+                    'role_name' => $user->userRoles->pluck('name')->toArray(),
+                    'first_name' => $user->user_firstname,
+                    'last_name' => $user->user_lastname,
+                    'email' => $user->email
+                ];
+            })
+            ->values()
+            ->all();
+
+            // $userAssigned = User::with('userRoles')
+            //     ->whereIn('id', [$requestorId, $operatorId])
+            //     ->get()
+            //     ->flatMap(function ($user) {
+            //         return $user->userRoles->map(function ($role) use ($user) {
+            //             return [
+            //                 'user_id' => $user->id,
+            //                 'role_name' => $role->name,
+            //                 'first_name' => $user->user_firstname,
+            //                 'last_name' => $user->user_lastname,
+            //                 'email' => $user->email
+            //             ];
+            //         });
+            //     })
+            //     ->groupBy('user_id');
+            //$assigned = $userAssigned->toArray();
+            //dd($dbiRequest,$dbiRequest->dbiRequestStatus, $userAssigned);
             // Log successful retrieval of DbiRequest
+            //dd($dbiRequest->dbiRequestStatus);
+            $userAssigned = User::with('userRoles')
+            ->whereIn('id', [$requestorId, $operatorId])
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'user_id' => $user->id,
+                    'role_name' => $user->userRoles->pluck('name')->toArray(),
+                    'first_name' => $user->user_firstname,
+                    'last_name' => $user->user_lastname,
+                    'email' => $user->email
+                ];
+            })
+            ->values()
+            ->all();
             Log::info('Fetched Dbi Request successfully. DbiRequestController::show()  ' . ' User id:' . Auth::user()->id . ' email: ' . Auth::user()->email);
-            return view('dbi.show', compact('dbiRequest', 'assigned'));
+            return view('dbi.show', compact('dbiRequest', 'userAssigned'));
         } catch (\Exception $e) {
             // Log error if fetching DbiRequest fails
             Log::error('Error occurred while fetching Dbi Request: DbiRequestController::show()' . $e->getMessage() . ' User id:' . Auth::user()->id . ' email: ' . Auth::user()->email);
@@ -307,26 +365,13 @@ class DbiRequestController extends Controller
     public function selectdb(DbiRequest $dbiRequest)
     {
         $markets = Market::all();
+        $selectedMarket = $dbiRequest->sw_version; // Get the selected market from the $dbiRequest
+        $selectedDbUser = $dbiRequest->db_user; // Get the selected DB user from the $dbiRequest
+        $selectedProdInstance = $dbiRequest->prod_instance; // Get the selected prod instance from the $dbiRequest
+        $selectedTestInstance = $dbiRequest->test_instance; // Get the selected test instance from the $dbiRequest
+        $sourceCode = $dbiRequest->source_code; // Get the source code from the $dbiRequest
 
-        // $username = 'DB_DEBIT';
-        // $tables = DB::connection('oracle')
-        //     ->select("SELECT TABLE_NAME FROM ALL_TABLES WHERE OWNER = ?", [$username]);
-        // dd($tables);
-
-        // $usernames = ["MNDBARW", "DB_CREDIT", "DB_DEBIT", "TOAKDBI", "RFEGADE"];
-        // $placeholders = implode(',', array_fill(0, count($usernames), '?'));
-
-        // $users = DB::connection('oracle')
-        //     ->select("SELECT * FROM ALL_USERS WHERE USERNAME IN ($placeholders)", $usernames);
-
-       // $users = $connection->select("SELECT USERNAME, ACCOUNT_STATUS, LOCK_DATE, EXPIRY_DATE FROM DBA_USERS WHERE USERNAME = 'DB_NK'");
-        //dd($users);
-        // Retrieve the list of databases grouped by db_user_name
-        // $dbList = DatabaseInfo::select('db_user_name', DB::raw('CAST(LISTAGG(DISTINCT db_name, \',\') WITHIN GROUP (ORDER BY db_name) AS VARCHAR2(4000)) AS db_names'))
-        //     ->groupBy('db_user_name')
-        //     ->get();
-
-        return view('dbi.selectdb', compact('dbiRequest', 'markets'));
+        return view('dbi.selectdb', compact('dbiRequest', 'markets', 'selectedMarket', 'selectedDbUser', 'selectedProdInstance', 'selectedTestInstance', 'sourceCode'));
     }
 
     public function getDbUser(Request $request)
@@ -334,8 +379,6 @@ class DbiRequestController extends Controller
         $dbUser = Databaseinfo::get();
 
         try {
-            // $marketDB = DB::connection('oracle')
-            //     ->select("select * from $dbUser.DBI_INSTANCE");
             $marketDB = DbInstance::where('market_id', $request->sw_version)->get();
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -597,6 +640,15 @@ class DbiRequestController extends Controller
             $dbiStatus = DbiStatus::where('dbi_id', $dbiRequest->id)
             ->where('user_id', Auth::user()->id)
             ->first();
+
+            $dbiRequest->dbiRequestStatus()->updateOrCreate(
+                ['request_id' => $dbiRequest->id],
+                [
+                    'request_status' => 0,
+                    'operator_status' => 0,
+                    'dat_status' => 0,
+                ]
+            );
             
             // Create a new DbiStatus for the current user
             if ($dbiStatus) {
@@ -676,7 +728,7 @@ class DbiRequestController extends Controller
             ['request_id' => $dbiRequest->id],
             [
                 'dat_status' => 0,
-                'request_status' => 1,
+                'request_status' => ($request->approvalorreject == 'approve') ? 1 : 0,
                 'operator_comment' => $request->operator_comment,
                 'operator_status' => ($request->approvalorreject == 'approve') ? 1 : (($request->approvalorreject == 'reject') ? 2 : 0),
             ]
@@ -698,8 +750,8 @@ class DbiRequestController extends Controller
         $dbiRequest->dbiRequestStatus()->updateOrCreate(
             ['request_id' => $dbiRequest->id],
             [
-                'operator_status' => 1,
-                'request_status' => 1,
+                'operator_status' => ($request->approvalorreject == 'approve') ? 1 : 0,
+                'request_status' => ($request->approvalorreject == 'approve') ? 1 : 0,
                 'dat_comment' => $request->dat_comment,
                 'dat_status' => ($request->approvalorreject == 'approve') ? 1 : (($request->approvalorreject == 'reject') ? 2 : 0),
             ]
