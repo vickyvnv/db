@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\DbiRequest;
 use App\Models\Category;
 use App\Models\Priority;
+use App\Models\DbiRequestStatus;
 use App\Models\User;
 use App\Models\Market;
 use App\Models\DbiType;
@@ -43,6 +44,7 @@ class DbiRequestController extends Controller
                 }])
                 ->where('is_requestor_submit', 1)
                 ->where('is_operator_approve', 1)
+                ->orWhere('requestor_id', Auth::user()->id)
                 ->get();
                 //$dbiRequests = DbiRequest::with('requestor', 'operator')->get();
             } else if(Auth::user()->userRoles[0]->name === 'SDE') {
@@ -648,8 +650,14 @@ class DbiRequestController extends Controller
      */
     public function submitToSDE(Request $request, DbiRequest $dbiRequest)
     {
-        $dbiRequest->is_requestor_submit = 1;
-        $dbiRequest->save();
+        $dbiRequest->dbiRequestStatus()->updateOrCreate(
+            ['request_id' => $dbiRequest->id],
+            [
+                'request_status' => 1,
+                'operator_status' => 0,
+                'dat_status' => 0,
+            ]
+        );
 
         // Redirect with a success message
         return redirect()->route('dbi.show', $dbiRequest->id)->with('success', 'SQL query executed successfully. Log file generated.');
@@ -664,15 +672,38 @@ class DbiRequestController extends Controller
      */
     public function sdeApprovedOrReject(Request $request, DbiRequest $dbiRequest)
     {
-        if($request->approvalorreject == 'approve') {
-            $dbiRequest->is_requestor_submit = 1;
-            $dbiRequest->is_operator_approve = 1; // approve
-        } elseif($request->approvalorreject == 'reject') {
-            $dbiRequest->is_requestor_submit = 1;
-            $dbiRequest->is_operator_approve = 2;  // reject
-        }
+        $dbiRequest->dbiRequestStatus()->updateOrCreate(
+            ['request_id' => $dbiRequest->id],
+            [
+                'dat_status' => 0,
+                'request_status' => 1,
+                'operator_comment' => $request->operator_comment,
+                'operator_status' => ($request->approvalorreject == 'approve') ? 1 : (($request->approvalorreject == 'reject') ? 2 : 0),
+            ]
+        );
 
-        $dbiRequest->save();
+        // Redirect with a success message
+        return redirect()->route('dbi.show', $dbiRequest->id)->with('success', 'SQL query executed successfully. Log file generated.');
+    }
+
+    /**
+     * Execute the submit request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\DbiRequest  $dbiRequest
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function datApprovedOrReject(Request $request, DbiRequest $dbiRequest)
+    {
+        $dbiRequest->dbiRequestStatus()->updateOrCreate(
+            ['request_id' => $dbiRequest->id],
+            [
+                'operator_status' => 1,
+                'request_status' => 1,
+                'dat_comment' => $request->dat_comment,
+                'dat_status' => ($request->approvalorreject == 'approve') ? 1 : (($request->approvalorreject == 'reject') ? 2 : 0),
+            ]
+        );
 
         // Redirect with a success message
         return redirect()->route('dbi.show', $dbiRequest->id)->with('success', 'SQL query executed successfully. Log file generated.');

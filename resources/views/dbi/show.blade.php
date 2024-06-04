@@ -51,6 +51,7 @@
                                             <p class="font-bold text-gray-600">Role:</p>
                                             <p class="text-gray-800">{{ $user['user_roles'][0]['name'] }}</p>
                                         </div>
+                                        
                                     @endif
                                 @endforeach
                             </div>
@@ -101,137 +102,166 @@
                             @endforeach
                         </div>
                         @endif
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                            <p class="font-bold text-gray-600">DBI Request Status:</p>
+                            <p class="text-gray-800">
+                                @if($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 0 && $dbiRequest->is_admin_approve == 0)
+                                    <h1>Request submitted to SDE: {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
+                                    <h1>Email: {{ $dbiRequest->operator->email }}</h1>
+                                @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 2 && $dbiRequest->is_admin_approve === 0)
+                                    <h1>Request rejected by SDE: {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
+                                    <h1>Email: {{ $dbiRequest->operator->email }}</h1>
+                                @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 1 && $dbiRequest->is_admin_approve == 0)
+                                    <h1>Request Approved by SDE : {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
+                                    <h1>Email: {{ $dbiRequest->operator->email }}</h1>
+                                @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 1 && $dbiRequest->is_admin_approve == 1)
+                                    <h1>Request Approved by DAT</h1>
+                                @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 1 && $dbiRequest->is_admin_approve == 2)
+                                <h1>Request rejected by DAT</h1>
+                                @else
+                                <h1>Request is pending</h1>
+                                @endif
+
+                            </p>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                            <div class="mb-2">
+                                <p class="font-bold text-gray-600">DBI Category:</p>
+                                <p class="text-gray-800">{{ $dbiRequest->category }}</p>
+                            </div>
+                            <div class="mb-2">
+                                <p class="font-bold text-gray-600">Priority:</p>
+                                <p class="text-gray-800">{{ $dbiRequest->priority_id }}</p>
+                            </div>
+                            <div class="mb-2">
+                                <p class="font-bold text-gray-600">Market:</p>
+                                <p class="text-gray-800">{{ $dbiRequest->sw_version }}</p>
+                            </div>
+                            <div class="mb-2">
+                                <p class="font-bold text-gray-600">DBI Type:</p>
+                                <p class="text-gray-800">{{ $dbiRequest->dbi_type }}</p>
+                            </div>
+                            <div class="mb-2">
+                                <p class="font-bold text-gray-600">TT Number:</p>
+                                <p class="text-gray-800">{{ $dbiRequest->tt_id }}</p>
+                            </div>
+                            <div class="mb-2">
+                                <p class="font-bold text-gray-600">Serf/CR:</p>
+                                <p class="text-gray-800">{{ $dbiRequest->serf_cr_id }}</p>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-600">Reference DBI:</p>
+                                <p class="text-gray-800">{{ $dbiRequest->reference_dbi }}</p>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                            <h3 class="text-xl font-bold mb-4">Description</h3>
+                            <div class="grid grid-cols-1 gap-4">
+                                <div class="mb-4">
+                                    <p class="font-bold text-gray-600">Brief Description:</p>
+                                    <p class="text-gray-800">{{ $dbiRequest->brief_desc }}</p>
+                                </div>
+                                <div class="mb-4">
+                                    <p class="font-bold text-gray-600">Problem Description:</p>
+                                    <p class="text-gray-800">{{ $dbiRequest->problem_desc }}</p>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-600">Business Impact:</p>
+                                    <p class="text-gray-800">{{ $dbiRequest->business_impact }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                            <h3 class="text-xl font-bold mb-4">Technical Details</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="mb-2">
+                                    <p class="font-bold text-gray-600">Source Code:</p>
+                                    <p class="text-gray-800">{{ $dbiRequest->source_code }}</p>
+                                </div>
+                                <div class="mb-2">
+                                    <p class="font-bold text-gray-600">DB Instance:</p>
+                                    <p class="text-gray-800">{{ $dbiRequest->db_instance }}</p>
+                                </div>
+                                <div class="mb-2">
+                                    <p class="font-bold text-gray-600">SQL File Path:</p>
+                                    <p class="text-gray-800">{{ $dbiRequest->sql_file_path }}</p>
+                                </div>
+                                <div class="mb-2">
+                                    <p class="font-bold text-gray-600">SQL Logs Info:</p>
+                                </div>
+                                <div class="col-span-2">
+                                    <textarea class="form-control" rows="10" disabled>{{ $dbiRequest->sql_logs_info }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                            @if($dbiRequest->is_requestor_submit == 0 && $assigned[0]['user_roles'][0]['name'] == 'Requester')
+                                <form action="{{ route('dbi.submitToSDE', $dbiRequest->id) }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="is_requestor_submit" value="0">
+                                    <button type="submit" class="btn btn-primary">Submit to SDE</button>
+                                </form>
+                            @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 0 && ((isset($assigned[0]['user_roles'][0]['name']) && !empty($assigned[0]['user_roles'][0]['name']) && $assigned[0]['user_roles'][0]['name'] == 'SDE') ||
+                                    (isset($assigned[1]['user_roles'][0]['name']) && !empty($assigned[1]['user_roles'][0]['name']) && $assigned[1]['user_roles'][0]['name'] == 'SDE')
+                                ))
+                                <form action="{{ route('dbi.sdeApprovedOrReject', $dbiRequest->id) }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="is_requestor_submit" value="1">
+                                    <div class="mb-4">
+                                    <label>Status: </label>
+                                        <div class="flex items-center">
+                                            <input type="radio" id="approve" name="approvalorreject" value="approve" class="mr-2" required>
+                                            <label for="approve" class="text-gray-700 font-bold">Approve</label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input type="radio" id="approve" name="approvalorreject" value="reject" class="mr-2" required>
+                                            <label for="reject" class="text-gray-700 font-bold">Reject</label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label>Comment Status: </label>
+                                    <input type="text" id="statuscomment" name="operator_comment" class="mr-2" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </form>
+                                @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 1 && $dbiRequest->is_admin_approve == 0 &&   Auth::user()->userRoles[0]->name === 'DAT')
+                                <form action="{{ route('dbi.datApprovedOrReject', $dbiRequest->id) }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="is_requestor_submit" value="1">
+                                    <div class="mb-4">
+                                    <label>sStatus: </label>
+                                        <div class="flex items-center">
+                                            <input type="radio" id="approvalorreject" name="approvalorreject" value="approve" class="mr-2" required>
+                                            <label for="approve" class="text-gray-700 font-bold">Approve</label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input type="radio" id="approvalorreject" name="approvalorreject" value="reject" class="mr-2" required>
+                                            <label for="reject" class="text-gray-700 font-bold">Reject</label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-4">
+                                    <label>Comment Status: </label>
+                                    <input type="text" id="statuscomment" name="dat_comment" class="mr-2" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </form>
+                            @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 1)
+                                <h1><b>DBI Request is submitted to DAT user</b></h1>
+                            @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 0)
+                                <h1><b>DBI Request is submitted to SDE user</b></h1>
+                            @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 2)
+                                <h1><b>DBI Request is rejected SDE user</b></h1>
+                            @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 1 && $dbiRequest->is_admin_approve == 1)
+                                <h1><b>DBI Request is Approved by DAT user</b></h1>
+                            @else
+                                <h1><b>DBI Request is submitted</b></h1>
+                            @endif
+
+                        </div>
                     </div>
                     
                 </div>
-                <div class="grid grid-cols-3 gap-6">
-                    <div class="bg-gray-100 dark:bg-gray-700 p-6 rounded-lg shadow-lg">
-                        <div class="mb-2">
-                            <p class="font-bold text-gray-600">DBI Category:</p>
-                            <p class="text-gray-800">{{ $dbiRequest->category }}</p>
-                        </div>
-                        <div class="mb-2">
-                            <p class="font-bold text-gray-600">Priority:</p>
-                            <p class="text-gray-800">{{ $dbiRequest->priority_id }}</p>
-                        </div>
-                        <div class="mb-2">
-                            <p class="font-bold text-gray-600">Market:</p>
-                            <p class="text-gray-800">{{ $dbiRequest->sw_version }}</p>
-                        </div>
-                        <div class="mb-2">
-                            <p class="font-bold text-gray-600">DBI Type:</p>
-                            <p class="text-gray-800">{{ $dbiRequest->dbi_type }}</p>
-                        </div>
-                        <div class="mb-2">
-                            <p class="font-bold text-gray-600">TT Number:</p>
-                            <p class="text-gray-800">{{ $dbiRequest->tt_id }}</p>
-                        </div>
-                        <div class="mb-2">
-                            <p class="font-bold text-gray-600">Serf/CR:</p>
-                            <p class="text-gray-800">{{ $dbiRequest->serf_cr_id }}</p>
-                        </div>
-                        <div>
-                            <p class="font-bold text-gray-600">Reference DBI:</p>
-                            <p class="text-gray-800">{{ $dbiRequest->reference_dbi }}</p>
-                        </div>
-                    </div>
-                    <div class="bg-gray-100 dark:bg-gray-700 p-6 rounded-lg shadow-lg">
-                        <h3 class="text-xl font-bold mb-4">Description</h3>
-                        <div class="grid grid-cols-1 gap-4">
-                            <div class="mb-4">
-                                <p class="font-bold text-gray-600">Brief Description:</p>
-                                <p class="text-gray-800">{{ $dbiRequest->brief_desc }}</p>
-                            </div>
-                            <div class="mb-4">
-                                <p class="font-bold text-gray-600">Problem Description:</p>
-                                <p class="text-gray-800">{{ $dbiRequest->problem_desc }}</p>
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-600">Business Impact:</p>
-                                <p class="text-gray-800">{{ $dbiRequest->business_impact }}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-gray-100 dark:bg-gray-700 p-6 rounded-lg shadow-lg">
-                        <h3 class="text-xl font-bold mb-4">Technical Details</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="mb-2">
-                                <p class="font-bold text-gray-600">Source Code:</p>
-                                <p class="text-gray-800">{{ $dbiRequest->source_code }}</p>
-                            </div>
-                            <div class="mb-2">
-                                <p class="font-bold text-gray-600">DB Instance:</p>
-                                <p class="text-gray-800">{{ $dbiRequest->db_instance }}</p>
-                            </div>
-                            <div class="mb-2">
-                                <p class="font-bold text-gray-600">SQL File Path:</p>
-                                <p class="text-gray-800">{{ $dbiRequest->sql_file_path }}</p>
-                            </div>
-                            <div class="mb-2">
-                                <p class="font-bold text-gray-600">SQL Logs Info:</p>
-                            </div>
-                            <div class="col-span-2">
-                                <textarea class="form-control" rows="10" disabled>{{ $dbiRequest->sql_logs_info }}</textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @if($dbiRequest->is_requestor_submit == 0 && $assigned[0]['user_roles'][0]['name'] == 'Requester')
-                    <form action="{{ route('dbi.submitToSDE', $dbiRequest->id) }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="is_requestor_submit" value="0">
-                        <button type="submit" class="btn btn-primary">Submit to SDE</button>
-                    </form>
-                @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 0 && (
-        (isset($assigned[0]['user_roles'][0]['name']) && !empty($assigned[0]['user_roles'][0]['name']) && $assigned[0]['user_roles'][0]['name'] == 'SDE') ||
-        (isset($assigned[1]['user_roles'][0]['name']) && !empty($assigned[1]['user_roles'][0]['name']) && $assigned[1]['user_roles'][0]['name'] == 'SDE')
-    ))
-                    <form action="{{ route('dbi.sdeApprovedOrReject', $dbiRequest->id) }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="is_requestor_submit" value="1">
-                        <div class="mb-4">
-                            <div class="flex items-center">
-                                <input type="radio" id="approve" name="approvalorreject" value="approve" class="mr-2" required>
-                                <label for="approve" class="text-gray-700 font-bold">Approve</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="radio" id="approve" name="approvalorreject" value="reject" class="mr-2" required>
-                                <label for="reject" class="text-gray-700 font-bold">Reject</label>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                    @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 1 && $dbiRequest->is_admin_approve == 0 &&   (
-        (isset($assigned[0]['user_roles'][0]['name']) && !empty($assigned[0]['user_roles'][0]['name']) && $assigned[0]['user_roles'][0]['name'] == 'DAT') ||
-        (isset($assigned[1]['user_roles'][0]['name']) && !empty($assigned[1]['user_roles'][0]['name']) && $assigned[1]['user_roles'][0]['name'] == 'DAT')
-    ))
-                    <form action="{{ route('dbi.sdeApprovedOrReject', $dbiRequest->id) }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="is_requestor_submit" value="1">
-                        <div class="mb-4">
-                            <div class="flex items-center">
-                                <input type="radio" id="approve" name="approvalorreject" value="approve" class="mr-2" required>
-                                <label for="approve" class="text-gray-700 font-bold">Approve</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="radio" id="approve" name="approvalorreject" value="reject" class="mr-2" required>
-                                <label for="reject" class="text-gray-700 font-bold">Reject</label>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 1)
-                    <h1><b>DBI Request is submitted to DAT user</b></h1>
-                @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 0)
-                    <h1><b>DBI Request is submitted to SDE user</b></h1>
-                @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 2)
-                    <h1><b>DBI Request is rejected SDE user</b></h1>
-                @elseif($dbiRequest->is_requestor_submit == 1 && $dbiRequest->is_operator_approve == 1 && $dbiRequest->is_admin_approve == 1)
-                    <h1><b>DBI Request is Approved by DAT user</b></h1>
-                @else
-                    <h1><b>DBI Request is submitted</b></h1>
-                @endif
-
+               
                
             </div>
         </div>

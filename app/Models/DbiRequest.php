@@ -55,4 +55,9 @@ class DbiRequest extends Model
         return $this->belongsTo(Market::class, 'sw_version');
 
     }
+
+    public function dbiRequestStatus()
+    {
+        return $this->hasOne(DbiRequestStatus::class, 'request_id');
+    }
 }
