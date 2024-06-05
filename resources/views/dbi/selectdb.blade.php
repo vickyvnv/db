@@ -252,13 +252,15 @@ $(document).ready(function() {
                             prodInstanceSelect.add(prodOption);
 
                             // Create options for test_instance
+                            testInstanceSelect.value = instance.preprod;
+                            testInstanceSelect1.value = instance.preprod;
                             //testInstanceSelect.value = instance.test_instance;
                         });
 
                         // Set the selected prod instance and test instance
                         prodInstanceSelect.value = '{{ $selectedProdInstance }}';
-                        testInstanceSelect.value = '{{ $selectedTestInstance }}';
-                        testInstanceSelect1.value = '{{ $selectedTestInstance }}';
+                        // testInstanceSelect.value = '{{ $selectedTestInstance }}';
+                        // testInstanceSelect1.value = '{{ $selectedTestInstance }}';
 
                         // Trigger the change event on the prod_instance select element to update the test_instance
                         prodInstanceSelect.dispatchEvent(new Event('change'));

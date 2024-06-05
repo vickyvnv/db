@@ -25,7 +25,7 @@
                                                 <div class="card-body">
                                                     <form method="POST" action="{{ route('dbi.update', $dbiRequest->id) }}" class="custom-form">
                                                         @csrf
-                                                        @method('PUT')
+                                                        @method('PUT') 
 
                                                         <!-- DBI Category -->
                                                         <div class="form-group">

@@ -8,7 +8,9 @@
             </a>
             <ul class="submenu">
                 <li><a href="{{ route('dbi.index') }}">DBI List</a></li>
-                <li><a href="{{ route('dbi.create') }}">DBI New User</a></li>
+                @if(Auth::user()->userRoles->first()->name == 'Requester' || Auth::user()->userRoles->first()->name == 'DAT')
+                    <li><a href="{{ route('dbi.create') }}">DBI New User</a></li>
+                @endif
             </ul>
         </li>
     </ul>
