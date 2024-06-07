@@ -34,12 +34,15 @@
                                                         <!-- Market -->
                                                         <div class="form-group">
                                                             <label for="sw_version">Market:</label>
-                                                            <select name="sw_version" id="sw_version" class="form-control">
+                                                            <select name="sw_version" id="sw_version" class="form-control @error('sw_version') is-invalid @enderror">
                                                                 <option value="">Select Market {{$selectedMarket}}</option>
                                                                 @foreach ($markets as $market)
                                                                     <option value="{{ $market->id }}" {{ $selectedMarket == $market->id ? 'selected' : '' }}>{{ $market->name }}</option>
                                                                 @endforeach
                                                             </select>
+                                                            @error('sw_version')
+                                                                <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                            @enderror
                                                         </div>
                                                         <!-- Reference DBI -->
                                                         <div class="form-group">
@@ -56,10 +59,13 @@
                                                     <!-- User Roles -->
                                                     <div class="mt-4">
                                                         <label for="roles" class="block font-medium text-sm text-gray-700">Prod Instance</label>
-                                                        <select id="prod-instance-container" name="prod_instance" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                                        <select id="prod-instance-container" name="prod_instance" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 @error('prod_instance') is-invalid @enderror">
                                                             <option value="">Please select Prod Instance</option>
                                                             <!-- Populate options based on the selected market -->
                                                         </select>
+                                                        @error('prod_instance')
+                                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                        @enderror
                                                     </div>
 
                                                     <div class="mt-4">
@@ -67,6 +73,9 @@
                                                         <input type="type" id="test-instance-container1" value="{{ $selectedTestInstance }}" disabled>
                                                         <input type="hidden" id="test-instance-container" name="test_instance" value="{{ $selectedTestInstance }}">
                                                         <label></label>
+                                                        @error('test_instance')
+                                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                        @enderror
                                                     </div>
                                                     <!-- Source Code -->
                                                     <div class="form-group">

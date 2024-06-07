@@ -438,27 +438,26 @@ class DbiRequestController extends Controller
     public function updateSelectDb(Request $request, DbiRequest $dbiRequest)
     {
         if(Auth::user()->userRoles->first()->name == 'Requester' || Auth::user()->userRoles->first()->name == 'DAT') {
-            //dd($request);
-            // Validate the request data
-            $validatedData = $request->validate([
-                'sw_version' => 'required',
-                'db_user' => 'required',
-                'source_code' => 'required',
-                'prod_instance' => 'required',
-                'test_instance' => 'required',
-            ]);
-
             try {
+                // Validate the request data
+                $validatedData = $request->validate([
+                    'sw_version' => 'required',
+                    'db_user' => 'required',
+                    'source_code' => 'required',
+                    'prod_instance' => 'required',
+                    'test_instance' => 'required',
+                ]);
+        
                 // Update the DbiRequest with the validated data
                 $dbiRequest->update($validatedData);
-
+        
                 // Create a new DbiStatus for the current user
                 // Check if the dbiStatus already exists for the given dbiRequest and user
                 $dbiStatus = DbiStatus::where('id', $dbiRequest->id)
-                ->where('user_id', Auth::user()->id)
-                ->where('filled', 2)
-                ->first();
-
+                    ->where('user_id', Auth::user()->id)
+                    ->where('filled', 2)
+                    ->first();
+        
                 if ($dbiStatus) {
                     // If the dbiStatus exists, update it
                     $dbiStatus->status_detail = "DB Selected";
@@ -473,25 +472,27 @@ class DbiRequestController extends Controller
                     $dbiStatus->filled = 2;
                     $dbiStatus->save();
                 }
-
+        
                 // Generate the SQL file name and save the source code content
                 $sqlfile = 'dbi_' . $dbiRequest->id . '_' . time() . '.sql';
                 $sourceCodeFilePath = storage_path('app/source_code_files/' . $sqlfile);
                 file_put_contents($sourceCodeFilePath, $validatedData['source_code']);
-
+        
                 // Update the DbiRequest with the SQL file path and db_user
                 $dbiRequest->sql_file_path = $sqlfile;
                 $dbiRequest->db_user = $validatedData['db_user'];
                 $dbiRequest->save();
-
+        
                 // Log successful update of DbiRequest
                 Log::channel('daily')->info('Dbi Request updated successfully. DbiRequestController::updateSelectDb()' . 'User id:' . Auth::user()->id . ' email: ' . Auth::user()->email);
-
                 return redirect()->route('dbi.createsqlfile', $dbiRequest->id)->with('success', 'Database selected successfully.');
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                // If validation fails, redirect back with validation errors
+                return redirect()->back()->withErrors($e->errors())->withInput();
             } catch (\Exception $e) {
                 // Log error if updating DbiRequest fails
                 Log::error('Error occurred while updating Dbi Request: ' . $e->getMessage() . ' DbiRequestController::updateSelectDb() User id:' . Auth::user()->id . ' email: ' . Auth::user()->email);
-                return redirect()->back()->with('error', 'Failed to select database.');
+                return redirect()->back()->with('error', 'Failed to select database. Please try again.');
             }
         } else {
             return redirect()->route('dbi.index')->with('error', 'You are not authorized to create a DBI request.');
@@ -585,9 +586,10 @@ class DbiRequestController extends Controller
     {
         // Find the DbiRequest by ID
         $dbiRequest = DbiRequest::findOrFail($dbiRequestId);
+        $prodTest = "No";
 
         // Return the test DBI view with the DbiRequest data
-        return view('dbi.testDBI', compact('dbiRequest'));
+        return view('dbi.testDBI', compact('dbiRequest', "prodTest"));
     }
 
     /**
@@ -611,11 +613,15 @@ class DbiRequestController extends Controller
                 $decryptedPassword = Crypt::decryptString($databaseInfo->db_user_password);
 
                 // Generate the SQL log file name
-                $outputFileName = 'output' . $dbiRequest->id . '_' . time() . '.txt';
-
+                if($request->prodTest == "Yes") {
+                    $outputFileName =  $dbiRequest->id .'_output_PreProd' . $dbiRequest->id . '_' . time() . '.txt';
+                } else {
+                    $outputFileName =  $dbiRequest->id .'_output_Prod' . $dbiRequest->id . '_' . time() . '.txt';
+                }
+                
                 $dbUser = $dbiRequest->db_user;  //$dbiRequest->db_user;   // mndbarw
                 $dbPassword = $decryptedPassword;   //$decryptedPassword;  // Mndb_123
-                $dbtestInstance = $dbiRequest->test_instance; //$dbiRequest->db_instance;  // U_PORCL1
+                $dbtestInstance = $request->prodTest == "Yes" ? $dbiRequest->prod_instance : $dbiRequest->test_instance; //$dbiRequest->db_instance;  // U_PORCL1
                 $sourceCode = $dbiRequest->source_code; //$dbiRequest->source_code;  // INSERT INTO test (id, name) VALUES (1, 'vicky');
                 //dd($dbtestInstance);
                 // Modify the source code to set the current schema and execute the insert query
@@ -635,11 +641,12 @@ class DbiRequestController extends Controller
                 // Prepare the additional information
                 $additionalInfo = "Date: $currentDate" . PHP_EOL;
                 $additionalInfo .= "DBI No.: $dbiRequest->id" . PHP_EOL;
-                $additionalInfo .= "DB: $dbtestInstance" . PHP_EOL;
+                $additionalInfo .= "DB: " . ($request->prodTest == 'Yes' ? "Prod DB" : "PreProd DB") . PHP_EOL;
                 $additionalInfo .= "DB-User: $dbUser" . PHP_EOL;
                 $additionalInfo .= "Requestor: " . $dbiRequest->requestor->user_firstname . " " . $dbiRequest->requestor->user_lastname . " " . PHP_EOL;
                 $additionalInfo .= "Operator: " . $dbiRequest->operator->user_firstname . " " . $dbiRequest->operator->user_lastname . "" . PHP_EOL;
                 $additionalInfo .= "Team: " . Auth::user()->team->name . PHP_EOL;
+                $additionalInfo .= "Database Instance: " . ($request->prodTest == "Yes" ? $dbiRequest->prod_instance : $dbiRequest->test_instance) . PHP_EOL;
 
                 // Prepend the additional information to the $terminalLog
                 $terminalLog = $additionalInfo . PHP_EOL . $terminalLog;
@@ -656,40 +663,48 @@ class DbiRequestController extends Controller
                 // Remove the temporary file
                 File::delete($tempFile);
 
-                // Store the file output in the sql_log_info field
-                $dbiRequest->sql_log_file = $outputFileName;
-                $dbiRequest->sql_logs_info = $terminalLog;
-                $dbiRequest->save();
+                if($request->prodTest == "Yes") {
+                    // Store the file output in the sql_log_info field
+                    $dbiRequest->sql_log_file_prod = $outputFileName;
+                    $dbiRequest->sql_logs_info_prod = $terminalLog;
+                    $dbiRequest->save();
+                } else {
+                    // Store the file output in the sql_log_info field
+                    $dbiRequest->sql_log_file = $outputFileName;
+                    $dbiRequest->sql_logs_info = $terminalLog;
+                    $dbiRequest->save();
+                }
+                
 
                 // Check if the dbiStatus already exists for the given dbiRequest and user
                 $dbiStatus = DbiStatus::where('dbi_id', $dbiRequest->id)
                 ->where('user_id', Auth::user()->id)
                 ->first();
-
+                
                 $dbiRequest->dbiRequestStatus()->updateOrCreate(
                     ['request_id' => $dbiRequest->id],
                     [
-                        'request_status' => 0,
-                        'operator_status' => 0,
-                        'dat_status' => 0,
+                        'request_status' => $request->prodTest == "Yes" ? 10 : 0,
+                        'operator_status' => $request->prodTest == "Yes" ? 1 : 0,
+                        'dat_status' => $request->prodTest == "Yes" ? 1 : 0,
                     ]
                 );
                 
                 // Create a new DbiStatus for the current user
-                if ($dbiStatus) {
-                    // If the dbiStatus exists, update it
-                    $dbiStatus->status_detail = "Test DBI";
-                    $dbiStatus->filled = 4;
-                    $dbiStatus->save();
-                } else {
-                    // If the dbiStatus doesn't exist, create a new one
-                    $dbiStatus = new DbiStatus();
-                    $dbiStatus->dbi_id = $dbiRequest->id;
-                    $dbiStatus->user_id = Auth::user()->id;
-                    $dbiStatus->status_detail = "Test DBI";
-                    $dbiStatus->filled = 4;
-                    $dbiStatus->save();
-                }
+                $dbiStatus = DbiStatus::updateOrCreate(
+                    [
+                        'id' => $dbiStatus->id,
+                        'user_id' => Auth::user()->id,
+                        'status_detail' => $request->prodTest == "Yes" ? "Prod Run" : "Test DBI",
+                        'filled' => $request->prodTest == "Yes" ? 5 : 4,
+                    ],
+                    [
+                        'dbi_id' => $dbiRequest->id,
+                        'user_id' => Auth::user()->id,
+                        'status_detail' => $request->prodTest == "Yes" ? 5 : 4,
+                        'filled' => 4,
+                    ]
+                );
                 
                 DB::commit(); // Commit the database transaction
 
@@ -707,11 +722,6 @@ class DbiRequestController extends Controller
 
                 // Save the error log file
                 file_put_contents($errorLogFilePath, $e->getMessage());
-
-                // Update the dbi_request record with the error log file path, error message, and shell output
-                $dbiRequest->sql_log_file = $errorLogFileName;
-                $dbiRequest->sql_logs_info = $e->getMessage();
-                $dbiRequest->save();
 
                 // Redirect with an error message
                 return redirect()->back()->with('error', 'An error occurred while executing the SQL query. Error log generated.');
@@ -733,9 +743,9 @@ class DbiRequestController extends Controller
         $dbiRequest->dbiRequestStatus()->updateOrCreate(
             ['request_id' => $dbiRequest->id],
             [
-                'request_status' => 1,
-                'operator_status' => 0,
-                'dat_status' => 0,
+                'request_status' => $request->prodTest == "Yes" ? 11 : 1,
+                'operator_status' => $request->prodTest == "Yes" ? 1 : 0,
+                'dat_status' => $request->prodTest == "Yes" ? 1 : 0,
             ]
         );
 
@@ -757,10 +767,10 @@ class DbiRequestController extends Controller
             $dbiRequest->dbiRequestStatus()->updateOrCreate(
                 ['request_id' => $dbiRequest->id],
                 [
-                    'dat_status' => 0,
-                    'request_status' => ($request->approvalorreject == 'approve') ? 1 : 0,
+                    'dat_status' => $request->prodTest == "Yes" ? 1 : 0,
+                    'request_status' => $request->prodTest == "Yes" ? (($request->approvalorreject == 'approve') ? 11 : 10) : (($request->approvalorreject == 'approve') ? 1 : 0),
                     'operator_comment' => $request->operator_comment,
-                    'operator_status' => ($request->approvalorreject == 'approve') ? 1 : (($request->approvalorreject == 'reject') ? 2 : 0),
+                    'operator_status' => $request->prodTest == "Yes" ? (($request->approvalorreject == 'approve') ? 11 : (($request->approvalorreject == 'reject') ? 12 : 10))  : (($request->approvalorreject == 'approve') ? 1 : (($request->approvalorreject == 'reject') ? 2 : 0)),
                 ]
             );
 
@@ -785,10 +795,13 @@ class DbiRequestController extends Controller
             $dbiRequest->dbiRequestStatus()->updateOrCreate(
                 ['request_id' => $dbiRequest->id],
                 [
-                    'operator_status' => ($request->approvalorreject == 'approve') ? 1 : 0,
-                    'request_status' => ($request->approvalorreject == 'approve') ? 1 : 0,
+                    'operator_status' =>$request->prodTest == "Yes" ? (($request->approvalorreject == 'approve') ? 11 : 10) : (($request->approvalorreject == 'approve') ? 1 : 0),
+
+                    'request_status' => $request->prodTest == "Yes" ? (($request->approvalorreject == 'approve') ? 11 : 10) : (($request->approvalorreject == 'approve') ? 1 : 0),
+
                     'dat_comment' => $request->dat_comment,
-                    'dat_status' => ($request->approvalorreject == 'approve') ? 1 : (($request->approvalorreject == 'reject') ? 2 : 0),
+
+                    'dat_status' => $request->prodTest == "Yes" ? (($request->approvalorreject == 'approve') ? 11 : (($request->approvalorreject == 'reject') ? 12 : 10))  : (($request->approvalorreject == 'approve') ? 1 : (($request->approvalorreject == 'reject') ? 2 : 0)),
                 ]
             );
 
@@ -799,4 +812,18 @@ class DbiRequestController extends Controller
             return redirect()->route('dbi.show', $dbiRequest->id)->with('error', 'You are not DAT User');
         }
     }
+
+    /**
+    * Execute the submit request.
+    *
+    * @param  \Illuminate\Http\Request  $request
+    * @param  \App\Models\DbiRequest  $dbiRequest
+    * @return \Illuminate\Http\RedirectResponse
+    */
+    // public function runSqlProd(Request $request, DbiRequest $dbiRequest) {
+    //     $prodTest = $request->prodTest;
+
+    //     // Return the test DBI view with the DbiRequest data
+    //     return view('dbi.testDBI', compact('dbiRequest', "prodTest"));
+    // }
 }

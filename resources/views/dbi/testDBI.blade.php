@@ -29,6 +29,7 @@
                                                         <input type="hidden" name="db_user" value="{{ $dbiRequest->db_user }}">
                                                         <input type="hidden" name="db_instance" value="{{ $dbiRequest->db_instance }}">
                                                         <input type="hidden" name="source_code" value="{{ $dbiRequest->source_code }}">
+                                                        <input type="hidden" name="prodTest" value="No">
                                                         <button type="submit" class="btn btn-primary">Test DBI</button>
                                                     </form>
                                                 </div>

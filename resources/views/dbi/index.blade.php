@@ -38,8 +38,9 @@
                                             <th>Requestor</th>
                                             <th>Operator</th>
                                             <th>Priority ID</th>
-                                            <th>Software Version</th>
+                                            <th>Market</th>
                                             <th>DBI Type</th>
+                                            <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -50,11 +51,46 @@
                                                 <td>{{ $dbiRequest->requestor->email }}</td>
                                                 <td>{{ $dbiRequest->operator->email }}</td>
                                                 <td>{{ $dbiRequest->priority_id }}</td>
-                                                <td>{{ $dbiRequest->sw_version }}</td>
+                                                <td>{{ $dbiRequest->swVersionMarket->name }}</td>
                                                 <td>{{ $dbiRequest->dbi_type }}</td>
                                                 <td>
+                                                    @if($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0)
+                                                        <h1>Request submitted to SDE: {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
+                                                        <h1>Email: {{ $dbiRequest->operator->email }}</h1>
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 2 && $dbiRequest->dbiRequestStatus->dat_status === 0)
+                                                        <h1>Request rejected by SDE: {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
+                                                        <h1>Email: {{ $dbiRequest->operator->email }}</h1>
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 0)
+                                                        <h1>Request Approved by SDE : {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
+                                                        <h1>Email: {{ $dbiRequest->operator->email }}</h1>
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1)
+                                                        <h1>Request Approved by DAT</h1>
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 2)
+                                                        <h1>Request rejected by DAT</h1>
+                                                    
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 10 && $dbiRequest->dbiRequestStatus->dat_status == 10)
+                                                        <h1>Request submitted to SDE: {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
+                                                        <h1>Email: {{ $dbiRequest->operator->email }}</h1>
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 10 && $dbiRequest->dbiRequestStatus->operator_status == 12 && $dbiRequest->dbiRequestStatus->dat_status === 10)
+                                                        <h1>Request rejected by SDE: {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
+                                                        <h1>Email: {{ $dbiRequest->operator->email }}</h1>
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 10)
+                                                        <h1>Request Approved by SDE : {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
+                                                        <h1>Email: {{ $dbiRequest->operator->email }}</h1>
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 11)
+                                                        <h1>Request Approved by DAT</h1>
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 10 && $dbiRequest->dbiRequestStatus->operator_status == 10 && $dbiRequest->dbiRequestStatus->dat_status == 12)
+                                                        <h1>Request rejected by DAT</h1>
+
+                                                    @else
+                                                        <h1>Request is pending</h1>
+                                                    @endif
+                                                </td>
+                                                <td>
                                                     <a href="{{ route('dbi.show', $dbiRequest->id) }}" class="btn btn-primary">View</a>
-                                                    @if(Auth::user()->userRoles[0]->name !== 'SDE' && Auth::user()->id == $dbiRequest->requestor_id)
+                                                    @if($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 11)
+
+                                                    @elseif(Auth::user()->userRoles[0]->name !== 'SDE' && Auth::user()->id == $dbiRequest->requestor_id)
                                                     <a href="{{ route('dbi.edit', $dbiRequest->id) }}" class="btn btn-secondary">Edit</a>
                                                     @endif
                                                     <!-- Add delete button with form submission if needed -->
