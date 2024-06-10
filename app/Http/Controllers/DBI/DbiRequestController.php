@@ -641,7 +641,8 @@ class DbiRequestController extends Controller
                 $modifiedSourceCode .= "COMMIT;";
                 // Create a temporary file using Laravel's Storage facade
                 $tempFile = Storage::disk('local')->put('temp/dbi_'.$dbiRequest->id.'_' . uniqid() . '.sql', $modifiedSourceCode);
-                $tempFilePath = storage_path('app/' . $tempFile);                
+                $tempFilePath = storage_path('app/' . $tempFile);   
+                dd($tempFilePath);             
                 // $tempFilePath = Storage::path($tempFile);
                 // $tempFile = tempnam(sys_get_temp_dir(), '');
                 //File::put($tempFilePath, $modifiedSourceCode);
