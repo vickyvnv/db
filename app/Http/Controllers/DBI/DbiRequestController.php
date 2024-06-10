@@ -639,7 +639,7 @@ class DbiRequestController extends Controller
                 $modifiedSourceCode .= $sourceCode . "\n";
                 $modifiedSourceCode .= "COMMIT;";
                 
-                $tempFile = tempnam(sys_get_temp_dir(), 'sql_script/');
+                $tempFile = tempnam(sys_get_temp_dir(), '');
                 File::put($tempFile, $modifiedSourceCode);
                 DB::enableQueryLog();
 
