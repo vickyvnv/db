@@ -32,6 +32,11 @@
             <!-- Display DBI request details -->
             <div class="grid grid-cols-2 gap-6">
                 <div class="bg-gray-100 dark:bg-gray-700 p-6 rounded-lg shadow-lg">
+                    <!-- Log button -->
+                    <div class="mt-4">
+                        <a href="{{ route('dbi.showLogs', $dbiRequest->id) }}" target="_blank" class="btn btn-primary">View Logs</a>
+                    </div>
+                    <br>
                     <h3 class="text-xl font-bold mb-4">DBI Request Details  :  <b>{{Auth::user()->userRoles[0]->name}}</b></h3>
                     <div class="grid grid-cols-2 gap-4">
                         @if($userAssigned[0]['role_name'][0] === 'Requester')
@@ -143,6 +148,15 @@
                                     <h1>Request Approved by DAT</h1>
                                 @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 2)
                                     <h1>Request rejected by DAT</h1>
+                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 10)
+                                <h1><b>DBI Request for Prod is submitted to DAT user</b></h1>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 10 && $dbiRequest->dbiRequestStatus->dat_status == 10)
+                                    <h1><b>DBI Request is for Prod submitted to SDE user</b></h1>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 10 && $dbiRequest->dbiRequestStatus->operator_status == 12 && $dbiRequest->dbiRequestStatus->dat_status == 10)
+                                    <h1><b>DBI Request for Prod is rejected by SDE user</b></h1>
+                                    
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 11)
+                                    <h1><b>DBI Request for prod is Approved by DAT user</b></h1>
                                 @else
                                     <h1>Request is pending</h1>
                                 @endif
@@ -305,6 +319,53 @@
             </div>
         </div>
     </div>
+    <!-- Logging code -->
+    @php
+        $logFile = storage_path('logs/' . $dbiRequest->id . '_dbi_request.log');
+        $timestamp = date('Y-m-d H:i:s');
+
+        // Log DBI request details
+        $logData = "[{$timestamp}] DBI Request Details:\n";
+        $logData .= "Request ID: {$dbiRequest->id}\n";
+        $logData .= "Requestor: {$dbiRequest->requestor->user_firstname} {$dbiRequest->requestor->user_lastname}\n";
+        $logData .= "Operator: {$dbiRequest->operator->user_firstname} {$dbiRequest->operator->user_lastname}\n";
+        $logData .= "Source Code:\n{$dbiRequest->source_code}\n";
+        $logData .= "Test Log:\n{$dbiRequest->sql_logs_info}\n";
+        if ($dbiRequest->sql_logs_info_prod) {
+            $logData .= "Prod Log:\n{$dbiRequest->sql_logs_info_prod}\n";
+        }
+
+        // Log status based on conditions
+        $logData .= "Status:\n";
+        if ($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0) {
+            $logData .= "Request submitted to SDE: {$dbiRequest->operator->user_firstname} {$dbiRequest->operator->user_lastname}\n";
+            $logData .= "Email: {$dbiRequest->operator->email}\n";
+        } elseif ($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 2 && $dbiRequest->dbiRequestStatus->dat_status === 0) {
+            $logData .= "Request rejected by SDE: {$dbiRequest->operator->user_firstname} {$dbiRequest->operator->user_lastname}\n";
+            $logData .= "Email: {$dbiRequest->operator->email}\n";
+        } elseif ($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 0) {
+            $logData .= "Request Approved by SDE: {$dbiRequest->operator->user_firstname} {$dbiRequest->operator->user_lastname}\n";
+            $logData .= "Email: {$dbiRequest->operator->email}\n";
+        } elseif ($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1) {
+            $logData .= "Request Approved by DAT\n";
+        } elseif ($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 2) {
+            $logData .= "Request rejected by DAT\n";
+        } elseif ($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 10) {
+            $logData .= "DBI Request for Prod is submitted to DAT user\n";
+        } elseif ($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 10 && $dbiRequest->dbiRequestStatus->dat_status == 10) {
+            $logData .= "DBI Request is for Prod submitted to SDE user\n";
+        } elseif ($dbiRequest->dbiRequestStatus->request_status == 10 && $dbiRequest->dbiRequestStatus->operator_status == 12 && $dbiRequest->dbiRequestStatus->dat_status == 10) {
+            $logData .= "DBI Request for Prod is rejected by SDE user\n";
+        } elseif ($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 11) {
+            $logData .= "DBI Request for prod is Approved by DAT user\n";
+        } else {
+            $logData .= "Request is pending\n";
+        }
+
+        $logData .= "-----------------------------\n";
+
+        file_put_contents($logFile, $logData);
+    @endphp
     </x-app-layout>
 <style>
     textarea.form-control {

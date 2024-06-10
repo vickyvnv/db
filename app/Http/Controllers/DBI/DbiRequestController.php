@@ -42,12 +42,22 @@ class DbiRequestController extends Controller
                 }, 'operator' => function($query) {
                     $query->select('id', 'user_firstname', 'user_lastname', 'email');
                 }, 'dbiRequestStatus' => function($query) {
-                    $query->where('request_status', 1)
-                          ->where('operator_status', 1);
+                    $query->where(function($subquery) {
+                        $subquery->where('request_status', 1)
+                                 ->where('operator_status', 1);
+                    })->orWhere(function($subquery) {
+                        $subquery->where('request_status', 11)
+                                 ->where('operator_status', 11);
+                    });
                 }])
                 ->whereHas('dbiRequestStatus', function($query) {
-                    $query->where('request_status', 1)
-                          ->where('operator_status', 1);
+                    $query->where(function($subquery) {
+                        $subquery->where('request_status', 1)
+                                 ->where('operator_status', 1);
+                    })->orWhere(function($subquery) {
+                        $subquery->where('request_status', 11)
+                                 ->where('operator_status', 11);
+                    });
                 })
                 ->get();
                 //dd($dbiRequests);
@@ -58,11 +68,11 @@ class DbiRequestController extends Controller
                 }, 'operator' => function($query) {
                     $query->select('id', 'user_firstname', 'user_lastname', 'email');
                 }, 'dbiRequestStatus' => function($query) {
-                    $query->where('request_status', 1);
+                    $query->whereIn('request_status', [1, 11]);
                 }])
                 ->where('operator_id', Auth::user()->id)
                 ->whereHas('dbiRequestStatus', function($query) {
-                    $query->where('request_status', 1);
+                    $query->whereIn('request_status', [1, 11]);
                 })
                 ->get();
 
@@ -626,14 +636,23 @@ class DbiRequestController extends Controller
                 //dd($dbtestInstance);
                 // Modify the source code to set the current schema and execute the insert query
                 $modifiedSourceCode = "ALTER SESSION SET CURRENT_SCHEMA = $dbtestInstance;\n";
-                $modifiedSourceCode .= $sourceCode . ";\n";
+                $modifiedSourceCode .= $sourceCode . "\n";
                 $modifiedSourceCode .= "COMMIT;";
                 
                 $tempFile = tempnam(sys_get_temp_dir(), 'sql_script');
                 File::put($tempFile, $modifiedSourceCode);
+                DB::enableQueryLog();
 
                 $command = "sqlplus $dbUser/$dbPassword @$tempFile 2>&1";
                 $terminalLog = shell_exec($command);
+                $queries = DB::getQueryLog();
+                $totalExecutionTime = 0;
+
+                foreach ($queries as $query) {
+                    $totalExecutionTime += $query['time'];
+                }
+
+                
                 //dd($terminalLog);
                 // Get the current date and time
                 $currentDate = date('D M d H:i:s Y');
@@ -647,7 +666,19 @@ class DbiRequestController extends Controller
                 $additionalInfo .= "Operator: " . $dbiRequest->operator->user_firstname . " " . $dbiRequest->operator->user_lastname . "" . PHP_EOL;
                 $additionalInfo .= "Team: " . Auth::user()->team->name . PHP_EOL;
                 $additionalInfo .= "Database Instance: " . ($request->prodTest == "Yes" ? $dbiRequest->prod_instance : $dbiRequest->test_instance) . PHP_EOL;
+                Log::info('Executed Queries:');
 
+                foreach ($queries as $index => $query) {
+                    Log::info('Query ' . ($index + 1) . ': ' . $query['query']);
+                    $additionalInfo .= 'Query ' . ($index + 1) . ': ' . $query['query']. PHP_EOL;
+                    Log::info('Bindings: ' . implode(', ', $query['bindings']));
+                    $additionalInfo .= 'Bindings: ' . implode(', ', $query['bindings']). PHP_EOL;
+                    Log::info('Time: ' . $query['time'] . ' ms');
+                    $additionalInfo .= 'Time: ' . $query['time'] . ' ms'. PHP_EOL;
+                }
+
+                $additionalInfo .= 'Total Execution Time: ' . $totalExecutionTime . ' ms'. PHP_EOL;
+                Log::info('Total Execution Time: ' . $totalExecutionTime . ' ms');
                 // Prepend the additional information to the $terminalLog
                 $terminalLog = $additionalInfo . PHP_EOL . $terminalLog;
 
@@ -810,6 +841,27 @@ class DbiRequestController extends Controller
         } else {
             // Redirect with a success message
             return redirect()->route('dbi.show', $dbiRequest->id)->with('error', 'You are not DAT User');
+        }
+    }
+
+    /**
+    * Read dbi request logs.
+    *
+    * @param  \Illuminate\Http\Request  $request
+    * @param  \App\Models\DbiRequest  $dbiRequest
+    * @return \Illuminate\Http\RedirectResponse
+    */
+    public function showLogs($id)
+    {
+        $logFile = storage_path('logs/' . $id . '_dbi_request.log');
+
+        if (file_exists($logFile)) {
+            return response()->file($logFile, [
+                'Content-Type' => 'text/plain',
+                'Content-Disposition' => 'inline; filename="' . $id . '_dbi_request.log"'
+            ]);
+        } else {
+            abort(404, 'Log file not found.');
         }
     }
 
