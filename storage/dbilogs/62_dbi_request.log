@@ -1,0 +1,82 @@
+[2024-06-10 09:48:48] DBI Request Details:
+Request ID: 62
+Requestor: User Requester
+Operator: USER SDE
+Source Code:
+insert into porcl1_t values (1, 'aaa','aaaa','aaa');
+Test Log:
+Date: Fri Jun 07 08:13:34 2024
+DBI No.: 62
+DB: U_TORCL1
+DB-User: mndbarw
+Requestor: User Requester 
+Operator: USER SDE
+Team: Linux team
+
+
+SQL*Plus: Release 19.0.0.0.0 - Production on Fri Jun 7 10:13:33 2024
+Version 19.3.0.0.0
+
+Copyright (c) 1982, 2019, Oracle.  All rights reserved.
+
+Last Successful login time: Wed Jun 05 2024 19:55:13 +02:00
+
+Connected to:
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Version 19.3.0.0.0
+
+
+Session altered.
+
+insert into porcl1_t values (1, 'aaa','aaaa','aaa');
+                                                   *
+ERROR at line 1:
+ORA-00933: SQL command not properly ended
+
+
+
+Commit complete.
+
+SQL> Disconnected from Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Version 19.3.0.0.0
+
+Prod Log:
+Date: Fri Jun 07 11:09:09 2024
+DBI No.: 62
+DB: U_PORCL1
+DB-User: mndbarw
+Requestor: User Requester 
+Operator: USER SDE
+Team: Linux team
+Database Instance: U_PORCL1
+
+
+SQL*Plus: Release 19.0.0.0.0 - Production on Fri Jun 7 13:09:08 2024
+Version 19.3.0.0.0
+
+Copyright (c) 1982, 2019, Oracle.  All rights reserved.
+
+Last Successful login time: Fri Jun 07 2024 13:02:56 +02:00
+
+Connected to:
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Version 19.3.0.0.0
+
+
+Session altered.
+
+insert into porcl1_t values (1, 'aaa','aaaa','aaa');
+                                                   *
+ERROR at line 1:
+ORA-00933: SQL command not properly ended
+
+
+
+Commit complete.
+
+SQL> Disconnected from Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Version 19.3.0.0.0
+
+Status:
+DBI Request for prod is Approved by DAT user
+-----------------------------

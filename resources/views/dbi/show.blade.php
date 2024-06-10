@@ -321,7 +321,7 @@
     </div>
     <!-- Logging code -->
     @php
-        $logFile = storage_path('logs/' . $dbiRequest->id . '_dbi_request.log');
+        $logFile = storage_path('dbilogs/' . $dbiRequest->id . '_dbi_request.log');
         $timestamp = date('Y-m-d H:i:s');
 
         // Log DBI request details
