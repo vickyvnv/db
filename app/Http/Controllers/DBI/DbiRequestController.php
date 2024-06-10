@@ -639,14 +639,15 @@ class DbiRequestController extends Controller
                 $modifiedSourceCode = "ALTER SESSION SET CURRENT_SCHEMA = $dbtestInstance;\n";
                 $modifiedSourceCode .= $sourceCode . "\n";
                 $modifiedSourceCode .= "COMMIT;";
-                $tempFile = Storage::put('temp/dbi_'.$dbiRequest->id.'_' . uniqid() . '.sql', $modifiedSourceCode);
-                
+                // Create a temporary file using Laravel's Storage facade
+                $tempFile = Storage::disk('local')->put('temp/dbi_'.$dbiRequest->id.'_' . uniqid() . '.sql', $modifiedSourceCode);
+                $tempFilePath = storage_path('app/' . $tempFile);                
                 // $tempFilePath = Storage::path($tempFile);
                 // $tempFile = tempnam(sys_get_temp_dir(), '');
-                File::put($tempFile, $modifiedSourceCode);
+                //File::put($tempFilePath, $modifiedSourceCode);
                 DB::enableQueryLog();
 
-                $command = "sqlplus $dbUser/$dbPassword @$tempFile 2>&1";
+                $command = "sqlplus $dbUser/$dbPassword @$tempFilePath 2>&1";
                 $terminalLog = shell_exec($command);
                 $queries = DB::getQueryLog();
                 $totalExecutionTime = 0;
@@ -695,7 +696,7 @@ class DbiRequestController extends Controller
                 }
 
                 // Remove the temporary file
-                File::delete($tempFile);
+                File::delete($tempFilePath);
 
                 if($request->prodTest == "Yes") {
                     // Store the file output in the sql_log_info field
