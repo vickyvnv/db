@@ -18,7 +18,7 @@
                             <div class="p-6 text-gray-900 dark:text-gray-100">
                                 <div class="container">
                                     <div class="row justify-content-center">
-                                        <a href="{{ route('dbi.index') }}" class="btn btn-primary mb-4">Back</a>
+                                        <a href="{{ route('dbi.createsqlfile', $dbiRequest->id) }}" class="btn btn-primary mb-4">Back</a>
                                         <div class="col-md-10">
                                             <div class="card">
                                                 <div class="card-header bg-primary text-white">Test DBI</div>

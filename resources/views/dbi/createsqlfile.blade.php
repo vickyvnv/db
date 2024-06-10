@@ -18,7 +18,7 @@
                             <div class="p-6 text-gray-900 dark:text-gray-100">
                                 <div class="container">
                                     <div class="row justify-content-center">
-                                        <button class="btn btn-primary" type="submit"><a href="{{ route('dbi.index') }}" class="btn btn-primary">Back</a></button>
+                                        <button class="btn btn-primary" type="submit"><a href="{{ route('dbi.selectdb', $dbiRequest->id) }}" class="btn btn-primary">Back</a></button>
                                         <div class="col-md-10">
                                             <div class="card-body d-flex justify-content-center">
                                                 <div class="card-header">SQL File</div>

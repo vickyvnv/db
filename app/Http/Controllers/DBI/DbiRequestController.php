@@ -853,7 +853,7 @@ class DbiRequestController extends Controller
     */
     public function showLogs($id)
     {
-        $logFile = storage_path('logs/' . $id . '_dbi_request.log');
+        $logFile = storage_path('dbilogs/' . $id . '_dbi_request.log');
 
         if (file_exists($logFile)) {
             return response()->file($logFile, [
