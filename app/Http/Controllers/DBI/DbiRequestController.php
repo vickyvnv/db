@@ -25,6 +25,7 @@ use Symfony\Component\Process\Process;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
+
 class DbiRequestController extends Controller
 {
     /**
@@ -638,15 +639,14 @@ class DbiRequestController extends Controller
                 $modifiedSourceCode = "ALTER SESSION SET CURRENT_SCHEMA = $dbtestInstance;\n";
                 $modifiedSourceCode .= $sourceCode . "\n";
                 $modifiedSourceCode .= "COMMIT;";
-                
-                // Create a temporary file using Laravel's Storage facade
                 $tempFile = Storage::put('temp/dbi_'.$dbiRequest->id.'_' . uniqid() . '.sql', $modifiedSourceCode);
                 
-                $tempFilePath = Storage::path($tempFile);
-                dd($tempFilePath);
+                // $tempFilePath = Storage::path($tempFile);
+                // $tempFile = tempnam(sys_get_temp_dir(), '');
+                File::put($tempFile, $modifiedSourceCode);
                 DB::enableQueryLog();
 
-                $command = "sqlplus $dbUser/$dbPassword @$tempFilePath 2>&1";
+                $command = "sqlplus $dbUser/$dbPassword @$tempFile 2>&1";
                 $terminalLog = shell_exec($command);
                 $queries = DB::getQueryLog();
                 $totalExecutionTime = 0;
@@ -695,7 +695,7 @@ class DbiRequestController extends Controller
                 }
 
                 // Remove the temporary file
-                File::delete($tempFilePath);
+                File::delete($tempFile);
 
                 if($request->prodTest == "Yes") {
                     // Store the file output in the sql_log_info field
