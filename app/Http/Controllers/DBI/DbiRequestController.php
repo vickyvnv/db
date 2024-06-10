@@ -640,15 +640,17 @@ class DbiRequestController extends Controller
                 $modifiedSourceCode .= $sourceCode . "\n";
                 $modifiedSourceCode .= "COMMIT;";
                 // Create a temporary file using Laravel's Storage facade
-                $tempFile = Storage::disk('local')->put('temp/dbi_'.$dbiRequest->id.'_' . uniqid() . '.sql', $modifiedSourceCode);
-                $tempFilePath = storage_path('app/' . $tempFile);   
-                dd($tempFilePath);             
+                // Create a temporary file using Laravel's File facade
+                $tempFilePath = 'temp/dbi_'.$dbiRequest->id.'_' . uniqid() . '.sql';
+                $absoluteTempFilePath = storage_path('app/' . $tempFilePath);
+                File::put($absoluteTempFilePath, $modifiedSourceCode);     
                 // $tempFilePath = Storage::path($tempFile);
                 // $tempFile = tempnam(sys_get_temp_dir(), '');
                 //File::put($tempFilePath, $modifiedSourceCode);
                 DB::enableQueryLog();
 
-                $command = "sqlplus $dbUser/$dbPassword @$tempFilePath 2>&1";
+                $command = "sqlplus $dbUser/$dbPassword @$absoluteTempFilePath 2>&1";
+                //$command = "sqlplus $dbUser/$dbPassword @$tempFilePath 2>&1";
                 $terminalLog = shell_exec($command);
                 $queries = DB::getQueryLog();
                 $totalExecutionTime = 0;
@@ -697,7 +699,7 @@ class DbiRequestController extends Controller
                 }
 
                 // Remove the temporary file
-                File::delete($tempFilePath);
+                File::delete($absoluteTempFilePath);
 
                 if($request->prodTest == "Yes") {
                     // Store the file output in the sql_log_info field
