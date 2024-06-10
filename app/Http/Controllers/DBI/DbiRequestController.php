@@ -641,9 +641,9 @@ class DbiRequestController extends Controller
                 
                 // Create a temporary file using Laravel's Storage facade
                 $tempFile = Storage::put('temp/dbi_'.$dbiRequest->id.'_' . uniqid() . '.sql', $modifiedSourceCode);
-                dd($tempFile);
+                
                 $tempFilePath = Storage::path($tempFile);
-
+                dd($tempFilePath);
                 DB::enableQueryLog();
 
                 $command = "sqlplus $dbUser/$dbPassword @$tempFilePath 2>&1";
@@ -695,7 +695,7 @@ class DbiRequestController extends Controller
                 }
 
                 // Remove the temporary file
-                File::delete($tempFile);
+                File::delete($tempFilePath);
 
                 if($request->prodTest == "Yes") {
                     // Store the file output in the sql_log_info field
