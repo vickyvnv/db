@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\Process\Process;
 use Illuminate\Support\Facades\File;
-
+use Illuminate\Support\Facades\Storage;
 
 class DbiRequestController extends Controller
 {
@@ -639,11 +639,13 @@ class DbiRequestController extends Controller
                 $modifiedSourceCode .= $sourceCode . "\n";
                 $modifiedSourceCode .= "COMMIT;";
                 
-                $tempFile = tempnam(sys_get_temp_dir(), '');
-                File::put($tempFile, $modifiedSourceCode);
+                // Create a temporary file using Laravel's Storage facade
+                $tempFile = Storage::put('temp/' . uniqid() . '.sql', $modifiedSourceCode);
+                $tempFilePath = Storage::path($tempFile);
+                
                 DB::enableQueryLog();
 
-                $command = "sqlplus $dbUser/$dbPassword @$tempFile 2>&1";
+                $command = "sqlplus $dbUser/$dbPassword @$tempFilePath 2>&1";
                 $terminalLog = shell_exec($command);
                 $queries = DB::getQueryLog();
                 $totalExecutionTime = 0;
