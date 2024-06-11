@@ -20,11 +20,10 @@
                                     <div class="row justify-content-center">
                                         <div class="col-md-10">
                                             <div class="card-body d-flex justify-content-center">
-                                                <div class="card-header">DB Instances List</div>
 
                                                 <div class="card-body">
                                                     <a href="{{ route('db-instances.create') }}" class="btn btn-primary mb-3">Create DB Instance</a>
-
+                                                    <br><br>
                                                     @if (session('success'))
                                                         <div class="alert alert-success">
                                                             {{ session('success') }}

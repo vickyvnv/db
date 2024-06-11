@@ -18,45 +18,46 @@
                             <div class="p-6 text-gray-900 dark:text-gray-100">
                                 <div class="container">
                                     <div class="row justify-content-center">
+                                        <button class="btn btn-primary mb-4" type="submit">
+                                            <a href="{{ route('db-instances.index') }}" class="btn-link">Back</a>
+                                        </button>
                                         <div class="col-md-10">
-                                            <div class="card-body d-flex justify-content-center">
-                                                <div class="card-header">Create DB Instance</div>
+                                            <div class="card-body">
+                                                <h4 class="mb-4">Create DB Instance</h4>
 
-                                                <div class="card-body">
-                                                    <a href="{{ route('db-instances.index') }}" class="btn btn-secondary mb-3">Back</a>
+                                                @if ($errors->any())
+                                                    <div class="alert alert-danger">
+                                                        <ul>
+                                                            @foreach ($errors->all() as $error)
+                                                                <li>{{ $error }}</li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </div>
+                                                @endif
 
-                                                    @if ($errors->any())
-                                                        <div class="alert alert-danger">
-                                                            <ul>
-                                                                @foreach ($errors->all() as $error)
-                                                                    <li>{{ $error }}</li>
-                                                                @endforeach
-                                                            </ul>
-                                                        </div>
-                                                    @endif
-
-                                                    <form action="{{ route('db-instances.store') }}" method="POST">
-                                                        @csrf
-                                                        <div class="form-group">
-                                                            <label for="prod">Prod</label>
-                                                            <input type="text" name="prod" id="prod" class="form-control" value="{{ old('prod') }}" required>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="preprod">Preprod</label>
-                                                            <input type="text" name="preprod" id="preprod" class="form-control" value="{{ old('preprod') }}" required>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="market_id">Market</label>
-                                                            <select name="market_id" id="market_id" class="form-control" required>
-                                                                <option value="">Select Market</option>
-                                                                @foreach ($markets as $market)
-                                                                    <option value="{{ $market->id }}" {{ old('market_id') == $market->id ? 'selected' : '' }}>{{ $market->name }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
+                                                <form action="{{ route('db-instances.store') }}" method="POST" class="form">
+                                                    @csrf
+                                                    <div class="form-group">
+                                                        <label for="prod" class="form-label">Prod</label>
+                                                        <input type="text" name="prod" id="prod" class="form-control" value="{{ old('prod') }}" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="preprod" class="form-label">Preprod</label>
+                                                        <input type="text" name="preprod" id="preprod" class="form-control" value="{{ old('preprod') }}" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="market_id" class="form-label">Market</label>
+                                                        <select name="market_id" id="market_id" class="form-control" required>
+                                                            <option value="">Select Market</option>
+                                                            @foreach ($markets as $market)
+                                                                <option value="{{ $market->id }}" {{ old('market_id') == $market->id ? 'selected' : '' }}>{{ $market->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
                                                         <button type="submit" class="btn btn-primary">Create</button>
-                                                    </form>
-                                                </div>
+                                                    </div>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
@@ -69,43 +70,39 @@
         </div>
     </div>
 </x-app-layout>
+
 <style>
-  .form-row {
-    display: flex;
-    flex-wrap: wrap;
-    margin-left: -15px;
-    margin-right: -15px;
-  }
+    .form {
+        max-width: 500px;
+        margin: 0 auto;
+    }
 
-  .form-group {
-    flex: 1;
-    padding-left: 15px;
-    padding-right: 15px;
-  }
+    .form-label {
+        font-weight: bold;
+    }
 
-  .form-group label {
-    display: block;
-    margin-bottom: 5px;
-  }
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
 
-  .form-group input,
-  .form-group textarea {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
+    .form-group {
+        margin-bottom: 20px;
+    }
 
-  .form-group textarea {
-    resize: vertical;
-  }
+    .btn-primary {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
 
-  .btn-primary {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
+    .btn-link {
+        color: #fff;
+        text-decoration: none;
+    }
 </style>

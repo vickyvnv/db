@@ -18,7 +18,7 @@
                             <div class="p-6 text-gray-900 dark:text-gray-100">
                                 <div class="container">
                                     <div class="row justify-content-center">
-                                        <button class="btn btn-primary" type="submit"><a href="{{ route('dbi.index') }}" class="btn btn-primary">Back</a></button>
+                                        <button class="btn btn-primary" type="submit"><a href="{{ route('roles.index') }}" class="btn btn-primary">Back</a></button>
                                         <div class="col-md-10">
                                             <div class="card">
                                                 <div class="card-header bg-blue-500 text-white">
@@ -26,38 +26,37 @@
                                                 </div>
                                                 
                                                 <div class="card-body">
-                                                    <form method="POST" action="{{ route('roles.update', $role->id) }}">
-                                                        @csrf
-                                                        @method('PUT')
-
-                                                        <div class="form-group">
-                                                            <label for="name">{{ __('Name') }}</label>
-                                                            <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ $role->name }}" required autofocus>
-                                                            @error('name')
-                                                                <span class="invalid-feedback" role="alert">
-                                                                    <strong>{{ $message }}</strong>
-                                                                </span>
-                                                            @enderror
-                                                        </div>
-
-                                                        <div class="form-group">
-                                                            <label for="rights">{{ __('Rights') }}</label>
-                                                            <select id="rights" class="form-control @error('rights') is-invalid @enderror" name="rights[]" multiple required>
-                                                                @foreach($rights as $right)
-                                                                    <option value="{{ $right->id }}" {{ in_array($right->id, $role->rights->pluck('id')->toArray()) ? 'selected' : '' }}>{{ $right->name }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                            @error('rights')
-                                                                <span class="invalid-feedback" role="alert">
-                                                                    <strong>{{ $message }}</strong>
-                                                                </span>
-                                                            @enderror
-                                                        </div>
-
-                                                        <button type="submit" class="btn btn-primary">
+                                                <form method="POST" action="{{ route('roles.update', $role->id) }}" class="custom-form">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <div class="form-group">
+                                                        <label for="name" class="form-label">{{ __('Name') }}</label>
+                                                        <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ $role->name }}" required autofocus>
+                                                        @error('name')
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong>{{ $message }}</strong>
+                                                            </span>
+                                                        @enderror
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="rights" class="form-label">{{ __('Rights') }}</label>
+                                                        <select id="rights" class="form-control custom-select @error('rights') is-invalid @enderror" name="rights[]" multiple required>
+                                                            @foreach($rights as $right)
+                                                                <option value="{{ $right->id }}" {{ in_array($right->id, $role->rights->pluck('id')->toArray()) ? 'selected' : '' }}>{{ $right->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        @error('rights')
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong>{{ $message }}</strong>
+                                                            </span>
+                                                        @enderror
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <button type="submit" class="btn btn-primary btn-block">
                                                             {{ __('Update') }}
                                                         </button>
-                                                    </form>
+                                                    </div>
+                                                </form>
                                                 </div>
                                             </div>
                                         </div>
@@ -110,4 +109,38 @@
     border-radius: 4px;
     cursor: pointer;
   }
+  .custom-form {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-label {
+        font-weight: bold;
+    }
+    
+    .form-control {
+        margin-bottom: 20px;
+    }
+    
+    .custom-select {
+        height: 150px;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0069d9;
+        border-color: #0062cc;
+    }
+    
+    .invalid-feedback {
+        color: #dc3545;
+    }
 </style>

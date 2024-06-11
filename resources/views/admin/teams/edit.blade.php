@@ -4,11 +4,9 @@
             {{ __('Edit Team') }}
         </h2>
     </x-slot>
-
     <div class="flex">
         <!-- Sidebar -->
         @include('partials.admin-sidebar')
-
         <!-- Main Content -->
         <div class="w-3/4">
             <div class="content">
@@ -18,23 +16,23 @@
                             <div class="p-6 text-gray-900 dark:text-gray-100">
                                 <div class="container">
                                     <div class="row justify-content-center">
+                                        <button class="btn btn-primary mb-4" type="submit">
+                                            <a href="{{ route('teams.index') }}" class="btn-link">Back</a>
+                                        </button>
                                         <div class="col-md-10">
-                                            <div class="card-body d-flex justify-content-center">
-                                                <div class="card-header">Edit Team</div>
-
-                                                <div class="card-body">
-                                                    <a href="{{ route('teams.index') }}" class="btn btn-secondary mb-3">Back</a>
-
-                                                    <form action="{{ route('teams.update', $team->id) }}" method="POST">
-                                                        @csrf
-                                                        @method('PUT')
-                                                        <div class="form-group">
-                                                            <label for="name">Name</label>
-                                                            <input type="text" name="name" id="name" class="form-control" value="{{ $team->name }}" required>
-                                                        </div>
+                                            <div class="card-body">
+                                                <h4 class="mb-4">Edit Team</h4>
+                                                <form action="{{ route('teams.update', $team->id) }}" method="POST" class="form">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <div class="form-group">
+                                                        <label for="name" class="form-label">Name</label>
+                                                        <input type="text" name="name" id="name" class="form-control" value="{{ $team->name }}" required>
+                                                    </div>
+                                                    <div class="form-group">
                                                         <button type="submit" class="btn btn-primary">Update</button>
-                                                    </form>
-                                                </div>
+                                                    </div>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
@@ -47,43 +45,39 @@
         </div>
     </div>
 </x-app-layout>
+
 <style>
-  .form-row {
-    display: flex;
-    flex-wrap: wrap;
-    margin-left: -15px;
-    margin-right: -15px;
-  }
+    .form {
+        max-width: 500px;
+        margin: 0 auto;
+    }
 
-  .form-group {
-    flex: 1;
-    padding-left: 15px;
-    padding-right: 15px;
-  }
+    .form-label {
+        font-weight: bold;
+    }
 
-  .form-group label {
-    display: block;
-    margin-bottom: 5px;
-  }
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
 
-  .form-group input,
-  .form-group textarea {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
+    .form-group {
+        margin-bottom: 20px;
+    }
 
-  .form-group textarea {
-    resize: vertical;
-  }
+    .btn-primary {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
 
-  .btn-primary {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
+    .btn-link {
+        color: #fff;
+        text-decoration: none;
+    }
 </style>

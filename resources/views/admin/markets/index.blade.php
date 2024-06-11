@@ -20,11 +20,10 @@
                                     <div class="row justify-content-center">
                                         <div class="col-md-10">
                                             <div class="card-body d-flex justify-content-center">
-                                                <div class="card-header">Markets List</div>
 
                                                 <div class="card-body">
                                                     <a href="{{ route('markets.create') }}" class="btn btn-primary mb-3">Create Market</a>
-
+                                                    <br><br>
                                                     @if (session('success'))
                                                         <div class="alert alert-success">
                                                             {{ session('success') }}
