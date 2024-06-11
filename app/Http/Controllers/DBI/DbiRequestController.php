@@ -871,18 +871,4 @@ class DbiRequestController extends Controller
             abort(404, 'Log file not found.');
         }
     }
-
-    /**
-    * Execute the submit request.
-    *
-    * @param  \Illuminate\Http\Request  $request
-    * @param  \App\Models\DbiRequest  $dbiRequest
-    * @return \Illuminate\Http\RedirectResponse
-    */
-    // public function runSqlProd(Request $request, DbiRequest $dbiRequest) {
-    //     $prodTest = $request->prodTest;
-
-    //     // Return the test DBI view with the DbiRequest data
-    //     return view('dbi.testDBI', compact('dbiRequest', "prodTest"));
-    // }
 }

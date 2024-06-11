@@ -217,8 +217,10 @@
                                     <button type="submit" class="btn btn-primary">Submit</button>
                                 </form>
                             @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 0)
+                            
                             <h1><b>Operator Comment: {{$dbiRequest->dbiRequestStatus->operator_comment}}</b></h1>
                                 <h1><b>DBI Request is submitted to DAT user</b></h1>
+
                             @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0)
                                 <h1><b>DBI Request is submitted to SDE user</b></h1>
                             @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 2 && $dbiRequest->dbiRequestStatus->dat_status == 0)
@@ -230,6 +232,11 @@
                             @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1)
                             <h1><b>DAT Comment: {{$dbiRequest->dbiRequestStatus->dat_comment}}</b></h1>
                                 <h1><b>DBI Request is Approved by DAT user</b></h1>
+
+                            @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 2)
+                            <h1><b>DAT Comment: {{$dbiRequest->dbiRequestStatus->dat_comment}}</b></h1>
+                                <h1><b>DBI Request is Rejected by DAT user</b></h1>
+
                             @elseif($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 10)
                                 <h1><b>DBI Request for Prod is submitted to DAT user</b></h1>
                             @elseif($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 10 && $dbiRequest->dbiRequestStatus->dat_status == 10)
@@ -239,6 +246,9 @@
                                 
                             @elseif($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 11)
                                 <h1><b>DBI Request for prod is Approved by DAT user</b></h1>
+                            @elseif($dbiRequest->dbiRequestStatus->request_status == 10 && $dbiRequest->dbiRequestStatus->operator_status == 10 && $dbiRequest->dbiRequestStatus->dat_status == 2)
+                            <h1><b>DAT Comment: {{$dbiRequest->dbiRequestStatus->dat_comment}}</b></h1>
+                                <h1><b>DBI Request is Rejected by DAT user</b></h1>
                             @else
                                 <h1><b>DBI Request is submitted</b></h1>
                             @endif
@@ -253,7 +263,7 @@
                             </div>
                         @endif
 
-                        @if(Auth::user()->id == $dbiRequest->operator_id && $dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1 && Auth::user()->userRoles[0]->name == 'SDE')
+                        @if(Auth::user()->id == $dbiRequest->operator_id && $dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 10 && $dbiRequest->dbiRequestStatus->dat_status == 10 && Auth::user()->userRoles[0]->name == 'SDE')
                             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                             <form action="{{ route('dbi.sdeApprovedOrReject', $dbiRequest->id) }}" method="POST">
                                     @csrf
@@ -278,7 +288,7 @@
                             </div>
                         @endif
 
-                        @if($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 1 && Auth::user()->userRoles[0]->name == 'DAT')
+                        @if($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 10 && Auth::user()->userRoles[0]->name == 'DAT')
                             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                                 <form action="{{ route('dbi.datApprovedOrReject', $dbiRequest->id) }}" method="POST">
                                     @csrf

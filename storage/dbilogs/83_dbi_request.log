@@ -1,13 +1,13 @@
-[2024-06-11 12:37:08] DBI Request Details:
-Request ID: 82
+[2024-06-11 13:20:18] DBI Request Details:
+Request ID: 83
 Requestor: User Requester
 Operator: USER SDE
 Source Code:
 insert into porcl1_t values (1, 'aaa','aaaa','aaa');
 insert into porcl1_t values (2, 'aaa','aaaa','aaa');
 Test Log:
-Date: Tue Jun 11 12:36:47 2024
-DBI No.: 82
+Date: Tue Jun 11 12:52:40 2024
+DBI No.: 83
 DB: PreProd DB
 DB-User: mndbarw
 Requestor: User Requester 
@@ -17,12 +17,12 @@ Database Instance: U_TORCL1
 Total Execution Time: 0 ms
 
 
-SQL*Plus: Release 19.0.0.0.0 - Production on Tue Jun 11 14:36:46 2024
+SQL*Plus: Release 19.0.0.0.0 - Production on Tue Jun 11 14:52:39 2024
 Version 19.3.0.0.0
 
 Copyright (c) 1982, 2019, Oracle.  All rights reserved.
 
-Last Successful login time: Tue Jun 11 2024 14:09:43 +02:00
+Last Successful login time: Tue Jun 11 2024 14:48:40 +02:00
 
 Connected to:
 Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
@@ -44,8 +44,8 @@ SQL> Disconnected from Oracle Database 19c Enterprise Edition Release 19.0.0.0.0
 Version 19.3.0.0.0
 
 Prod Log:
-Date: Tue Jun 11 10:55:38 2024
-DBI No.: 82
+Date: Tue Jun 11 13:15:18 2024
+DBI No.: 83
 DB: Prod DB
 DB-User: mndbarw
 Requestor: User Requester 
@@ -55,12 +55,12 @@ Database Instance: U_PORCL1
 Total Execution Time: 0 ms
 
 
-SQL*Plus: Release 19.0.0.0.0 - Production on Tue Jun 11 12:55:36 2024
+SQL*Plus: Release 19.0.0.0.0 - Production on Tue Jun 11 15:15:16 2024
 Version 19.3.0.0.0
 
 Copyright (c) 1982, 2019, Oracle.  All rights reserved.
 
-Last Successful login time: Tue Jun 11 2024 12:54:13 +02:00
+Last Successful login time: Tue Jun 11 2024 15:08:27 +02:00
 
 Connected to:
 Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
@@ -82,6 +82,5 @@ SQL> Disconnected from Oracle Database 19c Enterprise Edition Release 19.0.0.0.0
 Version 19.3.0.0.0
 
 Status:
-Request submitted to SDE: USER SDE
-Email: sdeuser@vodafone.com
+DBI Request for prod is Approved by DAT user
 -----------------------------
