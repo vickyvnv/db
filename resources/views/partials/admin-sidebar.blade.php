@@ -65,6 +65,7 @@
         padding: 20px;
         float: left;
         overflow-y: auto;
+        height: 1000px;
     }
 
     .sidebar-menu {

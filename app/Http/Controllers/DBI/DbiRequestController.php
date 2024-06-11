@@ -486,7 +486,7 @@ class DbiRequestController extends Controller
         
                 // Generate the SQL file name and save the source code content
                 $sqlfile = 'dbi_' . $dbiRequest->id . '_' . time() . '.sql';
-                $sourceCodeFilePath = storage_path('app/source_code_files/' . $sqlfile);
+                $sourceCodeFilePath = storage_path('app/public/source_code_files/' . $sqlfile);
                 file_put_contents($sourceCodeFilePath, $validatedData['source_code']);
         
                 // Update the DbiRequest with the SQL file path and db_user

@@ -21,8 +21,8 @@
         width: 250px;
         background-color: #2c3e50;
         padding: 20px;
-        height: 1000px;
         float: left;
+        height: 1000px;
         overflow-y: auto;
     }
 
