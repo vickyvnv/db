@@ -782,8 +782,8 @@ class DbiRequestController extends Controller
             ['request_id' => $dbiRequest->id],
             [
                 'request_status' => $request->prodTest == "Yes" ? 11 : 1,
-                'operator_status' => $request->prodTest == "Yes" ? 1 : 0,
-                'dat_status' => $request->prodTest == "Yes" ? 1 : 0,
+                'operator_status' => $request->prodTest == "Yes" ? 10 : 0,
+                'dat_status' => $request->prodTest == "Yes" ? 10 : 0,
             ]
         );
 
@@ -805,7 +805,7 @@ class DbiRequestController extends Controller
             $dbiRequest->dbiRequestStatus()->updateOrCreate(
                 ['request_id' => $dbiRequest->id],
                 [
-                    'dat_status' => $request->prodTest == "Yes" ? 1 : 0,
+                    'dat_status' => $request->prodTest == "Yes" ? 10 : 0,
                     'request_status' => $request->prodTest == "Yes" ? (($request->approvalorreject == 'approve') ? 11 : 10) : (($request->approvalorreject == 'approve') ? 1 : 0),
                     'operator_comment' => $request->operator_comment,
                     'operator_status' => $request->prodTest == "Yes" ? (($request->approvalorreject == 'approve') ? 11 : (($request->approvalorreject == 'reject') ? 12 : 10))  : (($request->approvalorreject == 'approve') ? 1 : (($request->approvalorreject == 'reject') ? 2 : 0)),

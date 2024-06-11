@@ -1,4 +1,4 @@
-[2024-06-11 08:15:37] DBI Request Details:
+[2024-06-11 10:56:03] DBI Request Details:
 Request ID: 82
 Requestor: User Requester
 Operator: USER SDE
@@ -6,7 +6,7 @@ Source Code:
 insert into porcl1_t values (1, 'aaa','aaaa','aaa');
 insert into porcl1_t values (2, 'aaa','aaaa','aaa');
 Test Log:
-Date: Tue Jun 11 08:05:09 2024
+Date: Tue Jun 11 10:54:14 2024
 DBI No.: 82
 DB: PreProd DB
 DB-User: mndbarw
@@ -17,12 +17,50 @@ Database Instance: U_TORCL1
 Total Execution Time: 0 ms
 
 
-SQL*Plus: Release 19.0.0.0.0 - Production on Tue Jun 11 10:05:07 2024
+SQL*Plus: Release 19.0.0.0.0 - Production on Tue Jun 11 12:54:12 2024
 Version 19.3.0.0.0
 
 Copyright (c) 1982, 2019, Oracle.  All rights reserved.
 
-Last Successful login time: Mon Jun 10 2024 12:15:05 +02:00
+Last Successful login time: Tue Jun 11 2024 10:05:08 +02:00
+
+Connected to:
+Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Version 19.3.0.0.0
+
+
+Session altered.
+
+
+1 row created.
+
+
+1 row created.
+
+
+Commit complete.
+
+SQL> Disconnected from Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Version 19.3.0.0.0
+
+Prod Log:
+Date: Tue Jun 11 10:55:38 2024
+DBI No.: 82
+DB: Prod DB
+DB-User: mndbarw
+Requestor: User Requester 
+Operator: USER SDE
+Team: Linux team
+Database Instance: U_PORCL1
+Total Execution Time: 0 ms
+
+
+SQL*Plus: Release 19.0.0.0.0 - Production on Tue Jun 11 12:55:36 2024
+Version 19.3.0.0.0
+
+Copyright (c) 1982, 2019, Oracle.  All rights reserved.
+
+Last Successful login time: Tue Jun 11 2024 12:54:13 +02:00
 
 Connected to:
 Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
@@ -44,6 +82,5 @@ SQL> Disconnected from Oracle Database 19c Enterprise Edition Release 19.0.0.0.0
 Version 19.3.0.0.0
 
 Status:
-Request submitted to SDE: USER SDE
-Email: sdeuser@vodafone.com
+Request is pending
 -----------------------------
