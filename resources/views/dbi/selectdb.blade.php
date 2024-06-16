@@ -1,10 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('DBI') }}
-        </h2>
-    </x-slot>
-
     <div class="flex">
     <!-- Sidebar -->
     @include('partials.dbi-sidebar')
@@ -21,76 +15,71 @@
                                     <button class="btn btn-primary" type="submit"><a href="{{ route('dbi.edit', $dbiRequest->id) }}" class="btn btn-primary">Back</a></button>
                                     <div class="col-md-10">
                                         <div class="card-body d-flex justify-content-center">
-                                            <div class="card-header">DBI Requests</div>
-                                            <div class="card-body">
-                                                <h1>Select Database</h1>
-                                                <p>DBI ID: {{ $dbiRequest->id }}</p>
-                                                
-                                                <form method="POST" action="{{ route('dbi.updateSelectDb', $dbiRequest->id) }}" class="custom-form">
-                                                    @csrf
-                                                    @method('PUT')
+                                            <form method="POST" action="{{ route('dbi.updateSelectDb', $dbiRequest->id) }}" class="custom-form">
+                                                @csrf
+                                                @method('PUT')
 
-                                                    <div class="form-row">
-                                                        <!-- Market -->
-                                                        <div class="form-group">
-                                                            <label for="sw_version">Market:</label>
-                                                            <select name="sw_version" id="sw_version" class="form-control @error('sw_version') is-invalid @enderror">
-                                                                <option value="">Select Market {{$selectedMarket}}</option>
-                                                                @foreach ($markets as $market)
-                                                                    <option value="{{ $market->id }}" {{ $selectedMarket == $market->id ? 'selected' : '' }}>{{ $market->name }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                            @error('sw_version')
-                                                                <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                                            @enderror
-                                                        </div>
-                                                        <!-- Reference DBI -->
-                                                        <div class="form-group">
-                                                            <div class="form-group" id="dbList">
-                                                                <label for="db_user">DB User:</label>
-                                                                <input type="type" id="db-user-input1" value="{{ $selectedDbUser }}" disabled>
-                                                                <input type="hidden" id="db-user-input" name="db_user" value="{{ $selectedDbUser }}">
-                                                            </div>
-                                                            @error('db_user')
-                                                                <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                                            @enderror
-                                                        </div>
-                                                    </div>
-                                                    <!-- User Roles -->
-                                                    <div class="mt-4">
-                                                        <label for="roles" class="block font-medium text-sm text-gray-700">Prod Instance</label>
-                                                        <select id="prod-instance-container" name="prod_instance" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 @error('prod_instance') is-invalid @enderror">
-                                                            <option value="">Please select Prod Instance</option>
-                                                            <!-- Populate options based on the selected market -->
+                                                <div class="form-row">
+                                                    <!-- Market -->
+                                                    <div class="form-group">
+                                                        <label for="sw_version">Market:</label>
+                                                        <select name="sw_version" id="sw_version" class="form-control @error('sw_version') is-invalid @enderror">
+                                                            <option value="">Select Market {{$selectedMarket}}</option>
+                                                            @foreach ($markets as $market)
+                                                                <option value="{{ $market->id }}" {{ $selectedMarket == $market->id ? 'selected' : '' }}>{{ $market->name }}</option>
+                                                            @endforeach
                                                         </select>
-                                                        @error('prod_instance')
+                                                        @error('sw_version')
                                                             <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                                         @enderror
                                                     </div>
-
-                                                    <div class="mt-4">
-                                                        <label for="roles" class="block font-medium text-sm text-gray-700">Test Instance</label>
-                                                        <input type="type" id="test-instance-container1" value="{{ $selectedTestInstance }}" disabled>
-                                                        <input type="hidden" id="test-instance-container" name="test_instance" value="{{ $selectedTestInstance }}">
-                                                        <label></label>
-                                                        @error('test_instance')
-                                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                                        @enderror
-                                                    </div>
-                                                    <!-- Source Code -->
+                                                    <!-- Reference DBI -->
                                                     <div class="form-group">
-                                                        <label>Source Code:</label>
-                                                        <textarea name="source_code" rows="4" class="form-control @error('source_code') is-invalid @enderror">{{ $sourceCode }}</textarea>
-                                                        @error('source_code')
+                                                        <div class="form-group" id="dbList">
+                                                            <label for="db_user">DB User:</label>
+                                                            <input type="type" id="db-user-input1" value="{{ $selectedDbUser }}" disabled>
+                                                            <input type="hidden" id="db-user-input" name="db_user" value="{{ $selectedDbUser }}">
+                                                        </div>
+                                                        @error('db_user')
                                                             <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                                         @enderror
                                                     </div>
+                                                </div>
+                                                <!-- User Roles -->
+                                                <div class="mt-4">
+                                                    <label for="roles" class="block font-medium text-sm text-gray-700">Prod Instance</label>
+                                                    <select id="prod-instance-container" name="prod_instance" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 @error('prod_instance') is-invalid @enderror">
+                                                        <option value="">Please select Prod Instance</option>
+                                                        <!-- Populate options based on the selected market -->
+                                                    </select>
+                                                    @error('prod_instance')
+                                                        <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
 
-                                                    <!-- Submit Button -->
-                                                    <div class="form-group">
-                                                        <button type="submit" class="btn btn-primary">Next</button>
-                                                    </div>
-                                                </form>
+                                                <div class="mt-4">
+                                                    <label for="roles" class="block font-medium text-sm text-gray-700">Test Instance</label>
+                                                    <input type="type" id="test-instance-container1" value="{{ $selectedTestInstance }}" disabled>
+                                                    <input type="hidden" id="test-instance-container" name="test_instance" value="{{ $selectedTestInstance }}">
+                                                    <label></label>
+                                                    @error('test_instance')
+                                                        <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                                <!-- Source Code -->
+                                                <div class="form-group">
+                                                    <label>Source Code:</label>
+                                                    <textarea name="source_code" rows="4" class="form-control @error('source_code') is-invalid @enderror">{{ $sourceCode }}</textarea>
+                                                    @error('source_code')
+                                                        <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+
+                                                <!-- Submit Button -->
+                                                <div class="form-group">
+                                                    <button type="submit" class="btn btn-primary">Next</button>
+                                                </div>
+                                            </form>
                                             </div>
                                         </div>
                                     </div>

@@ -48,6 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/dbi-tool/dbi/{dbiRequest}/submit-to-sde', [DbiRequestController::class, 'submitToSDE'])->name('dbi.submitToSDE');
     Route::post('/dbi-tool/dbi/{dbiRequest}/sdeApprovedOrReject', [DbiRequestController::class, 'sdeApprovedOrReject'])->name('dbi.sdeApprovedOrReject');
     Route::get('/dbi-tool/dbi/dbi-request-logs/{id}', [DbiRequestController::class, 'showLogs'])->name('dbi.showLogs');
+    Route::get('/dbi-tool/dbi/dbi-history-logs/{id}', [DbiRequestController::class, 'allLogs'])->name('dbi.allLogs');
     Route::post('/dbi-tool/dbi/{dbiRequest}/datApprovedOrReject', [DbiRequestController::class, 'datApprovedOrReject'])->name('dbi.datApprovedOrReject');
 });
 

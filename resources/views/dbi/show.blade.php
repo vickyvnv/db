@@ -1,17 +1,12 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('DBI Request Details') }}
-        </h2>
-    </x-slot>
-
+    
     <div class="flex">
         <!-- Sidebar -->
         @include('partials.dbi-sidebar')
 
         <!-- Main Content -->
         <div class="w-3/4 p-6 bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-            <a href="{{ route('dbi.index') }}" class="btn btn-secondary mb-3">Back</a>
+            <a href="{{ route('dbi.index') }}" class="btn btn-primary">Back</a><br><br>
 
             <!-- Display success or error messages if needed -->
             @if (session('status'))
@@ -29,12 +24,24 @@
                 </div>
             @endif
 
+            @if (session('error'))
+                <div class="alert alert-danger">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if (session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
+
             <!-- Display DBI request details -->
             <div class="grid grid-cols-2 gap-6">
                 <div class="bg-gray-100 dark:bg-gray-700 p-6 rounded-lg shadow-lg">
                     <!-- Log button -->
                     <div class="mt-4">
-                        <a href="{{ route('dbi.showLogs', $dbiRequest->id) }}" target="_blank" class="btn btn-primary">View Logs</a>
+                        <a href="{{ route('dbi.allLogs', $dbiRequest->id) }}" class="btn btn-primary">View All Logs And History</a>
                     </div>
                     <br>
                     <h3 class="text-xl font-bold mb-4">DBI Request Details  :  <b>{{Auth::user()->userRoles[0]->name}}</b></h3>
@@ -133,188 +140,189 @@
                             </div>
                         @endif
                         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                            <p class="font-bold text-gray-600">DBI Request Status:</p>
-                            <p class="text-gray-800">
+                            <div class="space-y-4">
                                 @if($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0)
-                                    <h1>Request submitted to SDE: {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
-                                    <h1>Email: {{ $dbiRequest->operator->email }}</h1>
+                                    <div class="space-y-2">
+                                        <h2 class="font-bold text-gray-600">Request submitted to SDE</h2>
+                                        <p>
+                                            <span class="font-bold">SDE:</span> {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}
+                                        </p>
+                                        <p>
+                                            <span class="font-bold">Email:</span> {{ $dbiRequest->operator->email }}
+                                        </p>
+                                    </div>
                                 @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 2 && $dbiRequest->dbiRequestStatus->dat_status === 0)
-                                    <h1>Request rejected by SDE: {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
-                                    <h1>Email: {{ $dbiRequest->operator->email }}</h1>
+                                    <div class="space-y-2">
+                                        <h2 class="font-bold text-gray-600">Request rejected by SDE</h2>
+                                        <p>
+                                            <span class="font-bold">SDE:</span> {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}
+                                        </p>
+                                        <p>
+                                            <span class="font-bold">Email:</span> {{ $dbiRequest->operator->email }}
+                                        </p>
+                                    </div>
                                 @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 0)
-                                    <h1>Request Approved by SDE : {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}</h1>
-                                    <h1>Email: {{ $dbiRequest->operator->email }}</h1>
-                                @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1)
-                                    <h1>Request Approved by DAT</h1>
+                                    <div class="space-y-2">
+                                        <h2 class="font-bold text-gray-600">Request Approved by SDE</h2>
+                                        <p>
+                                            <span class="font-bold">SDE:</span> {{ $dbiRequest->operator->user_firstname }} {{ $dbiRequest->operator->user_lastname }}
+                                        </p>
+                                        <p>
+                                            <span class="font-bold">Email:</span> {{ $dbiRequest->operator->email }}
+                                        </p>
+                                    </div>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1 && ($dbiRequest->prod_execution == 1 || $dbiRequest->prod_execution == 0))
+                                    <h2 class="font-bold text-gray-600">Request Approved by DAT</h2>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1 && $dbiRequest->prod_execution == 2)
+                                    <h2 class="font-bold text-gray-600">Error while Execution on Prod DB</h2>
                                 @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 2)
-                                    <h1>Request rejected by DAT</h1>
-                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 10)
-                                <h1><b>DBI Request for Prod is submitted to DAT user</b></h1>
-                                @elseif($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 10 && $dbiRequest->dbiRequestStatus->dat_status == 10)
-                                    <h1><b>DBI Request is for Prod submitted to SDE user</b></h1>
-                                @elseif($dbiRequest->dbiRequestStatus->request_status == 10 && $dbiRequest->dbiRequestStatus->operator_status == 12 && $dbiRequest->dbiRequestStatus->dat_status == 10)
-                                    <h1><b>DBI Request for Prod is rejected by SDE user</b></h1>
-                                    
-                                @elseif($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 11)
-                                    <h1><b>DBI Request for prod is Approved by DAT user</b></h1>
-                                @else
-                                    <h1>Request is pending</h1>
-                                @endif
-                            </p>
-                        </div>
-                        <!-- ... -->
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                            @if($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0 && $userAssigned[0]['role_name'][0] == 'Requester')
-                                <form action="{{ route('dbi.submitToSDE', $dbiRequest->id) }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="prodTest" value="No">
-                                    <button type="submit" class="btn btn-primary">Submit to SDE</button>
-                                </form>
-                            @elseif($dbiRequest->operator_id == Auth::user()->id && $dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0 && ((isset($userAssigned[0]['role_name'][0]) && !empty($userAssigned[0]['role_name'][0]) && $userAssigned[0]['role_name'][0] == 'SDE') ||
-                                    (isset($userAssigned[1]['role_name'][0]) && !empty($userAssigned[1]['role_name'][0]) && $userAssigned[1]['role_name'][0] == 'SDE')
-                                ))
-                                <form action="{{ route('dbi.sdeApprovedOrReject', $dbiRequest->id) }}" method="POST">
-                                    @csrf
-                                    <div class="mb-4">
-                                        <label>Status: </label>
-                                        <div class="flex items-center">
-                                            <input type="radio" id="approve" name="approvalorreject" value="approve" class="mr-2" required>
-                                            <label for="approve" class="text-gray-700 font-bold">Approve</label>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <input type="radio" id="approve" name="approvalorreject" value="reject" class="mr-2" required>
-                                            <label for="reject" class="text-gray-700 font-bold">Reject</label>
-                                        </div>
+                                    <div class="space-y-2">
+                                        <h2 class="font-bold text-gray-600">Request rejected by DAT</h2>
+                                        @if(Auth::user()->userRoles[0]->name !== 'SDE' && Auth::user()->id == $dbiRequest->requestor_id)
+                                            <a href="{{ route('dbi.edit', $dbiRequest->id) }}" class="inline-block bg-blue-500 hover:bg-blue-700  font-bold py-2 px-4 rounded">Edit</a>
+                                        @endif
                                     </div>
-                                    <div class="mb-4">
-                                        <label>Comment Status: </label>
-                                        <input type="text" id="statuscomment" name="operator_comment" class="mr-2" required>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0 && $dbiRequest->pre_execution == 2)
+                                    <div class="space-y-2">
+                                        <h2 class="font-bold text-gray-600">Pre DB Execution is failed</h2>
+                                        @if(Auth::user()->userRoles[0]->name !== 'SDE' && Auth::user()->id == $dbiRequest->requestor_id)
+                                            <a href="{{ route('dbi.edit', $dbiRequest->id) }}" class="btn btn-primary">Edit</a>
+                                        @endif
                                     </div>
-                                    <input type="hidden" name="prodTest" value="No">
-
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                </form>
-                            @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 0 && Auth::user()->userRoles[0]->name === 'DAT')
-                                <form action="{{ route('dbi.datApprovedOrReject', $dbiRequest->id) }}" method="POST">
-                                    @csrf
-                                    <div class="mb-4">
-                                        <label>Status: </label>
-                                        <div class="flex items-center">
-                                            <input type="radio" id="approvalorreject" name="approvalorreject" value="approve" class="mr-2" required>
-                                            <label for="approve" class="text-gray-700 font-bold">Approve</label>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <input type="radio" id="approvalorreject" name="approvalorreject" value="reject" class="mr-2" required>
-                                            <label for="reject" class="text-gray-700 font-bold">Reject</label>
-                                        </div>
-                                    </div>
-                                    <div class="mb-4">
-                                        <label>Comment Status: </label>
-                                        <input type="text" id="statuscomment" name="dat_comment" class="mr-2" required>
-                                    </div>
-                                    <input type="hidden" name="prodTest" value="No">
-
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                </form>
-                            @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 0)
-                            
-                            <h1><b>Operator Comment: {{$dbiRequest->dbiRequestStatus->operator_comment}}</b></h1>
-                                <h1><b>DBI Request is submitted to DAT user</b></h1>
-
-                            @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0)
-                                <h1><b>DBI Request is submitted to SDE user</b></h1>
-                            @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 2 && $dbiRequest->dbiRequestStatus->dat_status == 0)
-                            <h1><b>Operator Comment: {{$dbiRequest->dbiRequestStatus->operator_comment}}</b></h1>
-                                <h1><b>DBI Request is rejected by SDE user</b></h1>
-                                @if(Auth::user()->userRoles[0]->name !== 'SDE' && Auth::user()->id == $dbiRequest->requestor_id)
-                                    <a href="{{ route('dbi.edit', $dbiRequest->id) }}" class="btn btn-secondary">Edit</a>
-                                @endif
-                            @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1)
-                            <h1><b>DAT Comment: {{$dbiRequest->dbiRequestStatus->dat_comment}}</b></h1>
-                                <h1><b>DBI Request is Approved by DAT user</b></h1>
-
-                            @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 2)
-                            <h1><b>DAT Comment: {{$dbiRequest->dbiRequestStatus->dat_comment}}</b></h1>
-                                <h1><b>DBI Request is Rejected by DAT user</b></h1>
-
-                            @elseif($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 10)
-                                <h1><b>DBI Request for Prod is submitted to DAT user</b></h1>
-                            @elseif($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 10 && $dbiRequest->dbiRequestStatus->dat_status == 10)
-                                <h1><b>DBI Request is for Prod submitted to SDE user</b></h1>
-                            @elseif($dbiRequest->dbiRequestStatus->request_status == 10 && $dbiRequest->dbiRequestStatus->operator_status == 12 && $dbiRequest->dbiRequestStatus->dat_status == 10)
-                                <h1><b>DBI Request for Prod is rejected by SDE user</b></h1>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0 && ($dbiRequest->pre_execution == 1 || $dbiRequest->pre_execution == 0))
+                                <h2 class="font-bold text-gray-600">DBI Request Pending</h2>
                                 
-                            @elseif($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 11)
-                                <h1><b>DBI Request for prod is Approved by DAT user</b></h1>
-                            @elseif($dbiRequest->dbiRequestStatus->request_status == 10 && $dbiRequest->dbiRequestStatus->operator_status == 10 && $dbiRequest->dbiRequestStatus->dat_status == 2)
-                            <h1><b>DAT Comment: {{$dbiRequest->dbiRequestStatus->dat_comment}}</b></h1>
-                                <h1><b>DBI Request is Rejected by DAT user</b></h1>
-                            @else
-                                <h1><b>DBI Request is submitted</b></h1>
-                            @endif
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 3 && $dbiRequest->dbiRequestStatus->operator_status == 3 && $dbiRequest->dbiRequestStatus->dat_status == 3)
+                                    <h2 class="font-bold text-gray-600">DBI Request Changes commited on Production</h2>
+                                @endif
+                            </div>
                         </div>
-                        @if($dbiRequest->dbiRequestStatus->request_status == 10 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1 && Auth::user()->userRoles[0]->name == 'Requester')
-                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                                <form action="{{ route('dbi.submitToSDE', $dbiRequest->id) }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="prodTest" value="Yes">
-                                    <button type="submit" class="btn btn-primary">Submit to SDE(Prod)</button>
-                                </form>
-                            </div>
-                        @endif
 
-                        @if(Auth::user()->id == $dbiRequest->operator_id && $dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 10 && $dbiRequest->dbiRequestStatus->dat_status == 10 && Auth::user()->userRoles[0]->name == 'SDE')
-                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                            <form action="{{ route('dbi.sdeApprovedOrReject', $dbiRequest->id) }}" method="POST">
-                                    @csrf
-                                    <div class="mb-4">
-                                        <label>Status: </label>
-                                        <div class="flex items-center">
-                                            <input type="radio" id="approve" name="approvalorreject" value="approve" class="mr-2" required>
-                                            <label for="approve" class="text-gray-700 font-bold">Approve</label>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <input type="radio" id="approve" name="approvalorreject" value="reject" class="mr-2" required>
-                                            <label for="reject" class="text-gray-700 font-bold">Reject</label>
-                                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                            <div class="space-y-4">
+                                @if($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0 && $userAssigned[0]['role_name'][0] == 'Requester' && ($dbiRequest->pre_execution == 1 || $dbiRequest->pre_execution == 0))
+                                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <form action="{{ route('dbi.submitToSDE', $dbiRequest->id) }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="prodTest" value="No">
+                                            <button type="submit" class="btn btn-primary">Submit to SDE</button>
+                                        </form>
+                                        @if(Auth::user()->userRoles[0]->name !== 'SDE' && Auth::user()->id == $dbiRequest->requestor_id)
+                                        <form action="{{ route('dbi.edit', $dbiRequest->id) }}" method="GET">
+                                            @csrf
+                                            <input type="hidden" name="prodTest" value="No">
+                                            <button type="submit" class="btn btn-primary">Edit</button>
+                                        </form>
+                                        @endif
                                     </div>
-                                    <div class="mb-4">
-                                        <label>Comment Status: </label>
-                                        <input type="text" id="statuscomment" name="operator_comment" class="mr-2" required>
+                                </div>
+                                @elseif($dbiRequest->operator_id == Auth::user()->id && $dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0)
+                                    <form action="{{ route('dbi.sdeApprovedOrReject', $dbiRequest->id) }}" method="POST">
+                                        @csrf
+                                        <div class="space-y-2">
+                                            <label class="font-bold">Status:</label>
+                                            <div class="flex items-center space-x-2">
+                                                <input type="radio" id="approve" name="approvalorreject" value="approve" class="mr-2" required>
+                                                <label for="approve" class="text-gray-700 font-bold">Approve</label>
+                                            </div>
+                                            <div class="flex items-center space-x-2">
+                                                <input type="radio" id="reject" name="approvalorreject" value="reject" class="mr-2" required>
+                                                <label for="reject" class="text-gray-700 font-bold">Reject</label>
+                                            </div>
+                                        </div>
+                                        <div class="mb-4" id="rejectionReasonDiv" style="display: none;">
+                                            <label class="font-bold">Rejection Reasons:</label>
+                                            <select name="operator_comment[]" id="rejectionReason" class="form-control block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" multiple>
+                                                @foreach($rejectionReasons as $reason)
+                                                    <option value="{{ $reason->name }}">{{ $reason->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <input type="hidden" name="prodTest" value="No">
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </form>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 0 && Auth::user()->userRoles[0]->name === 'DAT')
+                                    <form action="{{ route('dbi.datApprovedOrReject', $dbiRequest->id) }}" method="POST">
+                                        @csrf
+                                        <div class="space-y-2">
+                                            <label class="font-bold">Status:</label>
+                                            <div class="flex items-center space-x-2">
+                                                <input type="radio" id="approve" name="approvalorreject" value="approve" class="mr-2" required>
+                                                <label for="approve" class="text-gray-700 font-bold">Approve</label>
+                                            </div>
+                                            <div class="flex items-center space-x-2">
+                                                <input type="radio" id="reject" name="approvalorreject" value="reject" class="mr-2" required>
+                                                <label for="reject" class="text-gray-700 font-bold">Reject</label>
+                                            </div>
+                                        </div>
+                                        <div class="mb-4" id="datrejectionReasonDiv" style="display: none;">
+                                            <label class="font-bold">Rejection Reasons:</label>
+                                            <select name="dat_comment[]" id="datrejectionReason" class="form-control block w-full rounded border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" multiple>
+                                                @foreach($rejectionReasons as $reason)
+                                                    <option value="{{ $reason->name }}">{{ $reason->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <input type="hidden" name="prodTest" value="No">
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </form>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 0)
+                                    <div class="space-y-2">
+                                        <h2 class="font-bold text-gray-600">Operator Comment:</h2>
+                                        <p>{{ $dbiRequest->dbiRequestStatus->operator_comment }}</p>
+                                        <h2 class="font-bold text-gray-600">DBI Request is submitted to DAT user</h2>
                                     </div>
-                                    <input type="hidden" name="prodTest" value="Yes">
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                </form>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0)
+                                    <h2 class="font-bold text-gray-600">DBI Request is submitted to SDE user</h2>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 2 && $dbiRequest->dbiRequestStatus->dat_status == 0)
+                                    <div class="space-y-2">
+                                        <h2 class="font-bold text-gray-600">Operator Rejected Reasons:</h2>
+                                        @php
+                                            $dbiRejectReason = explode(', ', $dbiRequest->dbiRequestStatus->operator_comment);
+                                        @endphp
+                                        <ul class="list-disc pl-5 space-y-1">
+                                            @foreach($dbiRejectReason as $comment)
+                                                <li>{{ $comment }}</li>
+                                            @endforeach
+                                        </ul>
+                                        @if(Auth::user()->userRoles[0]->name !== 'SDE' && Auth::user()->id == $dbiRequest->requestor_id)
+                                            <form action="{{ route('dbi.edit', $dbiRequest->id) }}" method="GET">
+                                                    @csrf
+                                                <input type="hidden" name="prodTest" value="No">
+                                                <button type="submit" class="btn btn-primary">Edit</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1  && ($dbiRequest->prod_execution == 1 || $dbiRequest->prod_execution == 0))
+                                    <div class="space-y-2">
+                                        <h2 class="font-bold text-gray-600">DAT:</h2>
+                                        <h2 class="font-bold text-gray-600">DBI Request is Approved by DAT user</h2>
+                                    </div>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1 && $dbiRequest->prod_execution == 2)
+                                    <div class="space-y-2">
+                                        <h2 class="font-bold text-gray-600">Production Execution failed.</h2>
+                                        <p>You can try again execution or edit your dbi request using the following button. (You Need approval from SDE and DAT user after PreProd Execution)</p>
+                                        @if(Auth::user()->userRoles[0]->name !== 'SDE' && Auth::user()->id == $dbiRequest->requestor_id)
+                                            <form action="{{ route('dbi.edit', $dbiRequest->id) }}" method="GET">
+                                                @csrf
+                                                <input type="hidden" name="prodTest" value="No">
+                                                <button type="submit" class="btn btn-primary">Edit</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 2)
+                                    <div class="space-y-2">
+                                        <h2 class="font-bold text-gray-600">DAT Comment:</h2>
+                                        <p>{{ $dbiRequest->dbiRequestStatus->dat_comment }}</p>
+                                        <h2 class="font-bold text-gray-600">DBI Request is Rejected by DAT user</h2>
+                                    </div>
+                                @elseif($dbiRequest->dbiRequestStatus->request_status == 3 && $dbiRequest->dbiRequestStatus->operator_status == 3 && $dbiRequest->dbiRequestStatus->dat_status == 3)
+                                    <h2 class="font-bold text-gray-600">DBI Request Changes commited on Production</h2>
+                                @endif
                             </div>
-                        @endif
-
-                        @if($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 10 && Auth::user()->userRoles[0]->name == 'DAT')
-                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                                <form action="{{ route('dbi.datApprovedOrReject', $dbiRequest->id) }}" method="POST">
-                                    @csrf
-                                    <div class="mb-4">
-                                        <label>Status: </label>
-                                        <div class="flex items-center">
-                                            <input type="radio" id="approvalorreject" name="approvalorreject" value="approve" class="mr-2" required>
-                                            <label for="approve" class="text-gray-700 font-bold">Approve</label>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <input type="radio" id="approvalorreject" name="approvalorreject" value="reject" class="mr-2" required>
-                                            <label for="reject" class="text-gray-700 font-bold">Reject</label>
-                                        </div>
-                                    </div>
-                                    <div class="mb-4">
-                                        <label>Comment Status: </label>
-                                        <input type="text" id="statuscomment" name="dat_comment" class="mr-2" required>
-                                    </div>
-                                    <input type="hidden" name="prodTest" value="Yes">
-
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                </form>
-                            </div>
-                        @endif
-                    
-                        @if($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1 && Auth::user()->userRoles[0]->name == 'Requester')
+                        </div>
+                        @if($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1 && Auth::user()->id == $dbiRequest->requestor_id)
                             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                                 <form action="{{ route('dbi.testDbi', $dbiRequest->id) }}" method="POST">
                                     @csrf
@@ -360,15 +368,7 @@
             $logData .= "Request Approved by DAT\n";
         } elseif ($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 2) {
             $logData .= "Request rejected by DAT\n";
-        } elseif ($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 10) {
-            $logData .= "DBI Request for Prod is submitted to DAT user\n";
-        } elseif ($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 10 && $dbiRequest->dbiRequestStatus->dat_status == 10) {
-            $logData .= "DBI Request is for Prod submitted to SDE user\n";
-        } elseif ($dbiRequest->dbiRequestStatus->request_status == 10 && $dbiRequest->dbiRequestStatus->operator_status == 12 && $dbiRequest->dbiRequestStatus->dat_status == 10) {
-            $logData .= "DBI Request for Prod is rejected by SDE user\n";
-        } elseif ($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 11) {
-            $logData .= "DBI Request for prod is Approved by DAT user\n";
-        } else {
+        }  else {
             $logData .= "Request is pending\n";
         }
 
@@ -377,6 +377,43 @@
         file_put_contents($logFile, $logData);
     @endphp
     </x-app-layout>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var approveRadio = document.getElementById('approve');
+            var rejectRadio = document.getElementById('reject');
+            var rejectionReasonDiv = document.getElementById('rejectionReasonDiv');
+
+            approveRadio.addEventListener('change', function() {
+                if (this.checked) {
+                    rejectionReasonDiv.style.display = 'none';
+                }
+            });
+
+            rejectRadio.addEventListener('change', function() {
+                if (this.checked) {
+                    rejectionReasonDiv.style.display = 'block';
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+        var approveRadio = document.getElementById('approve');
+        var rejectRadio = document.getElementById('reject');
+        var datrejectionReasonDiv = document.getElementById('datrejectionReasonDiv');
+
+        approveRadio.addEventListener('change', function() {
+            if (this.checked) {
+                datrejectionReasonDiv.style.display = 'none';
+            }
+        });
+
+        rejectRadio.addEventListener('change', function() {
+            if (this.checked) {
+                datrejectionReasonDiv.style.display = 'block';
+            }
+        });
+    });
+    </script>
 <style>
     textarea.form-control {
         width: 100%;
@@ -426,5 +463,23 @@
     }
     .btn-primary:hover {
         background-color: #2563eb;
+    }
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+
+    .alert-success {
+        color: #155724;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+    }
+
+    .alert-danger {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
     }
 </style>

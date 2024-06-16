@@ -28,7 +28,9 @@ class DbiRequest extends Model
         'prod_instance',
         'test_instance',
         'sql_file_path',
-        'sql_logs_info'
+        'sql_logs_info',
+        'pre_execution',
+        'prod_execution'
     ];
 
     /**
@@ -59,5 +61,10 @@ class DbiRequest extends Model
     public function dbiRequestStatus()
     {
         return $this->hasOne(DbiRequestStatus::class, 'request_id');
+    }
+
+    public function dbiRequestLog()
+    {
+        return $this->hasOne(DbiRequestStatus::class, 'dbi_request_id');
     }
 }

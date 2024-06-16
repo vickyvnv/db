@@ -7,6 +7,7 @@ use App\Models\DbiRequest;
 use App\Models\Category;
 use App\Models\Priority;
 use App\Models\DbiRequestStatus;
+use App\Models\RejectionReason;
 use App\Models\User;
 use App\Models\Market;
 use App\Models\DbiType;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\DatabaseInfo;
 use App\Models\DbInstance;
+use App\Models\DbiRequestLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
@@ -225,26 +227,9 @@ class DbiRequestController extends Controller
             })
             ->values()
             ->all();
+            
+            $rejectionReasons  = RejectionReason::get();
 
-            // $userAssigned = User::with('userRoles')
-            //     ->whereIn('id', [$requestorId, $operatorId])
-            //     ->get()
-            //     ->flatMap(function ($user) {
-            //         return $user->userRoles->map(function ($role) use ($user) {
-            //             return [
-            //                 'user_id' => $user->id,
-            //                 'role_name' => $role->name,
-            //                 'first_name' => $user->user_firstname,
-            //                 'last_name' => $user->user_lastname,
-            //                 'email' => $user->email
-            //             ];
-            //         });
-            //     })
-            //     ->groupBy('user_id');
-            //$assigned = $userAssigned->toArray();
-            //dd($dbiRequest,$dbiRequest->dbiRequestStatus, $userAssigned);
-            // Log successful retrieval of DbiRequest
-            //dd($dbiRequest->dbiRequestStatus);
             $userAssigned = User::with('userRoles')
             ->whereIn('id', [$requestorId, $operatorId])
             ->get()
@@ -260,7 +245,7 @@ class DbiRequestController extends Controller
             ->values()
             ->all();
             Log::info('Fetched Dbi Request successfully. DbiRequestController::show()  ' . ' User id:' . Auth::user()->id . ' email: ' . Auth::user()->email);
-            return view('dbi.show', compact('dbiRequest', 'userAssigned'));
+            return view('dbi.show', compact('dbiRequest', 'userAssigned', 'rejectionReasons'));
         } catch (\Exception $e) {
             // Log error if fetching DbiRequest fails
             Log::error('Error occurred while fetching Dbi Request: DbiRequestController::show()' . $e->getMessage() . ' User id:' . Auth::user()->id . ' email: ' . Auth::user()->email);
@@ -394,6 +379,7 @@ class DbiRequestController extends Controller
         if(Auth::user()->userRoles->first()->name == 'Requester' || Auth::user()->userRoles->first()->name == 'DAT') {
             $markets = Market::all();
             $selectedMarket = $dbiRequest->sw_version; // Get the selected market from the $dbiRequest
+            //dd($dbiRequest);
             $selectedDbUser = $dbiRequest->db_user; // Get the selected DB user from the $dbiRequest
             $selectedProdInstance = $dbiRequest->prod_instance; // Get the selected prod instance from the $dbiRequest
             $selectedTestInstance = $dbiRequest->test_instance; // Get the selected test instance from the $dbiRequest
@@ -452,13 +438,14 @@ class DbiRequestController extends Controller
             try {
                 // Validate the request data
                 $validatedData = $request->validate([
-                    'sw_version' => 'required',
+                    'sw_version' => 'required|integer',
                     'db_user' => 'required',
                     'source_code' => 'required',
                     'prod_instance' => 'required',
                     'test_instance' => 'required',
                 ]);
-        
+                $validatedData['sw_version'] = intval($validatedData['sw_version']);
+
                 // Update the DbiRequest with the validated data
                 $dbiRequest->update($validatedData);
         
@@ -612,7 +599,7 @@ class DbiRequestController extends Controller
      */
     public function testDbiQuery(Request $request, DbiRequest $dbiRequest)
     {
-        if(Auth::user()->userRoles->first()->name == 'Requester' || Auth::user()->userRoles->first()->name == 'DAT' && $dbiRequest->requestor_id === Auth::user()->id) { 
+        if((Auth::user()->userRoles->first()->name == 'Requester') || (Auth::user()->userRoles->first()->name == 'DAT') && ($dbiRequest->requestor_id == Auth::user()->id)) { 
             try {
                 DB::beginTransaction(); // Start a database transaction
 
@@ -624,7 +611,7 @@ class DbiRequestController extends Controller
                 $decryptedPassword = Crypt::decryptString($databaseInfo->db_user_password);
 
                 // Generate the SQL log file name
-                if($request->prodTest == "Yes") {
+                if($request->prodTest == "No") {
                     $outputFileName =  $dbiRequest->id .'_output_PreProd' . $dbiRequest->id . '_' . time() . '.txt';
                 } else {
                     $outputFileName =  $dbiRequest->id .'_output_Prod' . $dbiRequest->id . '_' . time() . '.txt';
@@ -634,24 +621,118 @@ class DbiRequestController extends Controller
                 $dbPassword = $decryptedPassword;   //$decryptedPassword;  // Mndb_123
                 $dbtestInstance = $request->prodTest == "Yes" ? $dbiRequest->prod_instance : $dbiRequest->test_instance; //$dbiRequest->db_instance;  // U_PORCL1
                 $sourceCode = $dbiRequest->source_code; //$dbiRequest->source_code;  // INSERT INTO test (id, name) VALUES (1, 'vicky');
-                //dd($dbtestInstance);
+
                 // Modify the source code to set the current schema and execute the insert query
                 $modifiedSourceCode = "ALTER SESSION SET CURRENT_SCHEMA = $dbtestInstance;\n";
                 $modifiedSourceCode .= $sourceCode . "\n";
-                $modifiedSourceCode .= "COMMIT;";
-                // Create a temporary file using Laravel's Storage facade
+
                 // Create a temporary file using Laravel's File facade
                 $tempFilePath = 'temp/dbi_'.$dbiRequest->id.'_' . uniqid() . '.sql';
                 $absoluteTempFilePath = storage_path('app/' . $tempFilePath);
                 File::put($absoluteTempFilePath, $modifiedSourceCode);     
-                // $tempFilePath = Storage::path($tempFile);
-                // $tempFile = tempnam(sys_get_temp_dir(), '');
-                //File::put($tempFilePath, $modifiedSourceCode);
+                
                 DB::enableQueryLog();
 
-                $command = "sqlplus $dbUser/$dbPassword @$absoluteTempFilePath 2>&1";
-                //$command = "sqlplus $dbUser/$dbPassword @$tempFilePath 2>&1";
-                $terminalLog = shell_exec($command);
+                try {
+                    // Create a new PDO connection
+                    $dsn = "oci:dbname=//localhost:1521/ocispice";
+                    $username = $dbUser;
+                    $password = $dbPassword;
+
+                    // Initialize the execution log
+                    $executionLog = "SQL*Plus: Release 12.2.0.1.0\n";
+                    $executionLog .= "Copyright (c) 1982, 2022, Oracle.  All rights reserved.\n\n";
+                    $executionLog .= "Connected to:\n";
+                    $executionLog .= "Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production\n\n";
+
+                    $conn = new \PDO($dsn, $username, $password);
+
+                    // Set error mode to exceptions
+                    $conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+                    // Begin a transaction
+                    $conn->beginTransaction();
+
+                    // Create a savepoint
+                    $executionLog .= "SQL> SAVEPOINT before_inserts;\n";
+                    $conn->exec("SAVEPOINT before_inserts");
+                    $executionLog .= "Savepoint created.\n\n";
+
+                    // Prepare and execute the ALTER SESSION statement
+                    $executionLog .= "SQL> ALTER SESSION SET CURRENT_SCHEMA = U_PORCL1;\n";
+                    $stmt = $conn->prepare("ALTER SESSION SET CURRENT_SCHEMA = U_PORCL1");
+                    $stmt->execute();
+                    $executionLog .= "Session altered.\n\n";
+
+                    // Split the SQL statements by semicolon
+                    $statements = explode(';', $sourceCode);
+
+                    // Iterate over each statement
+                    foreach ($statements as $statement) {
+                        $statement = trim($statement);
+
+                        // Skip empty statements
+                        if (empty($statement)) {
+                            continue;
+                        }
+
+                        // Prepare and execute the statement
+                        $executionLog .= "SQL> " . $statement . ";\n";
+                        $stmt = $conn->prepare($statement);
+                        $stmt->execute();
+                        $executionLog .= $stmt->rowCount() . " row(s) affected.\n\n";
+                    }
+
+                    if($request->prodTest != "Yes") {
+                        // Roll back to the savepoint
+                        $executionLog .= "SQL> ROLLBACK TO SAVEPOINT before_inserts;\n";
+                        $conn->exec("ROLLBACK TO SAVEPOINT before_inserts");
+                        $executionLog .= "Rollback complete.\n\n";
+                    } else {
+                        // Commit the transaction
+                        $conn->commit();
+                    }
+                    
+                    $successMessage = "PL/SQL procedure successfully completed.\n";
+                    echo $successMessage;
+                    $executionLog .= "SQL> QUIT\n" . $successMessage;
+
+                } catch (\PDOException $e) {
+                    // Roll back the transaction if an error occurs
+                    $conn->rollBack();
+                    $executionLog .= "SQL> ROLLBACK;\n";
+                    $executionLog .= "Rollback complete.\n\n";
+
+                    // Handle the error
+                    $errorMessage = "SQL Error: " . $e->getMessage() . "\n";
+                    echo $errorMessage;
+                    $executionLog .= "SQL> Error: \n" . $errorMessage;
+                    // Perform any additional error handling or logging
+                }
+                // // Execute the command and capture the output
+                // $command = "sqlplus -L $dbUser/$dbPassword @$absoluteTempFilePath 2>&1";
+                // $terminalLog = shell_exec($command);
+
+                // // Data insertion was successful, so roll back the changes
+                // $rollbackCommand = "sqlplus -L $dbUser/$dbPassword <<EOF
+                //     ROLLBACK;
+                //     EXIT;
+                // EOF";
+
+                // shell_exec($rollbackCommand);
+                
+                // Check if the output contains any error messages
+                if (strpos($executionLog, 'Error') !== false) {
+                    // SQL execution failed
+                    $executionStatus = 'Execution Failed';
+                    $errorMessage = 'An error occurred during SQL execution.';
+                    
+                } else {
+                    // SQL execution successful
+                    $executionStatus = 'Execution Successful';
+                    $errorMessage = '';
+                }
+                //dd("bbb");
                 $queries = DB::getQueryLog();
                 $totalExecutionTime = 0;
 
@@ -659,8 +740,6 @@ class DbiRequestController extends Controller
                     $totalExecutionTime += $query['time'];
                 }
 
-                
-                //dd($terminalLog);
                 // Get the current date and time
                 $currentDate = date('D M d H:i:s Y');
 
@@ -669,9 +748,11 @@ class DbiRequestController extends Controller
                 $additionalInfo .= "DBI No.: $dbiRequest->id" . PHP_EOL;
                 $additionalInfo .= "DB: " . ($request->prodTest == 'Yes' ? "Prod DB" : "PreProd DB") . PHP_EOL;
                 $additionalInfo .= "DB-User: $dbUser" . PHP_EOL;
+                $additionalInfo .= '======================================================'. PHP_EOL;
                 $additionalInfo .= "Requestor: " . $dbiRequest->requestor->user_firstname . " " . $dbiRequest->requestor->user_lastname . " " . PHP_EOL;
                 $additionalInfo .= "Operator: " . $dbiRequest->operator->user_firstname . " " . $dbiRequest->operator->user_lastname . "" . PHP_EOL;
                 $additionalInfo .= "Team: " . Auth::user()->team->name . PHP_EOL;
+                $additionalInfo .= '======================================================'. PHP_EOL;
                 $additionalInfo .= "Database Instance: " . ($request->prodTest == "Yes" ? $dbiRequest->prod_instance : $dbiRequest->test_instance) . PHP_EOL;
                 Log::info('Executed Queries:');
 
@@ -683,11 +764,14 @@ class DbiRequestController extends Controller
                     Log::info('Time: ' . $query['time'] . ' ms');
                     $additionalInfo .= 'Time: ' . $query['time'] . ' ms'. PHP_EOL;
                 }
+                
 
                 $additionalInfo .= 'Total Execution Time: ' . $totalExecutionTime . ' ms'. PHP_EOL;
+                $additionalInfo .= '======================================================'. PHP_EOL;
+
                 Log::info('Total Execution Time: ' . $totalExecutionTime . ' ms');
                 // Prepend the additional information to the $terminalLog
-                $terminalLog = $additionalInfo . PHP_EOL . $terminalLog;
+                $terminalLog = $additionalInfo . PHP_EOL . $executionLog;
 
                 if ($terminalLog === false) {
                     Log::error("Command execution failed for DBI request: " . $dbiRequest->id);
@@ -700,31 +784,42 @@ class DbiRequestController extends Controller
 
                 // Remove the temporary file
                 File::delete($absoluteTempFilePath);
+                
+                // Create a new DbiRequestLog
+                $dbiLogCreate = new DbiRequestLog();
+                $dbiLogCreate->dbi_request_id = $dbiRequest->id;
+                $dbiLogCreate->execution_status = $executionStatus;
+                $dbiLogCreate->log_file = $outputFileName;
+                $dbiLogCreate->env = $request->prodTest == "Yes" ? "Prod" : "PreProd";
+                $dbiLogCreate->db_instance = $request->prodTest == "Yes" ? $dbiRequest->prod_instance : $dbiRequest->test_instance;
+                $dbiLogCreate->save();
 
                 if($request->prodTest == "Yes") {
                     // Store the file output in the sql_log_info field
                     $dbiRequest->sql_log_file_prod = $outputFileName;
                     $dbiRequest->sql_logs_info_prod = $terminalLog;
+                    $dbiRequest->prod_execution = $executionStatus == "Execution Failed" ? 2 : 1;
                     $dbiRequest->save();
                 } else {
                     // Store the file output in the sql_log_info field
                     $dbiRequest->sql_log_file = $outputFileName;
                     $dbiRequest->sql_logs_info = $terminalLog;
+                    $dbiRequest->pre_execution = $executionStatus == "Execution Failed" ? 2 : 1;
                     $dbiRequest->save();
                 }
                 
-
                 // Check if the dbiStatus already exists for the given dbiRequest and user
                 $dbiStatus = DbiStatus::where('dbi_id', $dbiRequest->id)
                 ->where('user_id', Auth::user()->id)
                 ->first();
                 
+                // 0 for preprod and 3 for prod
                 $dbiRequest->dbiRequestStatus()->updateOrCreate(
                     ['request_id' => $dbiRequest->id],
                     [
-                        'request_status' => $request->prodTest == "Yes" ? 10 : 0,
-                        'operator_status' => $request->prodTest == "Yes" ? 1 : 0,
-                        'dat_status' => $request->prodTest == "Yes" ? 1 : 0,
+                        'request_status' => $request->prodTest == "Yes" ? ($executionStatus == 'Execution Successful' ? 3 : 1) : 0,
+                        'operator_status' => $request->prodTest == "Yes" ? ($executionStatus == 'Execution Successful' ? 3 : 1)  : 0,
+                        'dat_status' => $request->prodTest == "Yes" ? ($executionStatus == 'Execution Successful' ? 3 : 1)  : 0,
                     ]
                 );
                 
@@ -733,21 +828,27 @@ class DbiRequestController extends Controller
                     [
                         'id' => $dbiStatus->id,
                         'user_id' => Auth::user()->id,
-                        'status_detail' => $request->prodTest == "Yes" ? "Prod Run" : "Test DBI",
+                        'status_detail' => $request->prodTest == "Yes" ? ($executionStatus == "Execution Failed" ? "Execution Failed" : "Prod Run") : ($executionStatus == "Execution Failed" ? "Execution Failed" : "Test DBI"),
                         'filled' => $request->prodTest == "Yes" ? 5 : 4,
                     ],
                     [
                         'dbi_id' => $dbiRequest->id,
                         'user_id' => Auth::user()->id,
-                        'status_detail' => $request->prodTest == "Yes" ? 5 : 4,
+                        'status_detail' => $request->prodTest == "Yes" ? ($executionStatus == "Execution Failed" ? "Execution Failed" : "Prod Run") : ($executionStatus == "Execution Failed" ? "Execution Failed" : "Test DBI"),
                         'filled' => 4,
                     ]
                 );
                 
                 DB::commit(); // Commit the database transaction
 
-                // Redirect with a success message
-                return redirect()->route('dbi.show', $dbiRequest->id)->with('success', 'SQL query executed successfully. Log file generated.');
+                if($executionStatus == "Execution Failed") {
+                    // Redirect with a success message
+                    return redirect()->route('dbi.show', $dbiRequest->id)->with('error', 'SQL query execution Failed. Log file generated.');
+                } else {
+                    // Redirect with a success message
+                    return redirect()->route('dbi.show', $dbiRequest->id)->with('success', 'SQL query executed successfully. Log file generated.');
+                }
+                
             } catch (\Exception $e) {
                 DB::rollBack(); // Rollback the database transaction
 
@@ -781,9 +882,9 @@ class DbiRequestController extends Controller
         $dbiRequest->dbiRequestStatus()->updateOrCreate(
             ['request_id' => $dbiRequest->id],
             [
-                'request_status' => $request->prodTest == "Yes" ? 11 : 1,
-                'operator_status' => $request->prodTest == "Yes" ? 10 : 0,
-                'dat_status' => $request->prodTest == "Yes" ? 10 : 0,
+                'request_status' =>  1,
+                'operator_status' =>  0,
+                'dat_status' =>  0,
             ]
         );
 
@@ -802,12 +903,13 @@ class DbiRequestController extends Controller
     {
         
         if(Auth::user()->id == $dbiRequest->operator_id) {
+            //dd($request->operator_comment);
             $dbiRequest->dbiRequestStatus()->updateOrCreate(
                 ['request_id' => $dbiRequest->id],
                 [
                     'dat_status' => $request->prodTest == "Yes" ? 10 : 0,
                     'request_status' => $request->prodTest == "Yes" ? (($request->approvalorreject == 'approve') ? 11 : 10) : (($request->approvalorreject == 'approve') ? 1 : 0),
-                    'operator_comment' => $request->operator_comment,
+                    'operator_comment' => $request->operator_comment == null ? '' :implode(', ', $request->operator_comment),
                     'operator_status' => $request->prodTest == "Yes" ? (($request->approvalorreject == 'approve') ? 11 : (($request->approvalorreject == 'reject') ? 12 : 10))  : (($request->approvalorreject == 'approve') ? 1 : (($request->approvalorreject == 'reject') ? 2 : 0)),
                 ]
             );
@@ -837,12 +939,16 @@ class DbiRequestController extends Controller
 
                     'request_status' => $request->prodTest == "Yes" ? (($request->approvalorreject == 'approve') ? 11 : 10) : (($request->approvalorreject == 'approve') ? 1 : 0),
 
-                    'dat_comment' => $request->dat_comment,
+                    'dat_comment' => $request->dat_comment == null ? '' :implode(', ', $request->dat_comment),
 
                     'dat_status' => $request->prodTest == "Yes" ? (($request->approvalorreject == 'approve') ? 11 : (($request->approvalorreject == 'reject') ? 12 : 10))  : (($request->approvalorreject == 'approve') ? 1 : (($request->approvalorreject == 'reject') ? 2 : 0)),
                 ]
             );
 
+            
+            $dbiRequest->prod_execution = 0;
+            $dbiRequest->save();
+            
             // Redirect with a success message
             return redirect()->route('dbi.show', $dbiRequest->id)->with('success', 'SQL query executed successfully. Log file generated.');
         } else {
@@ -860,15 +966,32 @@ class DbiRequestController extends Controller
     */
     public function showLogs($id)
     {
-        $logFile = storage_path('dbilogs/' . $id . '_dbi_request.log');
+        $dbiRequestLog = DbiRequestLog::where('id', $id)->first();
+
+        //$logFile = storage_path('dbilogs/' . $id . '_dbi_request.log');
+        $logFile = storage_path('app/sql_logs/' . $dbiRequestLog->log_file);
 
         if (file_exists($logFile)) {
             return response()->file($logFile, [
                 'Content-Type' => 'text/plain',
-                'Content-Disposition' => 'inline; filename="' . $id . '_dbi_request.log"'
+                'Content-Disposition' => 'inline; '
             ]);
         } else {
             abort(404, 'Log file not found.');
         }
+    }
+
+    /**
+    * Read dbi request logs.
+    *
+    * @param  \Illuminate\Http\Request  $request
+    * @param  \App\Models\DbiRequest  $dbiRequest
+    * @return \Illuminate\Http\RedirectResponse
+    */
+    public function allLogs($id)
+    {
+        $dbiRequestLog = DbiRequestLog::where('dbi_request_id', $id)->get();
+
+        return view('dbi.allLogs', compact('dbiRequestLog'));
     }
 }

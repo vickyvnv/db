@@ -1,1 +1,37 @@
 php artisan db:seed
+
+
+// 13-0602024
+CREATE TABLE dbi_request_logs (
+    id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    dbi_request_id NUMBER,
+    execution_status VARCHAR2(255),
+    log_file CLOB,
+    DB_INSTANCE VARCHAR2(20)
+    ENV VARCHAR2(20)
+    CREATED_AT TIMESTAMP (6) DEFAULT SYSDATE, 
+	UPDATED_AT TIMESTAMP (6) DEFAULT SYSDATE
+);
+
+ALTER TABLE dbi_request_logs
+ADD CONSTRAINT fk_dbi_request_id
+FOREIGN KEY (dbi_request_id)
+REFERENCES dbi_requests(id)
+ON DELETE CASCADE;
+
+CREATE OR REPLACE TRIGGER trg_dbi_request_logs_updated
+BEFORE UPDATE ON dbi_request_logs
+FOR EACH ROW
+BEGIN
+    :new.updated_date := SYSDATE;
+END;
+
+ALTER TABLE dbi_request ADD (
+    pre_execution NUMBER DEFAULT 0,
+    prod_execution NUMBER DEFAULT 0
+);
+
+
+
+ALTER TABLE "DBI_REQUEST_STATUS" MODIFY "OPERATOR_COMMENT" VARCHAR2(4000);
+ALTER TABLE "DBI_REQUEST_STATUS" MODIFY "DAT_COMMENT" VARCHAR2(4000);

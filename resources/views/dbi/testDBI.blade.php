@@ -1,10 +1,5 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('DBI') }}
-        </h2>
-    </x-slot>
-
+    
     <div class="flex">
         <!-- Sidebar -->
         @include('partials.dbi-sidebar')
@@ -30,11 +25,9 @@
                                                         <input type="hidden" name="db_user" value="{{ $dbiRequest->db_user }}">
                                                         <input type="hidden" name="db_instance" value="{{ $dbiRequest->db_instance }}">
                                                         <input type="hidden" name="source_code" value="{{ $dbiRequest->source_code }}">
-                                                        @if(($dbiRequest->dbiRequestStatus->request_status == 10 && $dbiRequest->dbiRequestStatus->operator_status == 12 && $dbiRequest->dbiRequestStatus->dat_status == 10) || $dbiRequest->dbiRequestStatus->request_status == 10 && $dbiRequest->dbiRequestStatus->operator_status == 10 && $dbiRequest->dbiRequestStatus->dat_status == 12)
-                                                        <input type="hidden" name="prodTest" value="Yes">
-                                                        @else
+                                                        
+                                                        
                                                         <input type="hidden" name="prodTest" value="No">
-                                                        @endif
                                                         <button type="submit" class="btn btn-primary">Test DBI</button>
                                                     </form>
                                                 </div>
