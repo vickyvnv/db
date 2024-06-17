@@ -48,26 +48,26 @@
                                                 <td>{{ $dbiRequest->swVersionMarket->name }}</td>
                                                 <td>{{ $dbiRequest->dbi_type }}</td>
                                                 <td>
-    @if($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0)
-        Request submitted to SDE
-    @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 2 && $dbiRequest->dbiRequestStatus->dat_status === 0)
-        Request rejected by SDE
-    @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 0)
-        Request Approved by SDE
-    @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1 && ($dbiRequest->prod_execution == 1 || $dbiRequest->prod_execution == 0))
-        Request Approved by DAT
-    @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1 && $dbiRequest->prod_execution == 2)
-        Error while Execution on Prod DB
-    @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 2)
-        Request rejected by DAT
-    @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0 && $dbiRequest->pre_execution == 2)
-        Pre DB Execution is failed
-    @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0 && ($dbiRequest->pre_execution == 1 || $dbiRequest->pre_execution == 0))
-        DBI Request Pending
-    @elseif($dbiRequest->dbiRequestStatus->request_status == 3 && $dbiRequest->dbiRequestStatus->operator_status == 3 && $dbiRequest->dbiRequestStatus->dat_status == 3)
-        DBI Request Changes commited on Production
-    @endif
-</td>
+                                                    @if($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0)
+                                                        Request submitted to SDE
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 2 && $dbiRequest->dbiRequestStatus->dat_status === 0)
+                                                        Request rejected by SDE
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 0)
+                                                        Request Approved by SDE
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1 && ($dbiRequest->prod_execution == 1 || $dbiRequest->prod_execution == 0))
+                                                        Request Approved by DAT
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1 && $dbiRequest->prod_execution == 2)
+                                                        Error while Execution on Prod DB
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 2)
+                                                        Request rejected by DAT
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0 && $dbiRequest->pre_execution == 2)
+                                                        Pre DB Execution is failed
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0 && ($dbiRequest->pre_execution == 1 || $dbiRequest->pre_execution == 0))
+                                                        DBI Request Pending
+                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 3 && $dbiRequest->dbiRequestStatus->operator_status == 3 && $dbiRequest->dbiRequestStatus->dat_status == 3)
+                                                        DBI Request Changes commited on Production
+                                                    @endif
+                                                </td>
                                                 <td>
                                                     <a href="{{ route('dbi.show', $dbiRequest->id) }}" class="btn btn-primary">View</a>
                                                     @if($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 11)
