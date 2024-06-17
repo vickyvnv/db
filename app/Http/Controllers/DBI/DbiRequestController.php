@@ -642,20 +642,20 @@ class DbiRequestController extends Controller
                 
                 DB::enableQueryLog();
 
+                // Create a new PDO connection
+                $dsn = "oci:dbname=//localhost:1521/ocispice";
+                $username = $dbUser;
+                $password = $dbPassword;
+
+                // Initialize the execution log
+                $executionLog = "SQL*Plus: Release 12.2.0.1.0\n";
+                $executionLog .= "Copyright (c) 1982, 2022, Oracle.  All rights reserved.\n\n";
+                $executionLog .= "Connected to:\n";
+                $executionLog .= "Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production\n\n";
+
+                $conn = new \PDO($dsn, $username, $password);
+
                 try {
-                    // Create a new PDO connection
-                    $dsn = "oci:dbname=//localhost:1521/ocispice";
-                    $username = $dbUser;
-                    $password = $dbPassword;
-
-                    // Initialize the execution log
-                    $executionLog = "SQL*Plus: Release 12.2.0.1.0\n";
-                    $executionLog .= "Copyright (c) 1982, 2022, Oracle.  All rights reserved.\n\n";
-                    $executionLog .= "Connected to:\n";
-                    $executionLog .= "Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production\n\n";
-
-                    $conn = new \PDO($dsn, $username, $password);
-
                     // Set error mode to exceptions
                     $conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
