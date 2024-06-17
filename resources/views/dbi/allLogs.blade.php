@@ -46,6 +46,10 @@
                                     </tbody>
                                 </table>
                             </div>
+                            <!-- Add pagination links -->
+                            <div class="pagination">
+                                {{ $dbiRequestLog->links() }}
+                            </div>
                         </div>
                     </div>
                 </div>

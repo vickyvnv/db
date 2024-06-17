@@ -18,7 +18,7 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $roles = Role::with('rights')->get();
+        $roles = Role::with('rights')->paginate(10);
         //dd($roles);
         return view('admin.roles.index', compact('roles'));
     }

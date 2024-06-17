@@ -51,6 +51,10 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
+                                                <!-- Add pagination links -->
+                                                <div class="pagination">
+                                                    {{ $teams->links() }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

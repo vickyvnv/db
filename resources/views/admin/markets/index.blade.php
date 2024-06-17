@@ -64,6 +64,10 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
+                                                <!-- Add pagination links -->
+                                                <div class="pagination">
+                                                    {{ $markets->links() }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

@@ -62,7 +62,7 @@ class DbiRequestController extends Controller
                                  ->where('operator_status', 11);
                     });
                 })
-                ->get();
+                ->paginate(10);;
                 //dd($dbiRequests);
                 //$dbiRequests = DbiRequest::with('requestor', 'operator')->get();
             } else if(Auth::user()->userRoles[0]->name === 'SDE') {
@@ -77,7 +77,7 @@ class DbiRequestController extends Controller
                 ->whereHas('dbiRequestStatus', function($query) {
                     $query->whereIn('request_status', [1, 11]);
                 })
-                ->get();
+                ->paginate(10);
 
                 //$dbiRequests = DbiRequest::with('requestor', 'operator')->where('operator_id', Auth::user()->id)->get();
             } else {
@@ -87,7 +87,7 @@ class DbiRequestController extends Controller
                     $query->select('id', 'user_firstname', 'user_lastname', 'email');
                 }])
                 ->where('requestor_id', Auth::user()->id)
-                ->get();
+                ->paginate(10);
             }
             //dd($dbiRequests);
             // Log successful retrieval of DbiRequests
@@ -948,7 +948,7 @@ class DbiRequestController extends Controller
             
             $dbiRequest->prod_execution = 0;
             $dbiRequest->save();
-            
+
             // Redirect with a success message
             return redirect()->route('dbi.show', $dbiRequest->id)->with('success', 'SQL query executed successfully. Log file generated.');
         } else {
@@ -990,7 +990,7 @@ class DbiRequestController extends Controller
     */
     public function allLogs($id)
     {
-        $dbiRequestLog = DbiRequestLog::where('dbi_request_id', $id)->get();
+        $dbiRequestLog = DbiRequestLog::where('dbi_request_id', $id)->paginate(10);
 
         return view('dbi.allLogs', compact('dbiRequestLog'));
     }

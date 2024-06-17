@@ -66,8 +66,11 @@
                                                             </tbody>
                                                         </table>
                                                     </div>
+                                                    <!-- Add pagination links -->
+                                                    <div class="pagination">
+                                                        {{ $roles->links() }}
+                                                    </div>
                                                 </div>
-
                                             </div>
                                         </div>
                                     </div>

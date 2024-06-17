@@ -19,7 +19,7 @@ class DatabaseInfoController extends Controller
     public function index()
     {
         try {
-            $databaseInfos = DatabaseInfo::all();
+            $databaseInfos = DatabaseInfo::paginate(10);;
             return view('admin.dbinfo.index', compact('databaseInfos'));
         } catch (\Exception $e) {
             Log::error('Error fetching database info: ' . $e->getMessage());

@@ -17,7 +17,7 @@ class MarketController extends Controller
      */
     public function index()
     {
-        $markets = Market::latest()->get();
+        $markets = Market::latest()->paginate(10);
 
         return view('admin.markets.index', compact('markets'));
     }

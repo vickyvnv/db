@@ -90,9 +90,10 @@
                                     @endforeach
                                 </tbody>
                             </table>
-
-                            <!-- Pagination Links -->
-                            {{ $users->links() }}
+                            <!-- Add pagination links -->
+                            <div class="pagination">
+                                {{ $users->links() }}
+                            </div>
                         </div>
                     </div>
                 </div>

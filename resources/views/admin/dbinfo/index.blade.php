@@ -75,6 +75,10 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
+                                                <!-- Add pagination links -->
+                                                <div class="pagination">
+                                                    {{ $databaseInfos->links() }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

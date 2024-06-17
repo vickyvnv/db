@@ -18,7 +18,7 @@ class DbInstanceController extends Controller
      */
     public function index()
     {
-        $dbInstances = DbInstance::with('market')->latest()->get();
+        $dbInstances = DbInstance::with('market')->latest()->paginate(10);
 
         return view('admin.dbinstance.index', compact('dbInstances'));
     }

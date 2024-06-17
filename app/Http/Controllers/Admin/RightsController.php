@@ -17,7 +17,7 @@ class RightsController extends Controller
      */
     public function index()
     {
-        $rights = Right::all();
+        $rights = Right::paginate(4);
         return view('admin.rights.index', compact('rights'));
     }
 

@@ -73,6 +73,10 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
+                                                <!-- Add pagination links -->
+                                                <div class="pagination">
+                                                    {{ $rights->links() }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
