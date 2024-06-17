@@ -1,0 +1,11 @@
+[2024-06-17 10:30:40] DBI Request Details:
+Request ID: 102
+Requestor: User Requester
+Operator: USER SDE
+Source Code:
+insert into porcl1_t values (1, 'aaa','aaaa','aaa');
+Test Log:
+
+Status:
+Request is pending
+-----------------------------

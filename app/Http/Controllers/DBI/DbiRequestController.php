@@ -183,6 +183,15 @@ class DbiRequestController extends Controller
                 $dbiStatus->filled = 1;
                 $dbiStatus->save();
 
+                $dbiRequest->dbiRequestStatus()->updateOrCreate(
+                    ['request_id' => $dbiRequest->id],
+                    [
+                        'request_status' => 0,
+                        'operator_status' => 0,
+                        'dat_status' => 0,
+                    ]
+                );
+
                 // Log successful creation of DbiRequest
                 Log::channel('daily')->info('Dbi Request created successfully. DbiRequestController::store()' . 'User id:' . Auth::user()->id . ' email: ' . Auth::user()->email);
 
