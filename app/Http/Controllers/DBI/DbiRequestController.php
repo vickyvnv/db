@@ -643,7 +643,7 @@ class DbiRequestController extends Controller
                 DB::enableQueryLog();
 
                 // Create a new PDO connection
-                $dsn = "oci:dbname=//localhost:1521/ocispice";
+                $dsn = "oci:dbname=//saumitraserver:1521/POC1";
                 $username = $dbUser;
                 $password = $dbPassword;
 
