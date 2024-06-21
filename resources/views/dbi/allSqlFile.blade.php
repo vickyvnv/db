@@ -13,11 +13,11 @@
             <div class="content">
                 <div class="py-12">
                     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    @if (!empty($dbiRequestLog) && isset($dbiRequestLog[0]) && !is_null($dbiRequestLog[0]->dbi_request_id))
-                        <a href="{{ route('dbi.show', $dbiRequestLog[0]->dbi_request_id) }}" class="btn btn-secondary mb-3">Back</a>
-                    @endif  
+                    @if (!empty($dbiRequestsql) && isset($dbiRequestsql[0]) && !is_null($dbiRequestsql[0]->dbi_request_id))
+                        <a href="{{ route('dbi.show', $dbiRequestsql[0]->dbi_request_id) }}" class="btn btn-secondary mb-3">Back</a>
+                    @endif                       
                         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
-                            <h2 class="text-lg font-semibold mb-4">DBI Requests Logs And History</h2>
+                            <h2 class="text-lg font-semibold mb-4">DBI Requests SQL</h2>
 
 
                             <!-- Display DBI Requests Table -->
@@ -26,27 +26,19 @@
                                     <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Requestor Id</th>
-                                            <th>History</th>
-                                            <th>Environment</th>
-                                            <th>DB Instance</th>
-                                            <th>Date And Time</th>
-                                            <th>Logs</th>
+                                            <th>Requestor Name</th>
+                                            <th>SQL files</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($dbiRequestLog as $dbiRequest)
+                                        @foreach ($dbiRequestsql as $dbiRequest)
                                             <tr>
                                                 <td>{{ $dbiRequest->id }}</td>
                                                 <td>{{ $dbiRequest->dbiRequest->requestor->user_firstname}} {{ $dbiRequest->dbiRequest->requestor->user_lastname}}</td>
-                                                <td>{{ $dbiRequest->execution_status }}</td>
-                                                <td>{{ $dbiRequest->env }}</td>
-                                                <td>{{ $dbiRequest->db_instance }}</td>
-                                                <td>{{ $dbiRequest->created_at }}</td>
-                                                
+                                               
                                                 <td>
                                                     
-                                                    <a href="{{ route('dbi.showLogs', $dbiRequest->id) }}" class="btn btn-primary"  target="_blank">Logs</a>
+                                                    <a href="{{ route('dbi.showSQL', $dbiRequest->id) }}" class="btn btn-primary"  target="_blank">SQL FIle</a>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -55,7 +47,7 @@
                             </div>
                             <!-- Add pagination links -->
                             <div class="pagination">
-                                {{ $dbiRequestLog->links() }}
+                                {{ $dbiRequestsql->links() }}
                             </div>
                         </div>
                     </div>

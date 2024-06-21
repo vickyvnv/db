@@ -1,4 +1,9 @@
 <x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('DBI Requests') }}
+        </h2>
+    </x-slot>
     <div class="flex">
         <!-- Sidebar -->
         @include('partials.dbi-sidebar')
@@ -25,62 +30,66 @@
 
                             <!-- Display DBI Requests Table -->
                             <div class="table-container">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Requestor</th>
-                                            <th>Operator</th>
-                                            <th>Priority ID</th>
-                                            <th>Market</th>
-                                            <th>DBI Type</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
+                            <table class="table">
+                                <thead>
+                                    <tr class="text-center">
+                                        <th>ID</th>
+                                        <th>Requestor</th>
+                                        <th>Operator</th>
+                                        <th>Priority ID</th>
+                                        <th>Market</th>
+                                        <th>DBI Type</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($dbiRequests as $dbiRequest)
+                                        <tr class="text-center">
+                                            <td>{{ $dbiRequest->id }}</td>
+                                            <td>{{ $dbiRequest->requestor->email }}</td>
+                                            <td>{{ $dbiRequest->operator->email }}</td>
+                                            <td>{{ $dbiRequest->priority_id }}</td>
+                                            <td>{{ $dbiRequest->swVersionMarket->name }}</td>
+                                            <td>{{ $dbiRequest->dbi_type === "OT" ? "One Time" :  ($dbiRequest->dbi_type === "TP" ? "Template" : "Recurring")}}</td>
+                                            <td>
+                                                @if($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0)
+                                                Request submitted to SDE
+                                                @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 2 && $dbiRequest->dbiRequestStatus->dat_status === 0)
+                                                Request rejected by SDE
+                                                @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 0)
+                                                Request Approved by SDE
+                                                @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1 && ($dbiRequest->prod_execution == 1 || $dbiRequest->prod_execution == 0))
+                                                Request Approved by DAT
+                                                @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1 && $dbiRequest->prod_execution == 2)
+                                                Error while Execution on Prod DB
+                                                @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 2)
+                                                Request rejected by DAT
+                                                @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0 && $dbiRequest->pre_execution == 2)
+                                                Pre DB Execution is failed
+                                                @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0 && ($dbiRequest->pre_execution == 1 || $dbiRequest->pre_execution == 0))
+                                                DBI Request Pending
+                                                @elseif($dbiRequest->dbiRequestStatus->request_status == 3 && $dbiRequest->dbiRequestStatus->operator_status == 3 && $dbiRequest->dbiRequestStatus->dat_status == 3)
+                                                DBI Request Changes commited on Production
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('dbi.show', $dbiRequest->id) }}" class="btn btn-primary">View</a>
+                                                @if(Auth::user()->userRoles[0]->name !== 'SDE' && Auth::user()->id == $dbiRequest->requestor_id && ($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0) || ($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 2 && $dbiRequest->dbiRequestStatus->dat_status == 0) || ($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 2))
+                                                <a href="{{ route('dbi.edit', $dbiRequest->id) }}" class="btn btn-secondary">Edit</a><br>
+                                                @elseif(Auth::user()->userRoles[0]->name !== 'SDE' && Auth::user()->id == $dbiRequest->requestor_id && ($dbiRequest->dbiRequestStatus->request_status == 3 && $dbiRequest->dbiRequestStatus->operator_status == 3 && $dbiRequest->dbiRequestStatus->dat_status == 3) &&  $dbiRequest->dbi_type == "TP")
+                                                <br><br><a href="{{ route('dbi.edit', $dbiRequest->id) }}" class="btn btn-secondary">Use Template</a>
+                                                @endif
+                                                <!-- Add delete button with form submission if needed -->
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($dbiRequests as $dbiRequest)
-                                            <tr>
-                                                <td>{{ $dbiRequest->id }}</td>
-                                                <td>{{ $dbiRequest->requestor->email }}</td>
-                                                <td>{{ $dbiRequest->operator->email }}</td>
-                                                <td>{{ $dbiRequest->priority_id }}</td>
-                                                <td>{{ $dbiRequest->swVersionMarket->name }}</td>
-                                                <td>{{ $dbiRequest->dbi_type }}</td>
-                                                <td>
-                                                    @if($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0)
-                                                        Request submitted to SDE
-                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 2 && $dbiRequest->dbiRequestStatus->dat_status === 0)
-                                                        Request rejected by SDE
-                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 0)
-                                                        Request Approved by SDE
-                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1 && ($dbiRequest->prod_execution == 1 || $dbiRequest->prod_execution == 0))
-                                                        Request Approved by DAT
-                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 1 && $dbiRequest->dbiRequestStatus->operator_status == 1 && $dbiRequest->dbiRequestStatus->dat_status == 1 && $dbiRequest->prod_execution == 2)
-                                                        Error while Execution on Prod DB
-                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 2)
-                                                        Request rejected by DAT
-                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0 && $dbiRequest->pre_execution == 2)
-                                                        Pre DB Execution is failed
-                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0 && ($dbiRequest->pre_execution == 1 || $dbiRequest->pre_execution == 0))
-                                                        DBI Request Pending
-                                                    @elseif($dbiRequest->dbiRequestStatus->request_status == 3 && $dbiRequest->dbiRequestStatus->operator_status == 3 && $dbiRequest->dbiRequestStatus->dat_status == 3)
-                                                        DBI Request Changes commited on Production
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    <a href="{{ route('dbi.show', $dbiRequest->id) }}" class="btn btn-primary">View</a>
-                                                    @if($dbiRequest->dbiRequestStatus->request_status == 11 && $dbiRequest->dbiRequestStatus->operator_status == 11 && $dbiRequest->dbiRequestStatus->dat_status == 11)
-
-                                                    @elseif(Auth::user()->userRoles[0]->name !== 'SDE' && Auth::user()->id == $dbiRequest->requestor_id && ($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 0) || ($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 2 && $dbiRequest->dbiRequestStatus->dat_status == 0) || ($dbiRequest->dbiRequestStatus->request_status == 0 && $dbiRequest->dbiRequestStatus->operator_status == 0 && $dbiRequest->dbiRequestStatus->dat_status == 2) || ($dbiRequest->dbiRequestStatus->request_status == 10 && $dbiRequest->dbiRequestStatus->operator_status == 12 && $dbiRequest->dbiRequestStatus->dat_status == 10) || ($dbiRequest->dbiRequestStatus->request_status == 10 && $dbiRequest->dbiRequestStatus->operator_status == 10 && $dbiRequest->dbiRequestStatus->dat_status == 12))
-                                                    <a href="{{ route('dbi.edit', $dbiRequest->id) }}" class="btn btn-secondary">Edit</a>
-                                                    @endif
-                                                    <!-- Add delete button with form submission if needed -->
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            <!-- Add pagination links -->
+                            <div class="pagination">
+                                {{ $dbiRequests->links() }}
+                            </div>
                             </div>
                         </div>
                     </div>
@@ -92,6 +101,9 @@
 
 
 <style>
+    .text-center {
+        text-align: center;
+    }
     .edit-button {
         color: inherit;
     text-decoration: inherit;

@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-red-600 dark:bg-red-800 border-b border-red-700 dark:border-red-900">
+<nav x-data="{ open: false }" class="vodafone-nav">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -12,30 +12,28 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link :href="route('home')" :active="request()->routeIs('home')"
-                                class="text-white hover:bg-red-500 px-3 py-2 rounded-md text-lg font-bold {{ request()->routeIs('home') ? 'bg-red-700' : '' }}">
+                    <x-nav-link :href="route('home')" :active="request()->routeIs('home')" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
                         {{ __('ADBM Team') }}
                     </x-nav-link>
                 </div>
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link :href="route('dbi.index')" :active="request()->routeIs('dbi.index')"
-                                class="text-white hover:bg-red-500 px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('dbi.index') ? 'bg-red-700' : '' }}">
+                    <x-nav-link :href="route('dbi.index')" :active="request()->routeIs('dbi.index')" class="nav-link {{ request()->routeIs('dbi') ? 'active' : '' }}">
                         {{ __('DBI Tool') }}
                     </x-nav-link>
                 </div>
                 @if(Auth::user()->team_id == 4)
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('admin')"
-                                class="text-white hover:bg-red-500 px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin') ? 'bg-red-700' : '' }}">
+                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')" class="nav-link {{ request()->routeIs('admin') ? 'active' : '' }}">
                         {{ __('Administration') }}
                     </x-nav-link>
                 </div>
                 @endif
             </div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ml-6">
-                <form method="POST" action="{{ route('logout') }}">
+
+            <!-- Hamburger -->
+            <div class="-mr-2 flex items-center sm:hidden">
+            <form method="POST" action="{{ route('logout') }}">
                     @csrf
 
                     <x-dropdown-link :href="route('logout')"
@@ -45,16 +43,6 @@
                         {{ __('Log Out') }}
                     </x-dropdown-link>
                 </form>
-            </div>
-
-            <!-- Hamburger -->
-            <div class="-mr-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-white hover:bg-red-500 focus:outline-none focus:bg-red-500 focus:text-white transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
             </div>
         </div>
     </div>
@@ -98,8 +86,43 @@
 </nav>
 
 <style>
-    /* Custom styles for active tab */
-    .active-tab {
-        background-color: #b91c1c;
+    .vodafone-nav {
+        background-color: #e60000;
+        border-bottom: 1px solid #b60000;
     }
+
+    .vodafone-nav .nav-link {
+        color: white;
+        font-weight: bold;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        transition: background-color 0.2s;
+    }
+
+    .vodafone-nav .nav-link:hover {
+        background-color: #b60000;
+    }
+
+    .vodafone-nav .nav-link.active {
+        background-color: #9e0000;
+    }
+
+    .vodafone-nav .dropdown-link {
+        color: white;
+    }
+
+    .vodafone-nav .dropdown-link:hover {
+        background-color: #b60000;
+    }
+
+    .vodafone-nav .hamburger-button {
+        color: white;
+    }
+
+    .vodafone-nav .hamburger-button:hover,
+    .vodafone-nav .hamburger-button:focus {
+        background-color: #b60000;
+    }
+
+    /* Remove the .active-tab class as it's no longer needed */
 </style>

@@ -1,4 +1,9 @@
 <x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('DBI Requests') }}
+        </h2>
+    </x-slot>
     <div class="flex">
     <!-- Sidebar -->
     @include('partials.dbi-sidebar')
@@ -23,8 +28,8 @@
                                                     <!-- Market -->
                                                     <div class="form-group">
                                                         <label for="sw_version">Market:</label>
-                                                        <select name="sw_version" id="sw_version" class="form-control @error('sw_version') is-invalid @enderror">
-                                                            <option value="">Select Market {{$selectedMarket}}</option>
+                                                        <select name="sw_version" id="sw_version" class="form-control @error('sw_version') is-invalid @enderror" {{ $selectedMarket == '' ? '' : 'disabled'}}>
+                                                            <option value="">Select Market</option>
                                                             @foreach ($markets as $market)
                                                                 <option value="{{ $market->id }}" {{ $selectedMarket == $market->id ? 'selected' : '' }}>{{ $market->name }}</option>
                                                             @endforeach
@@ -48,7 +53,7 @@
                                                 <!-- User Roles -->
                                                 <div class="mt-4">
                                                     <label for="roles" class="block font-medium text-sm text-gray-700">Prod Instance</label>
-                                                    <select id="prod-instance-container" name="prod_instance" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 @error('prod_instance') is-invalid @enderror">
+                                                    <select id="prod-instance-container" name="prod_instance" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 @error('prod_instance') is-invalid @enderror" {{ $selectedMarket == '' ? '' : 'disabled'}}>
                                                         <option value="">Please select Prod Instance</option>
                                                         <!-- Populate options based on the selected market -->
                                                     </select>

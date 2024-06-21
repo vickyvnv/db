@@ -65,6 +65,11 @@ class DbiRequest extends Model
 
     public function dbiRequestLog()
     {
-        return $this->hasOne(DbiRequestStatus::class, 'dbi_request_id');
+        return $this->hasOne(DbiRequestLog::class, 'dbi_request_id');
+    }
+
+    public function dbiRequestSQL()
+    {
+        return $this->hasOne(DbiRequestSQL::class, 'dbi_request_id');
     }
 }

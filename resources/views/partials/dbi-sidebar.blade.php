@@ -4,13 +4,13 @@
             <a href="#" class="sidebar-link">
                 <i class="fas fa-users"></i>
                 <span>DBI</span>
-                <i class="fas fa-chevron-down dropdown-icon"></i>
             </a>
             <ul class="submenu">
                 <li><a href="{{ route('dbi.index') }}">DBI List</a></li>
                 @if(Auth::user()->userRoles->first()->name == 'Requester' || Auth::user()->userRoles->first()->name == 'DAT')
-                    <li><a href="{{ route('dbi.create') }}">DBI New User</a></li>
+                    <li><a href="{{ route('dbi.create') }}">New DBI</a></li>
                 @endif
+                <li><a href="{{ route('dbi.searchdbi') }}">DBI Search</a></li>
             </ul>
         </li>
     </ul>
@@ -25,17 +25,14 @@
         float: left;
         overflow-y: auto;
     }
-
     .sidebar-menu {
         list-style-type: none;
         padding: 0;
         margin: 0;
     }
-
     .sidebar-menu > li {
         margin-bottom: 10px;
     }
-
     .sidebar-link {
         display: flex;
         align-items: center;
@@ -45,26 +42,20 @@
         transition: background-color 0.3s;
         border-radius: 4px;
     }
-
     .sidebar-link:hover {
         background-color: #34495e;
     }
-
     .sidebar-link i {
         margin-right: 10px;
     }
-
     .submenu {
         list-style-type: none;
         margin: 0;
         padding: 0;
-        display: none;
     }
-
     .submenu li {
         margin-left: 30px;
     }
-
     .submenu li a {
         display: block;
         padding: 8px 15px;
@@ -72,22 +63,8 @@
         text-decoration: none;
         transition: color 0.3s;
     }
-
     .submenu li a:hover {
         color: #ecf0f1;
-    }
-
-    .dropdown-icon {
-        margin-left: auto;
-        transition: transform 0.3s;
-    }
-
-    .sidebar-menu > li:hover .submenu {
-        display: block;
-    }
-
-    .sidebar-menu > li:hover .dropdown-icon {
-        transform: rotate(180deg);
     }
 </style>
 

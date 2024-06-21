@@ -1,4 +1,9 @@
 <x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('DBI Requests') }}
+        </h2>
+    </x-slot>
     <div class="flex">
         <!-- Sidebar -->
         @include('partials.dbi-sidebar')
@@ -16,112 +21,112 @@
                                         <div class="col-md-10">
                                             <div class="card-body d-flex justify-content-center">
                                                 <div class="card-body">
-                                                    <form method="POST" action="{{ route('dbi.update', $dbiRequest->id) }}" class="custom-form">
-                                                        @csrf
-                                                        @method('PUT') 
+                                                <form method="POST" action="{{ route('dbi.update', $dbiRequest->id) }}" class="custom-form">
+                                                    @csrf
+                                                    @method('PUT')
 
-                                                        <div class="form-row">
-                                                            <!-- DBI Category -->
-                                                            <div class="form-group">
-                                                                <label>DBI Category:</label>
-                                                                <div class="input-group">
-                                                                    @foreach ($categories as $category)
-                                                                    <div class="radio-option">
-                                                                        <input type="radio" id="{{ $category->subname }}" name="category" value="{{ $category->subname }}" {{ $dbiRequest->category === $category->subname ? 'checked' : '' }}>
-                                                                        <label for="{{ $category->name }}">{{ $category->name }}</label>
-                                                                    </div>
-                                                                    @endforeach
-                                                                </div>
-                                                                @error('category')
-                                                                <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                                                @enderror
-                                                            </div>
-
-                                                            <!-- DBI Type -->
-                                                            <div class="form-group" id="dbiTypeGroup">
-                                                                <label for="name">DBI Type:</label>
-                                                                <select name="dbi_type" class="form-control">
-                                                                    @foreach ($dbiTypes as $dbiType)
-                                                                    <option value="{{ $dbiType->subname }}" {{ $dbiRequest->dbi_type === $dbiType->subname ? 'selected' : '' }}>{{ $dbiType->name }}</option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
-
-                                                            <!-- Priority -->
-                                                            <div class="form-group">
-                                                                <label>Priority:</label>
-                                                                <select name="priority_id" class="form-control">
-                                                                    @foreach ($priorities as $priority)
-                                                                    <option value="{{ $priority->name }}" {{ $dbiRequest->priority_id === $priority->name ? 'selected' : '' }}>{{ $priority->name }}</option>
-                                                                    @endforeach
-                                                                </select>
-                                                                @error('priority_id')
-                                                                <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                                                @enderror
-                                                            </div>
-
-                                                            <!-- TT ID -->
-                                                            <div class="form-group">
-                                                                <label>TT Number:</label>
-                                                                <input type="text" name="tt_id" class="form-control @error('tt_id') is-invalid @enderror" value="{{ $dbiRequest->tt_id }}">
-                                                                @error('tt_id')
-                                                                <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                                                @enderror
-                                                            </div>
-
-                                                            <!-- Serf CR ID -->
-                                                            <div class="form-group">
-                                                                <label>Serf/CR:</label>
-                                                                <input type="text" name="serf_cr_id" class="form-control @error('serf_cr_id') is-invalid @enderror" value="{{ $dbiRequest->serf_cr_id }}">
-                                                                @error('serf_cr_id')
-                                                                <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                                                @enderror
-                                                            </div>
-
-                                                            <!-- Reference DBI -->
-                                                            <div class="form-group">
-                                                                <label>Reference DBI:</label>
-                                                                <input type="text" name="reference_dbi" class="form-control @error('reference_dbi') is-invalid @enderror" value="{{ $dbiRequest->reference_dbi }}">
-                                                                @error('reference_dbi')
-                                                                <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                                                @enderror
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="form-row">
-                                                            <!-- Brief Description -->
-                                                            <div class="form-group">
-                                                                <label>Brief Description:</label>
-                                                                <textarea name="brief_desc" rows="4" class="form-control @error('brief_desc') is-invalid @enderror" maxlength="200">{{ $dbiRequest->brief_desc }}</textarea>
-                                                                @error('brief_desc')
-                                                                <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                                                @enderror
-                                                            </div>
-
-                                                            <!-- Problem Description -->
-                                                            <div class="form-group">
-                                                                <label>Problem Description:</label>
-                                                                <textarea name="problem_desc" rows="4" class="form-control @error('problem_desc') is-invalid @enderror" maxlength="1000">{{ $dbiRequest->problem_desc }}</textarea>
-                                                                @error('problem_desc')
-                                                                <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                                                @enderror
-                                                            </div>
-
-                                                            <!-- Business Impact -->
-                                                            <div class="form-group">
-                                                                <label>Business Impact:</label>
-                                                                <textarea name="business_impact" rows="4" class="form-control @error('business_impact') is-invalid @enderror" maxlength="1000">{{ $dbiRequest->business_impact }}</textarea>
-                                                                @error('business_impact')
-                                                                <span class="invalid-feedback" role="alert">{{ $message }}</span>
-                                                                @enderror
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Submit Button -->
+                                                    <div class="form-row">
+                                                        <!-- DBI Category -->
                                                         <div class="form-group">
-                                                            <button type="submit" class="btn btn-primary">Update</button>
+                                                            <label>DBI Category:</label>
+                                                            <div class="input-group">
+                                                                @foreach ($categories as $category)
+                                                                <div class="radio-option">
+                                                                    <input type="radio" id="{{ $category->subname }}" name="category" value="{{ $category->subname }}" {{ $dbiRequest->category === $category->subname ? 'checked' : '' }} disabled>
+                                                                    <label for="{{ $category->name }}">{{ $category->name }}</label>
+                                                                </div>
+                                                                @endforeach
+                                                            </div>
+                                                            @error('category')
+                                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                            @enderror
                                                         </div>
-                                                    </form>
+
+                                                        <!-- DBI Type -->
+                                                        <div class="form-group" id="dbiTypeGroup">
+                                                            <label for="name">DBI Type:</label>
+                                                            <select name="dbi_type" class="form-control" disabled>
+                                                                @foreach ($dbiTypes as $dbiType)
+                                                                <option value="{{ $dbiType->subname }}" {{ $dbiRequest->dbi_type === $dbiType->subname ? 'selected' : '' }}>{{ $dbiType->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+
+                                                        <!-- Priority -->
+                                                        <div class="form-group">
+                                                            <label>Priority:</label>
+                                                            <select name="priority_id" class="form-control">
+                                                                @foreach ($priorities as $priority)
+                                                                <option value="{{ $priority->name }}" {{ $dbiRequest->priority_id === $priority->name ? 'selected' : '' }}>{{ $priority->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                            @error('priority_id')
+                                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                            @enderror
+                                                        </div>
+
+                                                        <!-- TT ID -->
+                                                        <div class="form-group">
+                                                            <label>TT Number:</label>
+                                                            <input type="text" name="tt_id" class="form-control @error('tt_id') is-invalid @enderror" value="{{ $dbiRequest->tt_id }}" disabled>
+                                                            @error('tt_id')
+                                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                            @enderror
+                                                        </div>
+
+                                                        <!-- Serf CR ID -->
+                                                        <div class="form-group">
+                                                            <label>Serf/CR:</label>
+                                                            <input type="text" name="serf_cr_id" class="form-control @error('serf_cr_id') is-invalid @enderror" value="{{ $dbiRequest->serf_cr_id }}" disabled>
+                                                            @error('serf_cr_id')
+                                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                            @enderror
+                                                        </div>
+
+                                                        <!-- Reference DBI -->
+                                                        <div class="form-group">
+                                                            <label>Reference DBI:</label>
+                                                            <input type="text" name="reference_dbi" class="form-control @error('reference_dbi') is-invalid @enderror" value="{{ $dbiRequest->reference_dbi }}" disabled>
+                                                            @error('reference_dbi')
+                                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-row">
+                                                        <!-- Brief Description -->
+                                                        <div class="form-group">
+                                                            <label>Brief Description:</label>
+                                                            <textarea name="brief_desc" rows="4" class="form-control @error('brief_desc') is-invalid @enderror" maxlength="200">{{ $dbiRequest->brief_desc }}</textarea>
+                                                            @error('brief_desc')
+                                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                            @enderror
+                                                        </div>
+
+                                                        <!-- Problem Description -->
+                                                        <div class="form-group">
+                                                            <label>Problem Description:</label>
+                                                            <textarea name="problem_desc" rows="4" class="form-control @error('problem_desc') is-invalid @enderror" maxlength="1000">{{ $dbiRequest->problem_desc }}</textarea>
+                                                            @error('problem_desc')
+                                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                            @enderror
+                                                        </div>
+
+                                                        <!-- Business Impact -->
+                                                        <div class="form-group">
+                                                            <label>Business Impact:</label>
+                                                            <textarea name="business_impact" rows="4" class="form-control @error('business_impact') is-invalid @enderror" maxlength="1000" disabled>{{ $dbiRequest->business_impact }}</textarea>
+                                                            @error('business_impact')
+                                                            <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Submit Button -->
+                                                    <div class="form-group">
+                                                        <button type="submit" class="btn btn-primary">Update</button>
+                                                    </div>
+                                                </form>
                                                 </div>
                                             </div>
                                         </div>
@@ -135,8 +140,18 @@
         </div>
     </div>
 </x-app-layout>
-
+<script>
+    // Disable the input fields except priority_id, brief_desc, and problem_desc
+    document.getElementById('dbi_type').disabled = true;
+    document.getElementById('tt_id').disabled = true;
+    document.getElementById('serf_cr_id').disabled = true;
+    document.getElementById('reference_dbi').disabled = true;
+    document.getElementById('business_impact').disabled = true;
+</script>
 <style>
+    .invalid-feedback {
+        color: red;
+    }
     .card {
         margin-top: 20px;
     }

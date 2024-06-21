@@ -36,6 +36,7 @@ Route::middleware('auth')->group(function () {
     
     // DBI ROutes
     Route::resource('dbi-tool/dbi', DbiRequestController::class);
+    Route::get('/dbi-tool/searchdbi', [DbiRequestController::class, 'searchdbi'])->name('dbi.searchdbi');
     Route::get('/dbi-tool/dbi/{dbiRequest}/selectdb', [DbiRequestController::class, 'selectdb'])->name('dbi.selectdb');
     Route::put('/dbi-tool/dbi/{dbiRequest}/selectdb', [DbiRequestController::class, 'updateSelectDb'])->name('dbi.updateSelectDb');
     Route::get('/dbi-tool/dbi/{dbiRequest}/createsqlfile', [DbiRequestController::class, 'createsqlfile'])->name('dbi.createsqlfile');
@@ -49,6 +50,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/dbi-tool/dbi/{dbiRequest}/sdeApprovedOrReject', [DbiRequestController::class, 'sdeApprovedOrReject'])->name('dbi.sdeApprovedOrReject');
     Route::get('/dbi-tool/dbi/dbi-request-logs/{id}', [DbiRequestController::class, 'showLogs'])->name('dbi.showLogs');
     Route::get('/dbi-tool/dbi/dbi-history-logs/{id}', [DbiRequestController::class, 'allLogs'])->name('dbi.allLogs');
+    Route::get('/dbi-tool/dbi/dbi-sql-files/{id}', [DbiRequestController::class, 'allSqlFile'])->name('dbi.allSqlFile');
+    Route::get('/dbi-tool/dbi/dbi-show-files/{id}', [DbiRequestController::class, 'showSQL'])->name('dbi.showSQL');
     Route::post('/dbi-tool/dbi/{dbiRequest}/datApprovedOrReject', [DbiRequestController::class, 'datApprovedOrReject'])->name('dbi.datApprovedOrReject');
 });
 

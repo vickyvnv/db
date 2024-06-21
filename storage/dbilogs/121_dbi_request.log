@@ -1,13 +1,12 @@
-[2024-06-21 09:21:36] DBI Request Details:
-Request ID: 87
+[2024-06-21 09:30:53] DBI Request Details:
+Request ID: 121
 Requestor: User Requester
 Operator: USER SDE
 Source Code:
-insert into porcl1_t values (1,'aaa','aaaa','aaa');
-insert into porcl1_t values (2,'aaa','aaaa','aaa');
+insert into porcl1_t values (114, 'aaa','aaaa','aaa');
 Test Log:
-Date: Sun Jun 16 12:55:22 2024
-DBI No.: 87
+Date: Thu Jun 20 11:15:31 2024
+DBI No.: 121
 DB: PreProd DB
 DB-User: mndbarw
 ======================================================
@@ -25,27 +24,25 @@ Copyright (c) 1982, 2022, Oracle.  All rights reserved.
 Connected to:
 Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
 
-SQL> SAVEPOINT before_inserts;
+SQL> BEGIN TRANSACTION;
+SQL> SAVEPOINT before_changes;
 Savepoint created.
 
-SQL> ALTER SESSION SET CURRENT_SCHEMA = U_PORCL1;
+SQL> ALTER SESSION SET CURRENT_SCHEMA = U_TORCL1;
 Session altered.
 
-SQL> insert into porcl1_t values (1,'aaa','aaaa','aaa');
+SQL> insert into porcl1_t values (114, 'aaa','aaaa','aaa');
 1 row(s) affected.
 
-SQL> insert into porcl1_t values (2,'aaa','aaaa','aaa');
-1 row(s) affected.
-
-SQL> ROLLBACK TO SAVEPOINT before_inserts;
+SQL> ROLLBACK TO SAVEPOINT before_changes;
 Rollback complete.
 
 SQL> QUIT
 PL/SQL procedure successfully completed.
 
 Prod Log:
-Date: Sun Jun 16 13:06:19 2024
-DBI No.: 87
+Date: Thu Jun 20 11:24:13 2024
+DBI No.: 121
 DB: Prod DB
 DB-User: mndbarw
 ======================================================
@@ -63,17 +60,18 @@ Copyright (c) 1982, 2022, Oracle.  All rights reserved.
 Connected to:
 Oracle Database 12c Enterprise Edition Release 12.2.0.1.0 - 64bit Production
 
-SQL> SAVEPOINT before_inserts;
+SQL> BEGIN TRANSACTION;
+SQL> SAVEPOINT before_changes;
 Savepoint created.
 
 SQL> ALTER SESSION SET CURRENT_SCHEMA = U_PORCL1;
 Session altered.
 
-SQL> insert into porcl1_t values (1,'aaa','aaaa','aaa');
+SQL> insert into porcl1_t values (114, 'aaa','aaaa','aaa');
 1 row(s) affected.
 
-SQL> insert into porcl1_t values (2,'aaa','aaaa','aaa');
-1 row(s) affected.
+SQL> COMMIT;
+Commit complete.
 
 SQL> QUIT
 PL/SQL procedure successfully completed.

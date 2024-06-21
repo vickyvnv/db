@@ -39,3 +39,11 @@ ALTER TABLE "DBI_REQUEST_STATUS" MODIFY "DAT_COMMENT" VARCHAR2(4000);
 
 php artisan vendor:publish --tag=laravel-pagination
 
+
+CREATE TABLE dbi_request_sql (
+    id NUMBER(10) GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    dbi_request_id NUMBER(10) NOT NULL,
+    sql_file CLOB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

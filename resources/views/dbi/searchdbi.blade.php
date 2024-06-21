@@ -9,53 +9,60 @@
         @include('partials.dbi-sidebar')
 
         <!-- Main Content -->
-        <div class="w-3/4 overflow-x-auto">
+        <div class="w-3/4">
             <div class="content">
                 <div class="py-12">
                     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    @if (!empty($dbiRequestLog) && isset($dbiRequestLog[0]) && !is_null($dbiRequestLog[0]->dbi_request_id))
-                        <a href="{{ route('dbi.show', $dbiRequestLog[0]->dbi_request_id) }}" class="btn btn-secondary mb-3">Back</a>
-                    @endif  
                         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
-                            <h2 class="text-lg font-semibold mb-4">DBI Requests Logs And History</h2>
+                            <h2 class="text-lg font-semibold mb-4">User List</h2>
 
+                            <!-- Search Form -->
+                            <form action="{{ route('users.index') }}" method="GET">
+                                <div class="form-row">
+                                    <!-- First Row -->
+                                    <div class="form-group">
+                                        <label for="username">Username</label>
+                                        <input type="text" name="username" id="username" value="{{ request()->input('username') }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="phone">Phone</label>
+                                        <input type="text" name="phone" id="phone" value="{{ request()->input('phone') }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="id">ID</label>
+                                        <input type="text" name="id" id="id" value="{{ request()->input('id') }}">
+                                    </div>
+                                    <!-- Second Row -->
+                                    <div class="form-group">
+                                        <label for="email">Email</label>
+                                        <input type="text" name="email" id="email" value="{{ request()->input('email') }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="company">Company</label>
+                                        <input type="text" name="company" id="company" value="{{ request()->input('company') }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="department">Department</label>
+                                        <input type="text" name="department" id="department" value="{{ request()->input('department') }}">
+                                    </div>
+                                    <!-- Third Row -->
+                                    <div class="form-group">
+                                        <label for="position">Position</label>
+                                        <input type="text" name="position" id="position" value="{{ request()->input('position') }}">
+                                    </div>
+                                </div>
+                                <button type="submit">Search</button>
+                            </form>
+                            </br>
+                            @if (session('success'))
+                                <div class="alert alert-success" role="alert">
+                                    {{ session('success') }}
+                                </div>
+                            @endif
 
-                            <!-- Display DBI Requests Table -->
-                            <div class="table-container">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Requestor Id</th>
-                                            <th>History</th>
-                                            <th>Environment</th>
-                                            <th>DB Instance</th>
-                                            <th>Date And Time</th>
-                                            <th>Logs</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($dbiRequestLog as $dbiRequest)
-                                            <tr>
-                                                <td>{{ $dbiRequest->id }}</td>
-                                                <td>{{ $dbiRequest->dbiRequest->requestor->user_firstname}} {{ $dbiRequest->dbiRequest->requestor->user_lastname}}</td>
-                                                <td>{{ $dbiRequest->execution_status }}</td>
-                                                <td>{{ $dbiRequest->env }}</td>
-                                                <td>{{ $dbiRequest->db_instance }}</td>
-                                                <td>{{ $dbiRequest->created_at }}</td>
-                                                
-                                                <td>
-                                                    
-                                                    <a href="{{ route('dbi.showLogs', $dbiRequest->id) }}" class="btn btn-primary"  target="_blank">Logs</a>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
                             <!-- Add pagination links -->
                             <div class="pagination">
-                                {{ $dbiRequestLog->links() }}
+                               
                             </div>
                         </div>
                     </div>
@@ -66,8 +73,9 @@
 </x-app-layout>
 
 
+
 <style>
-    .edit-button {
+     .edit-button {
         color: inherit;
     text-decoration: inherit;
     padding: 12px 20px;
@@ -163,7 +171,7 @@ button:hover {
         border-bottom: 1px solid #ddd;
     }
 
-    .table th {
+    .table thead th {
         background-color: #ed0929;
         color: white;
     }
