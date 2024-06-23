@@ -1,14 +1,15 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 
-class User extends Authenticatable implements AuthenticatableContract{
-    protected $table = 'users'; // Assuming 'users' is the name of your table in Oracle
-
+class User extends Authenticatable implements AuthenticatableContract
+{
+    protected $table = 'users';
+    
     protected $fillable = [
         'email',
         'password',
@@ -41,7 +42,7 @@ class User extends Authenticatable implements AuthenticatableContract{
         'email_verified_at' => 'datetime',
     ];
 
-        public function userRoles()
+    public function userRoles()
     {
         return $this->belongsToMany(Role::class, 'user_role_right', 'user_id', 'role_id')->withTimestamps();
     }
@@ -59,5 +60,35 @@ class User extends Authenticatable implements AuthenticatableContract{
     public function pwgroups()
     {
         return $this->belongsToMany(Pwgroup::class, 'pwgroup_user');
+    }
+
+    /**
+     * Check if the user has a DAT role.
+     *
+     * @return bool
+     */
+    public function isDAT()
+    {
+        return $this->userRoles()->where('name', 'DAT')->exists();
+    }
+
+    /**
+     * Check if the user has an SDE role.
+     *
+     * @return bool
+     */
+    public function isSDE()
+    {
+        return $this->userRoles()->where('name', 'SDE')->exists();
+    }
+
+    /**
+     * Check if the user has a Requester role.
+     *
+     * @return bool
+     */
+    public function isRequester()
+    {
+        return $this->userRoles()->where('name', 'Requester')->exists();
     }
 }

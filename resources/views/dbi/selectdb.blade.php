@@ -26,9 +26,10 @@
 
                                                 <div class="form-row">
                                                     <!-- Market -->
+                                                    <!-- Market -->
                                                     <div class="form-group">
                                                         <label for="sw_version">Market:</label>
-                                                        <select name="sw_version" id="sw_version" class="form-control @error('sw_version') is-invalid @enderror" {{ $selectedMarket == '' ? '' : 'disabled'}}>
+                                                        <select name="sw_version" id="sw_version" class="form-control @error('sw_version') is-invalid @enderror">
                                                             <option value="">Select Market</option>
                                                             @foreach ($markets as $market)
                                                                 <option value="{{ $market->id }}" {{ $selectedMarket == $market->id ? 'selected' : '' }}>{{ $market->name }}</option>
@@ -51,11 +52,14 @@
                                                     </div>
                                                 </div>
                                                 <!-- User Roles -->
+                                                <!-- Prod Instance -->
                                                 <div class="mt-4">
-                                                    <label for="roles" class="block font-medium text-sm text-gray-700">Prod Instance</label>
-                                                    <select id="prod-instance-container" name="prod_instance" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 @error('prod_instance') is-invalid @enderror" {{ $selectedMarket == '' ? '' : 'disabled'}}>
-                                                        <option value="">Please select Prod Instance</option>
-                                                        <!-- Populate options based on the selected market -->
+                                                    <label for="prod_instance" class="block font-medium text-sm text-gray-700">Prod Instance</label>
+                                                    <select id="prod-instance-container" name="prod_instance" class="form-control @error('prod_instance') is-invalid @enderror">
+                                                        <option value="">Select Prod Instance</option>
+                                                        @if($selectedProdInstance)
+                                                            <option value="{{ $selectedProdInstance }}" selected>{{ $selectedProdInstance }}</option>
+                                                        @endif
                                                     </select>
                                                     @error('prod_instance')
                                                         <span class="invalid-feedback" role="alert">{{ $message }}</span>
@@ -98,7 +102,125 @@
     </div>
 </div>
 </x-app-layout>
+<script>
+$(document).ready(function() {
+    const swVersionSelect = $('#sw_version');
+    const dbUserInput = $('#db-user-input');
+    const dbUserInput1 = $('#db-user-input1');
+    const prodInstanceSelect = $('#prod-instance-container');
+    const testInstanceInput = $('#test-instance-container');
+    const testInstanceInput1 = $('#test-instance-container1');
 
+    function toggleFieldsState() {
+        const isSwVersionEmpty = swVersionSelect.val() === '';
+        const isDbUserEmpty = dbUserInput.val() === '';
+        const isProdInstanceEmpty = prodInstanceSelect.val() === '';
+
+        // Disable fields if they have a value
+        swVersionSelect.prop('disabled', !isSwVersionEmpty);
+        dbUserInput1.prop('disabled', !isDbUserEmpty);
+        prodInstanceSelect.prop('disabled', !isProdInstanceEmpty);
+
+        // Test instance is always disabled
+        testInstanceInput1.prop('disabled', true);
+    }
+
+    // Initial state
+    toggleFieldsState();
+
+    swVersionSelect.change(function() {
+        var swVersion = $(this).val();
+        
+        if (swVersion === '') {
+            dbUserInput.val('');
+            dbUserInput1.val('');
+            prodInstanceSelect.html('<option value="">Select Prod Instance</option>');
+            testInstanceInput.val('');
+            testInstanceInput1.val('');
+            toggleFieldsState();
+            return;
+        }
+
+        fetch('/dbi-tool/dbi/get-db-user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                sw_version: swVersion
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            if (data && data.dbuser && data.dbuser.length > 0) {
+                dbUserInput.val(data.dbuser[0].db_user_name);
+                dbUserInput1.val(data.dbuser[0].db_user_name);
+
+                prodInstanceSelect.html('<option value="">Select Prod Instance</option>');
+                data.marketDB.forEach(instance => {
+                    prodInstanceSelect.append($('<option>', {
+                        value: instance.prod,
+                        text: instance.prod
+                    }));
+                });
+
+                // Set the prod instance to the previously selected value if it exists
+                if ('{{ $selectedProdInstance }}') {
+                    prodInstanceSelect.val('{{ $selectedProdInstance }}');
+                }
+
+                if (data.marketDB.length > 0) {
+                    const selectedProdInstance = prodInstanceSelect.val();
+                    const selectedInstance = data.marketDB.find(instance => instance.prod === selectedProdInstance);
+                    if (selectedInstance) {
+                        testInstanceInput.val(selectedInstance.preprod);
+                        testInstanceInput1.val(selectedInstance.preprod);
+                    }
+                }
+            } else {
+                dbUserInput.val('');
+                dbUserInput1.val('');
+                prodInstanceSelect.html('<option value="">Select Prod Instance</option>');
+                testInstanceInput.val('');
+                testInstanceInput1.val('');
+                alert('No DB User found');
+            }
+
+            toggleFieldsState();
+        })
+        .catch(error => {
+            console.error('Error fetching DB User:', error);
+            dbUserInput.val('');
+            dbUserInput1.val('');
+            prodInstanceSelect.html('<option value="">Select Prod Instance</option>');
+            testInstanceInput.val('');
+            testInstanceInput1.val('');
+            alert('Error fetching DB User');
+            toggleFieldsState();
+        });
+    });
+
+    prodInstanceSelect.change(function() {
+        const selectedProd = $(this).val();
+        if (selectedProd && window.data && window.data.marketDB) {
+            const selectedInstance = window.data.marketDB.find(instance => instance.prod === selectedProd);
+            if (selectedInstance) {
+                testInstanceInput.val(selectedInstance.preprod);
+                testInstanceInput1.val(selectedInstance.preprod);
+            }
+        } else {
+            testInstanceInput.val('');
+            testInstanceInput1.val('');
+        }
+        toggleFieldsState();
+    });
+
+    // Trigger change event on page load to set initial state
+    swVersionSelect.trigger('change');
+});
+</script>
 <style>
     .custom-form {
         max-width: 800px;
@@ -178,114 +300,3 @@
         font-size: 14px;
     }
 </style>
-<script>
-$(document).ready(function() {
-    // Trigger the change event on page load to fetch the DB user and populate the form fields
-    $(document).ready(function() {
-  $('#sw_version').trigger('change');
-});
-
-    $('#sw_version').change(function() {
-        var swVersion = $(this).val();
-        var dbUserSelect = $('#db_user');
-        // Clear existing options
-        dbUserSelect.empty();
-        // Disable the db_user select if no sw_version is selected
-        if (swVersion === '') {
-            dbUserSelect.append('<option value="">Select DB User</option>');
-            dbUserSelect.prop('disabled', true);
-            return;
-        }
-        // Enable the db_user select
-        dbUserSelect.prop('disabled', false);
-        // Make a POST request to fetch the db_user based on sw_version
-        fetch('/dbi-tool/dbi/get-db-user', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                sw_version: swVersion
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Clear the db_user select options
-            dbUserSelect.innerHTML = '';
-            // Populate the db_user select options
-            if (data) {
-                const dbUserInput = document.getElementById('db-user-input');
-                const dbUserInput1 = document.getElementById('db-user-input1');
-                if (data) {
-                    console.log(data);
-                    dbUserInput.value = data.dbuser[0].db_user_name;
-                    dbUserInput1.value = data.dbuser[0].db_user_name;
-                    dbUserInput1.disabled = true;
-                    dbUserInput.name = "db_user";
-                    dbUserInput.type = "hidden";
-
-                    if (data.error) {
-                        console.error('Error fetching market data:', data.error);
-                        // Display an error message to the user or handle the error as needed
-                        alert(data.error);
-                    } else {
-                        // Get references to the prod_instance and test_instance select elements
-                        const prodInstanceSelect = document.getElementById('prod-instance-container');
-                        const testInstanceSelect = document.getElementById('test-instance-container');
-                        const testInstanceSelect1 = document.getElementById('test-instance-container1');
-
-                        // Clear existing options
-                        prodInstanceSelect.innerHTML = '';
-                        testInstanceSelect.innerHTML = '';
-                        
-                        const prodOption1 = document.createElement('option');
-                        prodOption1.value = "";
-                        prodOption1.text = "Please select prod instance";
-                        prodInstanceSelect.add(prodOption1);
-                        
-                        testInstanceSelect.value = '';
-                        
-                        // Loop through the marketDB array
-                        data.marketDB.forEach(instance => {
-                            // Create options for prod_instance
-                            const prodOption = document.createElement('option');
-                            prodOption.value = instance.prod;
-                            prodOption.text = instance.prod;
-                            prodInstanceSelect.add(prodOption);
-
-                            // Create options for test_instance
-                            testInstanceSelect.value = instance.preprod;
-                            testInstanceSelect1.value = instance.preprod;
-                            //testInstanceSelect.value = instance.test_instance;
-                        });
-
-                        // Set the selected prod instance and test instance
-                        prodInstanceSelect.value = '{{ $selectedProdInstance }}';
-                        // testInstanceSelect.value = '{{ $selectedTestInstance }}';
-                        // testInstanceSelect1.value = '{{ $selectedTestInstance }}';
-
-                        // Trigger the change event on the prod_instance select element to update the test_instance
-                        prodInstanceSelect.dispatchEvent(new Event('change'));
-                    }
-                } else {
-                    dbUserInput.value = '';
-                    alert('No DB User found');
-                }
-            } else {
-                var option = document.createElement('option');
-                option.value = '';
-                option.text = 'No DB User found';
-                dbUserSelect.add(option);
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching DB User:', error);
-            var option = document.createElement('option');
-            option.value = '';
-            option.text = 'Error fetching DB User';
-            dbUserSelect.add(option);
-        });
-    });
-});
-</script>

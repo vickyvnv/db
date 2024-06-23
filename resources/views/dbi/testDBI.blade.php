@@ -24,20 +24,20 @@
                                                 <div class="card-header bg-primary text-white">Test DBI</div>
                                                 <div class="card-body">
                                                     <p class="mb-4">DBI ID: {{ $dbiRequest->id }}</p>
-                                                    <form action="{{ route('dbi.testDbi', $dbiRequest->id) }}" method="POST">
+                                                    <form action="{{ route('dbi.testDbi', $dbiRequest->id) }}" method="POST" id="testDbiForm">
                                                         @csrf
                                                         <input type="hidden" name="db_user" value="{{ $dbiRequest->db_user }}">
                                                         <input type="hidden" name="db_instance" value="{{ $dbiRequest->db_instance }}">
                                                         <input type="hidden" name="source_code" value="{{ $dbiRequest->source_code }}">
-                                                        
-                                                        
                                                         <input type="hidden" name="prodTest" value="No">
-                                                        <button type="submit" class="btn btn-primary">Test DBI</button>
+                                                        <button type="submit" class="btn btn-primary" id="testDbiBtn">Test DBI</button>
                                                     </form>
+                                                    <!-- Loader -->
+                                                    <div id="loader" class="loader" style="display: none;">
+                                                        <div class="spinner"></div>
+                                                        <p>Processing... Please wait.</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="mt-4">
-                                                <textarea class="form-control" rows="10">{{ $dbiRequest->sql_logs_info }}</textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -86,4 +86,46 @@ textarea.form-control {
     border: 1px solid #ccc;
     border-radius: 0.25rem;
 }
+.loader {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.8);
+        z-index: 9999;
+    }
+
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('testDbiForm');
+    const loader = document.getElementById('loader');
+
+    form.addEventListener('submit', function(e) {
+        // Show the loader
+        loader.style.display = 'flex';
+
+        // Disable the submit button to prevent multiple submissions
+        document.getElementById('testDbiBtn').disabled = true;
+    });
+});
+</script>

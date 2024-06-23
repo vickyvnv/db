@@ -13,8 +13,8 @@
             <div class="content">
                 <div class="py-12">
                     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    @if (!empty($dbiRequestLog) && isset($dbiRequestLog[0]) && !is_null($dbiRequestLog[0]->dbi_request_id))
-                        <a href="{{ route('dbi.show', $dbiRequestLog[0]->dbi_request_id) }}" class="btn btn-secondary mb-3">Back</a>
+                    @if (!empty($logs) && isset($logs[0]) && !is_null($logs[0]->dbi_request_id))
+                        <a href="{{ route('dbi.show', $logs[0]->dbi_request_id) }}" class="btn btn-secondary mb-3">Back</a>
                     @endif  
                         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                             <h2 class="text-lg font-semibold mb-4">DBI Requests Logs And History</h2>
@@ -35,7 +35,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($dbiRequestLog as $dbiRequest)
+                                        @foreach ($logs as $dbiRequest)
                                             <tr>
                                                 <td>{{ $dbiRequest->id }}</td>
                                                 <td>{{ $dbiRequest->dbiRequest->requestor->user_firstname}} {{ $dbiRequest->dbiRequest->requestor->user_lastname}}</td>
@@ -55,7 +55,7 @@
                             </div>
                             <!-- Add pagination links -->
                             <div class="pagination">
-                                {{ $dbiRequestLog->links() }}
+                                {{ $logs->links() }}
                             </div>
                         </div>
                     </div>

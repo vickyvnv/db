@@ -25,6 +25,16 @@
                                                     <form method="POST" action="{{ route('dbi.store') }}" class="custom-form">
                                                         @csrf
 
+                                                        @if ($errors->any())
+                                                            <div class="alert alert-danger">
+                                                                <ul>
+                                                                    @foreach ($errors->all() as $error)
+                                                                        <li>{{ $error }}</li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            </div>
+                                                        @endif
+
                                                         <div class="form-row">
                                                             <!-- DBI Category -->
                                                             <div class="form-group">
@@ -32,7 +42,7 @@
                                                                 <div class="input-group">
                                                                     @foreach ($categories as $category)
                                                                     <div class="radio-option">
-                                                                        <input type="radio" id="{{ $category->subname }}" name="category" value="{{ $category->subname }}">
+                                                                        <input type="radio" id="{{ $category->subname }}" name="category" value="{{ $category->subname }}" {{ old('category') == $category->subname ? 'checked' : '' }}>
                                                                         <label for="{{ $category->name }}">{{ $category->name }}</label>
                                                                     </div>
                                                                     @endforeach
@@ -47,9 +57,12 @@
                                                                 <label for="name">DBI Type:</label>
                                                                 <select name="dbi_type" class="form-control">
                                                                     @foreach ($dbiTypes as $dbiType)
-                                                                    <option value="{{ $dbiType->subname }}">{{ $dbiType->name }}</option>
+                                                                    <option value="{{ $dbiType->subname }}" {{ old('dbi_type') == $dbiType->subname ? 'selected' : '' }}>{{ $dbiType->name }}</option>
                                                                     @endforeach
                                                                 </select>
+                                                                @error('dbi_type')
+                                                                <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                                                @enderror
                                                             </div>
 
                                                             <!-- Priority -->
@@ -57,7 +70,7 @@
                                                                 <label>Priority:</label>
                                                                 <select name="priority_id" class="form-control">
                                                                     @foreach ($priorities as $priority)
-                                                                    <option value="{{ $priority->name }}">{{ $priority->name }}</option>
+                                                                    <option value="{{ $priority->name }}" {{ old('priority_id') == $priority->name ? 'selected' : '' }}>{{ $priority->name }}</option>
                                                                     @endforeach
                                                                 </select>
                                                                 @error('priority_id')
@@ -70,7 +83,7 @@
                                                             <!-- TT ID -->
                                                             <div class="form-group">
                                                                 <label>TT Number:</label>
-                                                                <input type="text" name="tt_id" class="form-control @error('tt_id') is-invalid @enderror">
+                                                                <input type="text" name="tt_id" class="form-control @error('tt_id') is-invalid @enderror" value="{{ old('tt_id') }}">
                                                                 @error('tt_id')
                                                                 <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                                                 @enderror
@@ -79,7 +92,7 @@
                                                             <!-- Serf CR ID -->
                                                             <div class="form-group">
                                                                 <label>Serf/CR:</label>
-                                                                <input type="text" name="serf_cr_id" class="form-control @error('serf_cr_id') is-invalid @enderror">
+                                                                <input type="text" name="serf_cr_id" class="form-control @error('serf_cr_id') is-invalid @enderror" value="{{ old('serf_cr_id') }}">
                                                                 @error('serf_cr_id')
                                                                 <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                                                 @enderror
@@ -88,7 +101,7 @@
                                                             <!-- Reference DBI -->
                                                             <div class="form-group">
                                                                 <label>Reference DBI:</label>
-                                                                <input type="text" name="reference_dbi" class="form-control @error('reference_dbi') is-invalid @enderror">
+                                                                <input type="text" name="reference_dbi" class="form-control @error('reference_dbi') is-invalid @enderror" value="{{ old('reference_dbi') }}">
                                                                 @error('reference_dbi')
                                                                 <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                                                 @enderror
@@ -99,7 +112,7 @@
                                                             <!-- Brief Description -->
                                                             <div class="form-group">
                                                                 <label>Brief Description:</label>
-                                                                <textarea name="brief_desc" rows="4" class="form-control @error('brief_desc') is-invalid @enderror" maxlength="200"></textarea>
+                                                                <textarea name="brief_desc" rows="4" class="form-control @error('brief_desc') is-invalid @enderror" maxlength="200">{{ old('brief_desc') }}</textarea>
                                                                 @error('brief_desc')
                                                                 <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                                                 @enderror
@@ -108,7 +121,7 @@
                                                             <!-- Problem Description -->
                                                             <div class="form-group">
                                                                 <label>Problem Description:</label>
-                                                                <textarea name="problem_desc" rows="4" class="form-control @error('problem_desc') is-invalid @enderror" maxlength="1000"></textarea>
+                                                                <textarea name="problem_desc" rows="4" class="form-control @error('problem_desc') is-invalid @enderror" maxlength="1000">{{ old('problem_desc') }}</textarea>
                                                                 @error('problem_desc')
                                                                 <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                                                 @enderror
@@ -117,7 +130,7 @@
                                                             <!-- Business Impact -->
                                                             <div class="form-group">
                                                                 <label>Business Impact:</label>
-                                                                <textarea name="business_impact" rows="4" class="form-control @error('business_impact') is-invalid @enderror" maxlength="1000"></textarea>
+                                                                <textarea name="business_impact" rows="4" class="form-control @error('business_impact') is-invalid @enderror" maxlength="1000">{{ old('business_impact') }}</textarea>
                                                                 @error('business_impact')
                                                                 <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                                                 @enderror
@@ -215,8 +228,26 @@
     }
 
     .invalid-feedback {
+        display: block;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 80%;
         color: #dc3545;
-        font-size: 14px;
+    }
+
+    .alert-danger {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        padding: .75rem 1.25rem;
+        margin-bottom: 1rem;
+        border: 1px solid transparent;
+        border-radius: .25rem;
+    }
+
+    .alert-danger ul {
+        margin-bottom: 0;
+        padding-left: 20px;
     }
 
     @media (max-width: 768px) {
@@ -225,6 +256,7 @@
         }
     }
 </style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var categoryRadios = document.querySelectorAll('input[name="category"]');

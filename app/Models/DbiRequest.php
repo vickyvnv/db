@@ -72,4 +72,9 @@ class DbiRequest extends Model
     {
         return $this->hasOne(DbiRequestSQL::class, 'dbi_request_id');
     }
+
+    public function operatorComments()
+    {
+        return $this->hasMany(OperatorComment::class);
+    }
 }

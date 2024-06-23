@@ -43,15 +43,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/dbi-tool/dbi/{dbiRequestId}/additionalinfo', [DbiRequestController::class, 'additionalinfo'])->name('dbi.additionalinfo');
     Route::post('/dbi-tool/dbi/{dbiRequestId}/temporarytable', [DbiRequestController::class, 'storeTemporaryTable'])->name('dbi.storeTemporaryTable');
     Route::get('/dbi-tool/dbi/{dbiRequestId}/testDBI', [DbiRequestController::class, 'testDBI'])->name('dbi.testDBI');
-    Route::post('/dbi-tool/dbi/{dbiRequest}/test', [DbiRequestController::class, 'testDbiQuery'])->name('dbi.testDbi');
+    Route::post('/dbi-tool/dbi/{dbiRequest}/test', [DbiRequestController::class, 'executeDbiQuery'])->name('dbi.testDbi');
     Route::post('/dbi-tool/dbi/get-db-user', [DbiRequestController::class, 'getDbUser'])->name('dbi.getDbUser');
 
     Route::post('/dbi-tool/dbi/{dbiRequest}/submit-to-sde', [DbiRequestController::class, 'submitToSDE'])->name('dbi.submitToSDE');
-    Route::post('/dbi-tool/dbi/{dbiRequest}/sdeApprovedOrReject', [DbiRequestController::class, 'sdeApprovedOrReject'])->name('dbi.sdeApprovedOrReject');
+    Route::post('/dbi-tool/dbi/{dbiRequest}/sdeApprovedOrReject', [DbiRequestController::class, 'sdeApproveOrReject'])->name('dbi.sdeApprovedOrReject');
     Route::get('/dbi-tool/dbi/dbi-request-logs/{id}', [DbiRequestController::class, 'showLogs'])->name('dbi.showLogs');
     Route::get('/dbi-tool/dbi/dbi-history-logs/{id}', [DbiRequestController::class, 'allLogs'])->name('dbi.allLogs');
-    Route::get('/dbi-tool/dbi/dbi-sql-files/{id}', [DbiRequestController::class, 'allSqlFile'])->name('dbi.allSqlFile');
+    Route::get('/dbi-tool/dbi/dbi-sql-files/{id}', [DbiRequestController::class, 'allSqlFiles'])->name('dbi.allSqlFile');
     Route::get('/dbi-tool/dbi/dbi-show-files/{id}', [DbiRequestController::class, 'showSQL'])->name('dbi.showSQL');
+    Route::get('/dbi-tool/dbi/dbi-request-flow/{id}', [DbiRequestController::class, 'requestProcess'])->name('dbi.requestProcess');
+
     Route::post('/dbi-tool/dbi/{dbiRequest}/datApprovedOrReject', [DbiRequestController::class, 'datApprovedOrReject'])->name('dbi.datApprovedOrReject');
 });
 

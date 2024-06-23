@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use App\Models\DbiRequest;
+use App\Policies\DbiRequestPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -18,6 +20,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
+        DbiRequest::class => DbiRequestPolicy::class,
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
     ];
     
