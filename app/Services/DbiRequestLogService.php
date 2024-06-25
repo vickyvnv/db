@@ -18,7 +18,11 @@ class DbiRequestLogService
 
         $logMessage = "========================================================================================================================================\n";
         $logMessage .= "[{$timestamp}] {$message}\n";
-        $logMessage .= "User Name: ".Auth::user()->user_firstname. " User Lastname:".Auth::user()->user_lastname. " User Id: ".Auth::user()->id. "User email: ".Auth::user()->email;
+        $logMessage .= "User Name: ".Auth::user()->user_firstname."\n";
+        $logMessage .= " User Lastname:".Auth::user()->user_lastname."\n";
+        $logMessage .= " User Id: ".Auth::user()->id."\n";
+        $logMessage .= "User email: ".Auth::user()->email."\n";
+
         if ($data !== null) {
             if ($data instanceof Model) {
                 // If it's an Eloquent model, we'll log its attributes

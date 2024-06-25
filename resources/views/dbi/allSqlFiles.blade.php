@@ -27,6 +27,7 @@
                                         <tr>
                                             <th>ID</th>
                                             <th>Requestor Name</th>
+                                            <th>Date And Time</th>
                                             <th>SQL files</th>
                                         </tr>
                                     </thead>
@@ -35,7 +36,7 @@
                                             <tr>
                                                 <td>{{ $dbiRequest->id }}</td>
                                                 <td>{{ $dbiRequest->dbiRequest->requestor->user_firstname}} {{ $dbiRequest->dbiRequest->requestor->user_lastname}}</td>
-                                               
+                                                <td>{{ $dbiRequest->created_at}}</td>
                                                 <td>
                                                     
                                                     <a href="{{ route('dbi.showSQL', $dbiRequest->id) }}" class="btn btn-primary"  target="_blank">SQL FIle</a>

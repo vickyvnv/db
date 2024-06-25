@@ -21,7 +21,7 @@
                         {{ __('DBI Tool') }}
                     </x-nav-link>
                 </div>
-                @if(Auth::user()->team_id == 4)
+                @if(Auth::user()->isDAT())
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                     <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')" class="nav-link {{ request()->routeIs('admin') ? 'active' : '' }}">
                         {{ __('Administration') }}
@@ -32,7 +32,7 @@
 
 
             <!-- Hamburger -->
-            <div class="-mr-2 flex items-center sm:hidden">
+            <div class="-mr-2 flex items-center">
             <form method="POST" action="{{ route('logout') }}">
                     @csrf
 

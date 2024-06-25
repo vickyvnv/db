@@ -21,7 +21,7 @@
                                         <br><br><br>
                                         <div class="col-md-10">
                                             <div class="card">
-                                                <div class="card-header bg-primary text-white">Test DBI</div>
+                                                <div class="card-header bg-primary text-white">Pre Production Run</div>
                                                 <div class="card-body">
                                                     <p class="mb-4">DBI ID: {{ $dbiRequest->id }}</p>
                                                     <form action="{{ route('dbi.testDbi', $dbiRequest->id) }}" method="POST" id="testDbiForm">

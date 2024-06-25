@@ -355,7 +355,10 @@ class DbiRequestController extends Controller
             
             $this->dbiRequestService->updateDbiRequest($dbiRequest, $updatedData);
 
-            $this->dbiRequestLogService->log($dbiRequest->id, "DBI Request db selection updated successfully.", $updatedData);
+            $this->dbiRequestLogService->log($dbiRequest->id, "DBI Request db selection updated successfully.", ['sw_version' => $dbiRequest->sw_version,
+            'db_user' => $dbiRequest->db_user,
+            'prod_instance' => $dbiRequest->prod_instance,
+            'test_instance' => $dbiRequest->test_instance,]);
 
             Log::info('DBI Request select DB updated', [
                 'user_id' => auth()->id(),
@@ -420,11 +423,12 @@ class DbiRequestController extends Controller
 
         try {
             $result = $this->dbiRequestService->executeDbiQuery($dbiRequest, $request->prodTest === "Yes");
-            $logmessage = $request->prodTest === "Yes" ? "SQL query executed successfully on Production." : "SQL query executed successfully on PreProduction.";
+            //$logmessage = $request->prodTest === "Yes" ? "SQL query executed successfully on Production." : "SQL query executed successfully on PreProduction.";
+            //dd($result['status']);
+            $message = $result['status'] == 'execution successful' ? 'SQL query executed successfully. Log file generated.' : 'SQL query execution failed. Please check the logs.';
 
-            $this->dbiRequestLogService->log($dbiRequest->id, $logmessage, $dbiRequest);
+            $this->dbiRequestLogService->log($dbiRequest->id, $message, $dbiRequest->sql_logs_info);
 
-            $message = $result['status'] === 'success' ? 'SQL query executed successfully. Log file generated.' : 'SQL query execution failed. Please check the logs.';
             return redirect()->route('dbi.show', $dbiRequest->id)->with($result['status'], $message);
         } catch (\Exception $e) {
             $logmessage = $request->prodTest === "Yes" ? "SQL query executed failed on Production." : "SQL query executed failed PreProduction.";

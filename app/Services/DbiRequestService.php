@@ -124,7 +124,7 @@ class DbiRequestService
                 // Generate and save SQL file
                 $sqlfile = 'dbi_' . $dbiRequest->id . '_' . time() . '.sql';
                 Storage::disk('public')->put('source_code_files/' . $sqlfile, $data['source_code']);
-
+                $dbiRequest->sql_file_path = $sqlfile;
                 // Create a record for the SQL file
                 DbiRequestSQL::create([
                     'dbi_request_id' => $dbiRequest->id,
@@ -198,12 +198,9 @@ class DbiRequestService
             $dbUser = $dbiRequest->db_user;
             $dbPassword = $decryptedPassword;
             $dbInstance = $isProd ? $dbiRequest->prod_instance : $dbiRequest->test_instance;
+            
+            // Assume $dbiRequest->source_code now contains the SQL or PL/SQL code
             $sourceCode = $dbiRequest->source_code;
-
-            $modifiedSourceCode = "ALTER SESSION SET CURRENT_SCHEMA = $dbInstance;\n" . $sourceCode . "\n";
-
-            $tempFilePath = 'temp/dbi_' . $dbiRequest->id . '_' . uniqid() . '.sql';
-            Storage::put($tempFilePath, $modifiedSourceCode);
 
             $executionLog = "SQL*Plus: Release 12.2.0.1.0\n";
             $executionLog .= "Copyright (c) 1982, 2022, Oracle.  All rights reserved.\n\n";
@@ -222,35 +219,74 @@ class DbiRequestService
             $stmt->execute();
             $executionLog .= "Session altered.\n\n";
 
-            $statements = explode(';', $sourceCode);
             $executionStatus = 'Execution Successful';
 
-            foreach ($statements as $statement) {
-                $statement = trim($statement);
-                if (empty($statement)) continue;
+            $sourceCode = trim($dbiRequest->source_code);
+            $executionStatus = 'Execution Successful';
 
-                $executionLog .= "SQL> " . $statement . ";\n";
-                try {
-                    $stmt = $conn->prepare($statement);
-                    $stmt->execute();
-
-                    if (stripos($statement, 'SELECT') === 0) {
-                        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                        $executionLog .= "Result:\n";
-                        foreach ($result as $row) {
-                            $executionLog .= implode(',', array_values($row)) . "\n";
-                        }
-                        $executionLog .= "\n";
-                    } elseif (stripos($statement, 'INSERT') === 0 || stripos($statement, 'DELETE') === 0 || stripos($statement, 'UPDATE') === 0 || stripos($statement, 'ALTER') === 0) {
-                        $executionLog .= $stmt->rowCount() . " row(s) affected.\n\n";
-                    } else {
-                        $executionLog .= "Statement executed.\n\n";
-                    }
-                } catch (\PDOException $e) {
-                    $executionStatus = 'Execution Failed';
-                    $executionLog .= "Error: " . $e->getMessage() . "\n\n";
-                    //break;  // Stop execution on first error
+            // Function to determine the type of SQL input
+            function determineInputType($code) {
+                $upperCode = strtoupper($code);
+                if (strpos($upperCode, 'CREATE OR REPLACE PACKAGE') !== false ||
+                    strpos($upperCode, 'CREATE PACKAGE') !== false) {
+                    return 'PACKAGE';
+                } elseif (strpos($upperCode, 'BEGIN') !== false ||
+                        strpos($upperCode, 'DECLARE') !== false ||
+                        strpos($upperCode, 'CREATE OR REPLACE PROCEDURE') !== false ||
+                        strpos($upperCode, 'CREATE OR REPLACE FUNCTION') !== false) {
+                    return 'PLSQL';
+                } else {
+                    return 'SQL';
                 }
+            }
+
+            $inputType = determineInputType($sourceCode);
+
+            $executionLog .= "Detected input type: $inputType\n\n";
+
+            switch ($inputType) {
+                case 'PACKAGE':
+                case 'PLSQL':
+                    $executionLog .= "Executing as PL/SQL:\n$sourceCode\n";
+                    try {
+                        // For packages, we don't wrap in BEGIN/END
+                        if ($inputType !== 'PACKAGE') {
+                            // Ensure the PL/SQL block is properly formatted
+                            if (strpos(strtoupper($sourceCode), 'BEGIN') === false) {
+                                $sourceCode = "BEGIN\n" . $sourceCode . "\nEND;";
+                            }
+                        }
+                        $sourceCode .= "\n";
+
+                        $stmt = $conn->prepare($sourceCode);
+                        $stmt->execute();
+                        $executionLog .= "PL/SQL execution successful.\n\n";
+                    } catch (\PDOException $e) {
+                        $executionStatus = 'Execution Failed';
+                        $errorInfo = $e->errorInfo;
+                        $executionLog .= "Error: " . $errorInfo[2] . "\n\n";
+                    }
+                    break;
+
+                case 'SQL':
+                    $statements = explode(';', $sourceCode);
+                    foreach ($statements as $statement) {
+                        $statement = trim($statement);
+                        if (empty($statement)) continue;
+
+                        $executionLog .= "SQL> $statement;\n";
+                        try {
+                            $stmt = $conn->prepare($statement);
+                            $stmt->execute();
+                            $executionLog .= "Statement executed successfully.\n\n";
+                        } catch (\PDOException $e) {
+                            $executionStatus = 'Execution Failed';
+                            $errorInfo = $e->errorInfo;
+                            $executionLog .= "Error: " . $errorInfo[2] . "\n\n";
+                            break;
+                        }
+                    }
+                    break;
             }
 
             if ($executionStatus === 'Execution Successful') {
@@ -270,11 +306,51 @@ class DbiRequestService
             }
 
             $executionLog .= "SQL> QUIT\n";
-            $executionLog .= $executionStatus === 'Execution Successful' ? "PL/SQL procedure successfully completed.\n" : "PL/SQL procedure failed.\n";
+            $executionLog .= $executionStatus === 'Execution Successful' ? "Procedure successfully completed.\n" : "Procedure failed.\n";
 
-            Storage::delete($tempFilePath);
+            $queries = DB::getQueryLog();
+                $totalExecutionTime = 0;
 
-            $logFile = $this->generateLogFile($dbiRequest, $executionLog, $isProd);
+                foreach ($queries as $query) {
+                    $totalExecutionTime += $query['time'];
+                }
+
+                // Get the current date and time
+                $currentDate = date('D M d H:i:s Y');
+
+                // Prepare the additional information
+                $additionalInfo = "Date: $currentDate" . PHP_EOL;
+                $additionalInfo .= "DBI No.: $dbiRequest->id" . PHP_EOL;
+                $additionalInfo .= "DB: " . ($isProd ? "Prod DB" : "PreProd DB") . PHP_EOL;
+                $additionalInfo .= "DB-User: $dbUser" . PHP_EOL;
+                $additionalInfo .= '======================================================'. PHP_EOL;
+                $additionalInfo .= "Requestor: " . $dbiRequest->requestor->user_firstname . " " . $dbiRequest->requestor->user_lastname . " " . PHP_EOL;
+                $additionalInfo .= "Operator: " . $dbiRequest->operator->user_firstname . " " . $dbiRequest->operator->user_lastname . "" . PHP_EOL;
+                $additionalInfo .= "Team: " . Auth::user()->team->name . PHP_EOL;
+                $additionalInfo .= '======================================================'. PHP_EOL;
+                $additionalInfo .= "Database Instance: " . ($isProd == "Yes" ? $dbiRequest->prod_instance : $dbiRequest->test_instance) . PHP_EOL;
+                Log::info('Executed Queries:');
+
+                foreach ($queries as $index => $query) {
+                    Log::info('Query ' . ($index + 1) . ': ' . $query['query']);
+                    $additionalInfo .= 'Query ' . ($index + 1) . ': ' . $query['query']. PHP_EOL;
+                    Log::info('Bindings: ' . implode(', ', $query['bindings']));
+                    $additionalInfo .= 'Bindings: ' . implode(', ', $query['bindings']). PHP_EOL;
+                    Log::info('Time: ' . $query['time'] . ' ms');
+                    $additionalInfo .= 'Time: ' . $query['time'] . ' ms'. PHP_EOL;
+                }
+                
+
+                $additionalInfo .= 'Total Execution Time: ' . $totalExecutionTime . ' ms'. PHP_EOL;
+                $additionalInfo .= '======================================================'. PHP_EOL;
+
+                Log::info('Total Execution Time: ' . $totalExecutionTime . ' ms');
+                // Prepend the additional information to the $terminalLog
+                $terminalLog = $additionalInfo . PHP_EOL . $executionLog;
+                
+            //Storage::delete($tempFilePath);
+
+            $logFile = $this->generateLogFile($dbiRequest, $terminalLog, $isProd);
 
             $dbiLogCreate = DbiRequestLog::create([
                 'dbi_request_id' => $dbiRequest->id,
